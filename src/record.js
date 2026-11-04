@@ -49,6 +49,61 @@ export function recordingName(title, type, at = new Date()) {
   const stamp = `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())} ${pad(at.getHours())}.${pad(at.getMinutes())}`;
   return `${String(title || "Recording").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim()} ${stamp}.${/^video\/mp4/.test(type) ? "mp4" : "webm"}`;
 }
+/** The size a frame of `from` takes inside a fixed `to` frame: scaled to fit, centred. */
+export function fitInto(from, to) {
+  const k = Math.min(to.width / from.width, to.height / from.height);
+  const width = Math.round(from.width * k), height = Math.round(from.height * k);
+  return { x: Math.round((to.width - width) / 2), y: Math.round((to.height - height) / 2), width, height };
+}
+const even = (n) => Math.max(2, Math.round(n / 2) * 2);
+/* Chrome's MP4 writer keeps the frame size the recording started with, so when the shared tab changes size (Chrome's
+   "sharing this tab" bar appears, or the window is resized) every later frame no longer matches it and players stop on
+   the first picture. The tab is copied onto a canvas of one fixed size instead: the size it settles at once sharing
+   starts, with later changes scaled to fit. */
+async function steadyTrack(stream, { settleMs = 600, waitMs = 2000 } = {}) {
+  const video = document.createElement("video");
+  video.muted = true;
+  video.playsInline = true;
+  video.srcObject = stream;
+  await video.play().catch(() => {});
+  const size = () => `${video.videoWidth}x${video.videoHeight}`;
+  const until = Date.now() + waitMs;
+  let last = size(), since = Date.now();
+  while (Date.now() < until && (!video.videoWidth || Date.now() - since < settleMs)) {
+    await sleep(100);
+    if (size() !== last) {
+      last = size();
+      since = Date.now();
+    }
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = even(video.videoWidth || innerWidth * (devicePixelRatio || 1));
+  canvas.height = even(video.videoHeight || innerHeight * (devicePixelRatio || 1));
+  const g = canvas.getContext("2d", { alpha: false });
+  let on = true, handle = 0;
+  const draw = () => {
+    if (!on) return;
+    if (video.videoWidth) {
+      const r = fitInto({ width: video.videoWidth, height: video.videoHeight }, canvas);
+      if (r.width !== canvas.width || r.height !== canvas.height) g.fillRect(0, 0, canvas.width, canvas.height);
+      g.drawImage(video, r.x, r.y, r.width, r.height);
+    }
+    handle = video.requestVideoFrameCallback ? video.requestVideoFrameCallback(draw) : requestAnimationFrame(draw);
+  };
+  draw();
+  const track = canvas.captureStream(60).getVideoTracks()[0];
+  track.contentHint = "detail";
+  return {
+    track,
+    stop() {
+      on = false;
+      if (video.cancelVideoFrameCallback) video.cancelVideoFrameCallback(handle);
+      else cancelAnimationFrame(handle);
+      track.stop();
+      video.srcObject = null;
+    },
+  };
+}
 // An element inside something fixed or sticky stays put while the page scrolls, so the tour never scrolls to it.
 const pinned = (el) => {
   for (let at = el; at && at.nodeType === 1; at = at.parentElement) {
@@ -223,13 +278,15 @@ export function startRecord({
     const track = stream.getVideoTracks()[0];
     track.contentHint = "detail";
     track.addEventListener("ended", stop, { once: true });
+    const steady = await steadyTrack(stream);
     const type = pickType((t) => MediaRecorder.isTypeSupported(t));
     const chunks = [];
     let recorder;
     try {
-      recorder = new MediaRecorder(new MediaStream([track, ...run.out.stream.getAudioTracks()]), { ...(type ? { mimeType: type } : {}), videoBitsPerSecond: BPS, audioBitsPerSecond: 128e3 });
+      recorder = new MediaRecorder(new MediaStream([steady.track, ...run.out.stream.getAudioTracks()]), { ...(type ? { mimeType: type } : {}), videoBitsPerSecond: BPS, audioBitsPerSecond: 128e3 });
     } catch (e) {
       onMessage(`Could not start recording: ${e?.message || e}`, "error");
+      steady.stop();
       stream.getTracks().forEach((t) => t.stop());
       ctx.close();
       run = null;
@@ -280,6 +337,7 @@ export function startRecord({
     await saved;
     save(new Blob(chunks, { type: (recorder.mimeType || type || "video/webm").split(";")[0] }), recordingName(s.title, recorder.mimeType || type));
     cancelAnimationFrame(run.raf);
+    steady.stop();
     stream.getTracks().forEach((t) => t.stop());
     ctx.close();
     run = null;

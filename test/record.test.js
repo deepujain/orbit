@@ -55,3 +55,13 @@ test("the voice track runs through every pause, so the voice stays in time with 
   assert.match(js, /const hold = ctx\.createConstantSource\(\);\s*hold\.offset\.value = 0;\s*hold\.connect\(run\.out\);\s*hold\.start\(\);/);
   assert.ok(js.indexOf("hold.start()") < js.indexOf("new MediaRecorder("), "the track is held before recording starts");
 });
+
+test("Record films one fixed frame size, so a tab that changes size never breaks the MP4", async () => {
+  const { fitInto } = await import("../src/record.js");
+  assert.deepEqual(fitInto({ width: 1400, height: 840 }, { width: 1400, height: 788 }), { x: 44, y: 0, width: 1313, height: 788 }, "a taller tab is scaled to fit, centred");
+  assert.deepEqual(fitInto({ width: 1400, height: 788 }, { width: 1400, height: 788 }), { x: 0, y: 0, width: 1400, height: 788 });
+  const src = readFileSync(new URL("../src/record.js", import.meta.url), "utf8");
+  assert.match(src, /const steady = await steadyTrack\(stream\);/);
+  assert.match(src, /new MediaRecorder\(new MediaStream\(\[steady\.track, /, "the recorder films the steady canvas, not the tab itself");
+  assert.equal(src.match(/steady\.stop\(\);/g)?.length, 2, "the canvas stops when recording ends or cannot start");
+});
