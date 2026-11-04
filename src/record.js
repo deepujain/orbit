@@ -77,8 +77,16 @@ export function startRecord({
   label = "Record",
   onMessage = (text) => console.info(text),
 } = {}) {
-  const visible = show || (() => root.getAttribute(attribute) === "record");
-  const current = () => withIntro(script(), intro);
+  // The page may not be ready when Record starts, so a script or show that throws means no button yet.
+  const safe = (fn) => {
+    try {
+      return fn();
+    } catch {
+      return null;
+    }
+  };
+  const visible = () => safe(show || (() => root.getAttribute(attribute) === "record"));
+  const current = () => safe(() => withIntro(script(), intro));
   const make = (cls, tag = "div") => Object.assign(document.createElement(tag), { className: cls, hidden: true });
   const button = make("playskin-record", "button");
   button.type = "button";

@@ -47,4 +47,5 @@ test("the button hides while recording so it is never in the video, and the look
   assert.doesNotMatch(css, /\[data-playskin="record"\]/, "Record changes no colours");
   const js = readFileSync(new URL("../src/record.js", import.meta.url), "utf8");
   assert.match(js, /src\.connect\(run\.out\);\s*src\.connect\(run\.ctx\.destination\);/, "the voice is in the file and heard aloud");
+  assert.match(js, /const current = \(\) => safe\(\(\) => withIntro\(script\(\), intro\)\);/, "a page that is not ready yet shows no button instead of breaking");
 });
