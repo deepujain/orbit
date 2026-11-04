@@ -87,7 +87,8 @@
     linear-gradient(168deg, transparent 30%, #ffffff0a 36%, transparent 41%, transparent 58%, #ffffff08 63%, transparent 68%),
     radial-gradient(120% 90% at 50% 40%, transparent 60%, #0b1c1566);
 }
-[data-playskin="crayon"] main { background-color: transparent; padding-top: 2.4rem; }
+[data-playskin="crayon"] main { background-color: transparent; }
+[data-playskin="crayon"] body:not(:has([data-topbar])) main { padding-top: 2.4rem; }
 [data-playskin="crayon"]:is(.dark, [data-theme="dark"]) body::after { content: ""; position: fixed; inset: 0; z-index: 45; pointer-events: none; border: 8px solid #8b5a2b; border-image: repeating-linear-gradient(90deg, #9a6533 0 7px, #8a5829 7px 11px, #a8723d 11px 19px, #7d4f24 19px 22px) 8; box-shadow: inset 0 0 0 1px #5e3a1a, inset 0 0 22px #00000059; }
 /* Handwriting for headings, buttons and tabs; everything else stays readable */
 [data-playskin="crayon"] :where(h1, h2, h3, h4, [data-card-title], [role="tab"], .font-headline, [data-button]) { font-family: var(--hand); letter-spacing: .01em; }
@@ -196,7 +197,7 @@
 [data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+4) { --c: #8ce99a; }
 [data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+5) { --c: #8ec5ff; }
 [data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n) { --c: #d9b3ff; }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] { text-shadow: 0 0 1px #fff8, 0 0 6px #ffffff1f; }
+[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) :is([data-wordmark], h1, h2, h3) { text-shadow: 0 0 1px #fff8, 0 0 6px #ffffff1f; }
 .playskin-said { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 [data-playskin="crayon"] [data-nav] :is(a, button) { font-family: var(--hand); }
 :where([data-playskin="crayon"] [data-nav] :is(a, button)) { color: inherit; text-decoration: none; }
