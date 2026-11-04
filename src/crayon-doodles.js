@@ -1,4 +1,6 @@
-/* Crayon doodles behind the page: bunting, drifting clouds, corner drawings and a slow snail. crayon.css shows them
+import { SNAIL_SVG } from "./crayon-art.js";
+
+/* Crayon doodles behind the page: bunting, drifting clouds, corner drawings and a snail that crawls the page and back. crayon.css shows them
    only while <html data-playskin="crayon"> is set; everything here sits behind the content and never takes a click. */
 const MARKUP = `<div class="crayon-doodles" aria-hidden="true">
   <svg class="cd-defs" width="0" height="0" focusable="false">
@@ -58,15 +60,7 @@ const MARKUP = `<div class="crayon-doodles" aria-hidden="true">
     </g>
   </svg>
 
-  <div class="cd-snail-track">
-    <svg class="cd-snail" viewBox="0 0 64 40" focusable="false">
-      <path class="cd-snail-body" d="M4 36c8 0 40 0 54-1 3 0 4-3 2-5l-4-3c1-4 2-9 4-14" />
-      <path class="cd-snail-eyes" d="M56 27c0-6-3-12-6-15M58 26c2-6 4-11 4-16" />
-      <circle class="cd-snail-dot" cx="50" cy="11" r="1.6" />
-      <circle class="cd-snail-dot" cx="62" cy="9" r="1.6" />
-      <path class="cd-snail-shell" d="M10 34c-4-14 6-27 19-26 11 1 18 11 15 21-2 6-8 9-14 7-5-2-6-8-3-11 3-3 7-1 7 2" />
-    </svg>
-  </div>
+  <i class="cr-snail">${SNAIL_SVG}</i>
 </div>`;
 
 /** Adds the doodles to the page once and returns a function that takes them away. */

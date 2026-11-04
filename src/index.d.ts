@@ -1,5 +1,6 @@
 import type { WhiskersOptions } from "./whiskers/index.js";
 import type { RecordOptions } from "./record.js";
+import type { CrayonOptions } from "./crayon.js";
 
 export type Theme = "aura" | "crayon" | "whiskers" | "record";
 
@@ -7,6 +8,7 @@ export declare const THEMES: Theme[];
 export declare const THEME_NAMES: Record<Theme, string>;
 export declare const CHANGE_EVENT: "playskin-change";
 export { mountCrayonDoodles } from "./crayon-doodles.js";
+export { startCrayon } from "./crayon.js";
 
 export interface PlayskinOptions {
   themes?: string[];
@@ -14,6 +16,7 @@ export interface PlayskinOptions {
   attribute?: string;
   root?: Element;
   effects?: boolean;
+  crayon?: CrayonOptions;
   whiskers?: WhiskersOptions;
   record?: RecordOptions | null;
 }

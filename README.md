@@ -131,9 +131,16 @@ A few markers let a skin restyle specific parts:
 | `data-card` | Cards: glass in Aura, hand-drawn in Crayon, platforms for the cat |
 | `data-card-title` | Card titles |
 | `data-button="default"`, `"outline"`, `"secondary"`, `"ghost"`, `"destructive"`, `"link"` | Buttons and their variants |
+| `data-topbar` | The top bar: frosted glass in Aura; a rainbow edge and bunting in Crayon |
+| `data-brand` | Your logo link, where Crayon's paper plane takes off |
+| `data-wordmark` | Your name in the top bar: tight in Aura; each letter its own crayon colour in Crayon |
+| `data-nav` | A row of nav links; mark the current one with `aria-current="page"`. Each icon gets its own colour and the current one a pill in Aura; hand-written and circled in Crayon |
+| `data-theme-toggle` | Your light and dark button; Crayon swaps its face for a sun and a moon |
 | `data-playskin-floor` | An element whose top edge is the cat's floor, such as a bottom tab bar |
 | `data-playskin-ignore` | Anything the cat should never walk on |
 | `data-cat-chart` | Charts the cat plays with |
+
+Dark mode follows `class="dark"` or `data-theme="dark"` on `<html>`, whichever your app uses.
 
 Headings, `main`, form fields, menus (`role="menu"`, `role="listbox"`) and tabs (`role="tab"`) are styled with no markers.
 
@@ -149,7 +156,8 @@ Keeps the attribute on `<html>` in step with the chosen skin and runs each skin'
 | `storageKey` | `"playskin"` | `localStorage` key for the visitor's choice; `null` to not save it |
 | `attribute` | `"data-playskin"` | Attribute set on the root element |
 | `root` | `document.documentElement` | Element that carries the attribute |
-| `effects` | `true` | Set `false` to run Crayon's doodles and the cat yourself |
+| `effects` | `true` | Set `false` to run Crayon's drawings and the cat yourself |
+| `crayon` | `{}` | Options passed to `startCrayon` |
 | `whiskers` | `{}` | Options passed to `startWhiskers` |
 | `record` | `null` | Options passed to `startRecord`; Record shows nothing without a script |
 
@@ -184,15 +192,20 @@ Adds the Record button. It shows while `show()` returns true (by default, while 
 
 Adds Crayon's doodles to `target` (default `document.body`) and returns a function that removes them. `crayon.css` shows them only while the Crayon skin is on.
 
+### `startCrayon(options)` from `playskin/crayon`
+
+Brings out all of Crayon on the marked parts: the corner doodles and snail, bunting under `data-topbar`, a letter for each crayon colour in `data-wordmark`, the sun and moon in `data-theme-toggle`, and the paper plane. `createPlayskin` runs it while the skin is `"crayon"`, so most apps never call it. If your app redraws those parts, it adds them again on the next frame. Options: `anchor` (where the plane takes off), `reducedMotion`, `doodles` and `plane` (set `false` to leave one out). Returns `{ fly, flights, stop }`; `stop()` takes every part away and gives the wordmark back its plain text.
+
 ### Crayon's drawings from `playskin/crayon`
 
-Drawings to put in your own page, styled by `crayon.css` in light and dark. Your app decides where each one sits and when it shows.
+The same drawings, for an app that wants to place them itself. `crayon.css` styles them in light and dark.
 
 | Export | What it is |
 | --- | --- |
 | `PLANE_SVG` | A folded paper plane facing right |
 | `CRAYON_TOGGLE` | A light and dark button face: a smiling sun in light, a moon with stars in dark |
 | `CRAYON_ICON` | A red crayon, for a style menu |
+| `BUNTING` | A string of flags that hangs below a top bar |
 | `LADYBUG_SVG` | A ladybug facing up |
 | `SNAIL_SVG` | A snail; inside an element with the `cr-snail` class it crawls the width of the page and back |
 | `planeFrames({ cx, cy }, width)` | Keyframes for one flight: a climb, a loop-the-loop and a glide off the right edge |

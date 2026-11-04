@@ -3,13 +3,14 @@
    with the visitor's saved choice and, unless told not to, brings out what a skin draws beyond CSS: Crayon's doodles,
    the Whiskers cat and Record's narrated tour. */
 import { mountCrayonDoodles } from "./crayon-doodles.js";
+import { startCrayon } from "./crayon.js";
 
 export const THEMES = ["aura", "crayon", "whiskers", "record"];
 export const THEME_NAMES = { aura: "Aura", crayon: "Crayon", whiskers: "Whiskers", record: "Record" };
 export const CHANGE_EVENT = "playskin-change";
-export { mountCrayonDoodles };
+export { mountCrayonDoodles, startCrayon };
 
-const DEFAULTS = { themes: THEMES, storageKey: "playskin", attribute: "data-playskin", effects: true, whiskers: {}, record: null };
+const DEFAULTS = { themes: THEMES, storageKey: "playskin", attribute: "data-playskin", effects: true, crayon: {}, whiskers: {}, record: null };
 
 function readStored(key) {
   try {
@@ -29,7 +30,8 @@ function writeStored(key, value) {
 /**
  * Keeps <html data-playskin> in step with the chosen skin.
  * Options: themes (allowed names), storageKey (where the choice is saved, or null to not save), attribute,
- * root (the element that carries the attribute), effects (false to skip doodles, the cat and the tour), whiskers
+ * root (the element that carries the attribute), effects (false to skip Crayon's drawings, the cat and the tour), crayon
+ * (options for startCrayon), whiskers
  * (options for startWhiskers), record (options for startRecord; Record shows nothing without a script).
  */
 export function createPlayskin(options = {}) {
@@ -37,7 +39,7 @@ export function createPlayskin(options = {}) {
   const root = o.root || document.documentElement;
   const listeners = new Set();
   let current = null;
-  let unmountDoodles = null;
+  let crayon = null;
   let catStarted = false;
   let recordStarted = false;
 
@@ -45,10 +47,10 @@ export function createPlayskin(options = {}) {
 
   function effects(theme) {
     if (!o.effects) return;
-    if (theme === "crayon" && !unmountDoodles) unmountDoodles = mountCrayonDoodles();
-    if (theme !== "crayon" && unmountDoodles) {
-      unmountDoodles();
-      unmountDoodles = null;
+    if (theme === "crayon" && !crayon) crayon = startCrayon(o.crayon);
+    if (theme !== "crayon" && crayon) {
+      crayon.stop();
+      crayon = null;
     }
     if (theme === "whiskers" && !catStarted) {
       catStarted = true;
@@ -101,8 +103,8 @@ export function createPlayskin(options = {}) {
     destroy() {
       window.removeEventListener("storage", onStorage);
       listeners.clear();
-      if (unmountDoodles) unmountDoodles();
-      unmountDoodles = null;
+      crayon?.stop();
+      crayon = null;
     },
   };
 }

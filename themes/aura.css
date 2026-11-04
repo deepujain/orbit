@@ -1,4 +1,5 @@
-/* playskin: Aura. Soft white glass by day, graphite by night. Turn it on with <html data-playskin="aura">. */
+/* playskin: Aura. Soft white glass by day, graphite by night. Turn it on with <html data-playskin="aura">; dark is
+   <html class="dark"> or <html data-theme="dark">. */
 [data-playskin="aura"] {
   --aura-mint: #b6efd0; --aura-peach: #ffd0b5; --aura-lilac: #d4c6ff; --aura-rose: #ffc6da; --aura-sky: #bfe0ff;
   --aura-green: #059669; --aura-orange: #ea580c; --aura-violet: #7c3aed; --aura-pink: #db2777; --aura-blue: #0284c7;
@@ -30,7 +31,7 @@
   --chart-4: 340 72% 68%;
   --chart-5: 205 78% 58%;
 }
-[data-playskin="aura"].dark {
+[data-playskin="aura"]:is(.dark, [data-theme="dark"]) {
   --aura-mint: #1c7a55; --aura-peach: #8a4422; --aura-lilac: #5240a6; --aura-rose: #872a52; --aura-sky: #1f5b8f;
   --aura-green: #34d399; --aura-orange: #fb923c; --aura-violet: #a78bfa; --aura-pink: #f472b6; --aura-blue: #38bdf8;
   --aura-glow: .5;
@@ -133,6 +134,20 @@
 @media (min-width: 640px) {
   [data-playskin="aura"] :is([role="dialog"], [role="alertdialog"]).sm\:rounded-lg { border-radius: 24px; }
 }
+/* The parts an app marks. data-topbar: no bar, just the brand on the glow, frosted once the page scrolls under it.
+   data-wordmark: tight and confident. data-nav: every icon in its own colour, the current page on a soft glass pill. */
+[data-playskin="aura"] [data-topbar] { border-bottom-color: transparent; background-color: hsl(var(--background) / .72); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2); }
+[data-playskin="aura"] [data-wordmark] { font-weight: 650; letter-spacing: -.03em; color: hsl(var(--foreground)); }
+[data-playskin="aura"] [data-nav] > :is(a, button) { --aura-icon: var(--aura-violet); border-radius: 14px; }
+:where([data-playskin="aura"] [data-nav] > :is(a, button)) { color: hsl(var(--muted-foreground)); text-decoration: none; }
+[data-playskin="aura"] [data-nav] > :is(a, button):nth-child(5n+2) { --aura-icon: var(--aura-green); }
+[data-playskin="aura"] [data-nav] > :is(a, button):nth-child(5n+3) { --aura-icon: var(--aura-orange); }
+[data-playskin="aura"] [data-nav] > :is(a, button):nth-child(5n+4) { --aura-icon: var(--aura-blue); }
+[data-playskin="aura"] [data-nav] > :is(a, button):nth-child(5n) { --aura-icon: var(--aura-pink); }
+[data-playskin="aura"] [data-nav] > :is(a, button) svg { color: var(--aura-icon); }
+[data-playskin="aura"] [data-nav] > :is(a, button):hover { background-color: color-mix(in srgb, var(--aura-icon) 12%, transparent); }
+[data-playskin="aura"] [data-nav] > :is(a, button)[aria-current]:not([aria-current="false"]) { color: hsl(var(--foreground)); background-color: hsl(var(--card)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--aura-icon) 35%, transparent), 0 6px 16px -8px color-mix(in srgb, var(--aura-icon) 55%, transparent); }
+[data-playskin="aura"] [role="tooltip"] { border-radius: 12px; box-shadow: var(--aura-shadow); }
 @media (forced-colors: active) {
   [data-playskin="aura"] [data-card] { background-image: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 }

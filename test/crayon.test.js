@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { PLANE_SVG, LADYBUG_SVG, SNAIL_SVG, CRAYON_TOGGLE, CRAYON_ICON, planeFrames, startCrayonPlane, mountCrayonDoodles } from "../src/crayon.js";
+import { PLANE_SVG, LADYBUG_SVG, SNAIL_SVG, CRAYON_TOGGLE, CRAYON_ICON, BUNTING, planeFrames, startCrayonPlane, startCrayon, mountCrayonDoodles } from "../src/crayon.js";
 
 const css = readFileSync(new URL("../themes/crayon.css", import.meta.url), "utf8");
 
@@ -16,7 +16,7 @@ test("the paper plane leaves its anchor hidden, loops once upside down and glide
 });
 
 test("every part of every drawing is drawn by crayon.css, in light and in dark", () => {
-  for (const svg of [PLANE_SVG, LADYBUG_SVG, SNAIL_SVG, CRAYON_TOGGLE])
+  for (const svg of [PLANE_SVG, LADYBUG_SVG, SNAIL_SVG, CRAYON_TOGGLE, BUNTING])
     for (const [, cls] of svg.matchAll(/class="([^"]+)"/g)) assert.match(css, new RegExp(`\\.${cls}\\b`), `.${cls} is styled`);
   assert.match(css, /:is\(\.dark, \[data-theme="dark"\]\) \.cr-moon \{ display: block; \}/, "dark shows the moon");
   assert.match(CRAYON_ICON, /^<svg viewBox="0 0 24 24"/);
@@ -51,4 +51,19 @@ test("the plane moves only when asked: never under reduced motion, in a hidden t
   assert.equal(p.flights(), 1);
   assert.equal(p.fly(), false, "one plane in the air at a time");
   assert.ok(timers[0][1] >= 14000 && timers[0][1] <= 26000, "the next flight is 14 to 26 seconds away");
+});
+
+test("Crayon is whole from the library: createPlayskin brings out every part, and each theme reads either dark switch", () => {
+  const index = readFileSync(new URL("../src/index.js", import.meta.url), "utf8");
+  assert.match(index, /if \(theme === "crayon" && !crayon\) crayon = startCrayon\(o\.crayon\);/);
+  assert.match(index, /crayon\.stop\(\);/, "turning Crayon off takes its parts away");
+  assert.equal(typeof startCrayon, "function");
+  for (const part of ["data-topbar", "data-wordmark", "data-nav", "data-theme-toggle"]) assert.ok(css.includes(`[${part}]`), `Crayon styles [${part}]`);
+  const aura = readFileSync(new URL("../themes/aura.css", import.meta.url), "utf8");
+  for (const part of ["data-topbar", "data-wordmark", "data-nav"]) assert.ok(aura.includes(`[${part}]`), `Aura styles [${part}]`);
+  for (const [name, sheet] of [["crayon", css], ["aura", aura]]) {
+    assert.doesNotMatch(sheet, /\]\.dark\b/, `${name} never reads .dark alone`);
+    assert.match(sheet, /:is\(\.dark, \[data-theme="dark"\]\)/, `${name} reads .dark or data-theme="dark"`);
+  }
+  assert.match(readFileSync(new URL("../src/crayon-doodles.js", import.meta.url), "utf8"), /<i class="cr-snail">\$\{SNAIL_SVG\}<\/i>/, "the doodles' snail turns at the edge");
 });
