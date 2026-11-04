@@ -10,6 +10,31 @@ Playful skins for any web page. Turn one on with a single attribute, and your pa
 
 All three follow light and dark mode (a `dark` class on `<html>`), respect `prefers-reduced-motion`, and step aside in forced-colors mode.
 
+## Screenshots
+
+The same demo page in each skin, light on the left and dark on the right.
+
+### Aura
+
+<p>
+  <img src="docs/aura-light.png" alt="Aura skin in light mode: white glass cards with soft coloured glows and pill buttons" width="49%">
+  <img src="docs/aura-dark.png" alt="Aura skin in dark mode: graphite glass cards with coloured glows in their corners" width="49%">
+</p>
+
+### Crayon
+
+<p>
+  <img src="docs/crayon-light.png" alt="Crayon skin in light mode: ruled cream paper, hand-drawn cards, bunting, clouds, a rainbow and a snail" width="49%">
+  <img src="docs/crayon-dark.png" alt="Crayon skin in dark mode: a green chalkboard in a wooden frame with chalk doodles" width="49%">
+</p>
+
+### Whiskers
+
+<p>
+  <img src="docs/whiskers-light.png" alt="Whiskers skin in light mode: the cat sitting on the page title next to its ball of yarn" width="49%">
+  <img src="docs/whiskers-dark.png" alt="Whiskers skin in dark mode: the cat walking across the cards while a round button spins like a wheel" width="49%">
+</p>
+
 ## Try it
 
 Open `index.html` from this repository in a browser (`npm run demo` serves it), or see the live demo once GitHub Pages is on.
