@@ -49,3 +49,9 @@ test("the button hides while recording so it is never in the video, and the look
   assert.match(js, /src\.connect\(run\.out\);\s*src\.connect\(run\.ctx\.destination\);/, "the voice is in the file and heard aloud");
   assert.match(js, /const current = \(\) => safe\(\(\) => withIntro\(script\(\), intro\)\);/, "a page that is not ready yet shows no button instead of breaking");
 });
+
+test("the voice track runs through every pause, so the voice stays in time with the picture", () => {
+  const js = readFileSync(new URL("../src/record.js", import.meta.url), "utf8");
+  assert.match(js, /const hold = ctx\.createConstantSource\(\);\s*hold\.offset\.value = 0;\s*hold\.connect\(run\.out\);\s*hold\.start\(\);/);
+  assert.ok(js.indexOf("hold.start()") < js.indexOf("new MediaRecorder("), "the track is held before recording starts");
+});

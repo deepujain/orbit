@@ -194,6 +194,12 @@ export function startRecord({
     }
     const ctx = new AudioContext();
     run = { ctx, out: ctx.createMediaStreamDestination(), stopped: false, recording: false, step: null, pressed: [] };
+    // With nothing playing into it, Chrome records no audio at all, so every pause would drop out of the voice track and
+    // the voice would run ahead of the picture. A silent source keeps the track going between lines.
+    const hold = ctx.createConstantSource();
+    hold.offset.value = 0;
+    hold.connect(run.out);
+    hold.start();
     refresh();
     const clips = await Promise.all(s.steps.map((step) => clip(ctx, step.say)));
     if (voice && clips.some((c) => !c)) onMessage("Some lines have no voice, so they show as captions only.", "error");
