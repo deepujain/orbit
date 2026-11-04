@@ -177,6 +177,50 @@
 @keyframes crayon-bob { from { transform: translateY(-4px) rotate(-6deg); } to { transform: translateY(4px) rotate(5deg); } }
 @keyframes crayon-crawl { from { transform: translateX(-70px); } to { transform: translateX(calc(100vw + 20px)); } }
 @keyframes crayon-peek { from { transform: rotate(-4deg); } to { transform: rotate(6deg); } }
+/* The drawings in playskin/crayon. The app places each one and decides when it shows; these rules only draw them. */
+.cr-flyer { display: block; position: fixed; left: 0; top: 0; z-index: 40; width: 40px; height: 25px; margin: -12.5px 0 0 -20px; pointer-events: none; opacity: 0; }
+.cr-flyer svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(1px 2px 0 #2b211833); }
+.pl-wing { fill: #fff; stroke: #2b2118; stroke-width: 1.4; stroke-linejoin: round; }
+.pl-under { fill: #cfe3ff; stroke: #2b2118; stroke-width: 1.4; stroke-linejoin: round; }
+.pl-fold { fill: none; stroke: #2b2118; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+.cr-toggle { position: relative; width: 30px; height: 30px; }
+.cr-toggle svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.cr-rays { transform-origin: 32px 32px; }
+.cr-rays path { stroke: #f4a261; stroke-width: 3.2; stroke-linecap: round; }
+.cr-sun-face { fill: #ffd60a; stroke: #e07a00; stroke-width: 1.8; }
+.cr-eye { fill: #2b2118; }
+.cr-smile { fill: none; stroke: #2b2118; stroke-width: 1.8; stroke-linecap: round; }
+.cr-cheek { fill: #ff8fa3; opacity: .7; }
+.cr-moon { display: none; }
+.cr-moon-face { fill: #fff3c4; stroke: #f4f1e6; stroke-width: 1.4; }
+.cr-stars path { fill: #ffd166; }
+:is(.dark, [data-theme="dark"]) .cr-sun { display: none; }
+:is(.dark, [data-theme="dark"]) .cr-moon { display: block; }
+.cr-snail { position: fixed; left: 0; bottom: 6px; z-index: 5; width: 46px; height: 29px; pointer-events: none; }
+.cr-snail svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.sn-body { fill: #c3e88d; stroke: #2b2118; stroke-width: 1.4; stroke-linejoin: round; }
+.sn-horn { fill: none; stroke: #2b2118; stroke-width: 1.4; stroke-linecap: round; }
+.sn-tip { fill: #2b2118; }
+.sn-shell { fill: #f4a261; stroke: #2b2118; stroke-width: 1.5; }
+.sn-swirl { fill: none; stroke: #9a3412; stroke-width: 1.6; stroke-linecap: round; }
+:is(.dark, [data-theme="dark"]) .cr-snail { filter: drop-shadow(0 0 1px #f4f1e699); }
+.lb-legs path { fill: none; stroke: #2b2118; stroke-width: 1.3; stroke-linecap: round; }
+.lb-head { fill: #2b2118; }
+.lb-shell { fill: #e63946; stroke: #2b2118; stroke-width: 1.4; }
+.lb-seam { stroke: #2b2118; stroke-width: 1.2; }
+.lb-spots circle { fill: #2b2118; }
+.lb-eye { fill: #fff; }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-rays { animation: crayon-rays 40s linear infinite; }
+  .cr-stars path { animation: crayon-twinkle 2.4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+  .cr-stars path + path { animation-delay: -1.2s; }
+  .cr-snail { animation: crayon-snail 160s linear infinite; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.cr-flyer, .cr-snail) { display: none; }
+}
+@keyframes crayon-rays { to { rotate: 360deg; } }
+@keyframes crayon-snail { 0% { translate: -50px 0; scale: 1 1; } 49.9% { translate: calc(100vw + 10px) 0; scale: 1 1; } 50% { translate: calc(100vw + 10px) 0; scale: -1 1; } 99.9% { translate: -50px 0; scale: -1 1; } 100% { translate: -50px 0; scale: 1 1; } }
 @media (max-width: 900px) {
   .crayon-doodles :is(.cd-doodle, .cd-cloud) { display: none; }
 }
@@ -185,6 +229,6 @@
   .cd-bunting i { width: 14px; height: 16px; }
 }
 @media (forced-colors: active) {
-  [data-playskin="crayon"] .crayon-doodles { display: none; }
+  [data-playskin="crayon"] .crayon-doodles, .cr-flyer, .cr-snail { display: none; }
   [data-playskin="crayon"].dark body::after { display: none; }
 }

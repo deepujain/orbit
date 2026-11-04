@@ -184,6 +184,22 @@ Adds the Record button. It shows while `show()` returns true (by default, while 
 
 Adds Crayon's doodles to `target` (default `document.body`) and returns a function that removes them. `crayon.css` shows them only while the Crayon skin is on.
 
+### Crayon's drawings from `playskin/crayon`
+
+Drawings to put in your own page, styled by `crayon.css` in light and dark. Your app decides where each one sits and when it shows.
+
+| Export | What it is |
+| --- | --- |
+| `PLANE_SVG` | A folded paper plane facing right |
+| `CRAYON_TOGGLE` | A light and dark button face: a smiling sun in light, a moon with stars in dark |
+| `CRAYON_ICON` | A red crayon, for a style menu |
+| `LADYBUG_SVG` | A ladybug facing up |
+| `SNAIL_SVG` | A snail; inside an element with the `cr-snail` class it crawls the width of the page and back |
+| `planeFrames({ cx, cy }, width)` | Keyframes for one flight: a climb, a loop-the-loop and a glide off the right edge |
+| `startCrayonPlane(options)` | Sends the plane off your brand every 14 to 26 seconds |
+
+`startCrayonPlane` options: `anchor` (the element it takes off from, default `[data-brand]`), `active` (whether it may fly, default while the Crayon skin is on), `reducedMotion`, `every` and `first` (milliseconds between flights and before the first, as `[shortest, longest]`). It never flies under reduced motion or in a hidden tab, and returns `{ fly, flights, stop }`; `fly()` sends it now.
+
 ## Credits
 
 The cat's meow is a public domain (CC0) recording from the "Micro Pack - Cat Meows" sound pack. Everything else is original work.

@@ -19,6 +19,10 @@
       "types": "./src/record.d.ts",
       "default": "./src/record.js"
     },
+    "./crayon": {
+      "types": "./src/crayon.d.ts",
+      "default": "./src/crayon.js"
+    },
     "./crayon-doodles": {
       "types": "./src/crayon-doodles.d.ts",
       "default": "./src/crayon-doodles.js"
