@@ -1,0 +1,72 @@
+{
+  "name": "playskin",
+  "version": "0.1.0",
+  "description": "Playful skins for any web page: Aura glass, Crayon paper and chalkboard, and Whiskers, a cat that lives on your page.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./whiskers": {
+      "types": "./src/whiskers/index.d.ts",
+      "default": "./src/whiskers/index.js"
+    },
+    "./crayon-doodles": {
+      "types": "./src/crayon-doodles.d.ts",
+      "default": "./src/crayon-doodles.js"
+    },
+    "./react": {
+      "types": "./react/index.d.ts",
+      "default": "./react/index.js"
+    },
+    "./aura.css": "./themes/aura.css",
+    "./crayon.css": "./themes/crayon.css",
+    "./whiskers.css": "./themes/whiskers.css",
+    "./meow.m4a": "./src/whiskers/meow.m4a",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "themes",
+    "react",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "demo": "npx --yes serve ."
+  },
+  "keywords": [
+    "theme",
+    "skin",
+    "css",
+    "cat",
+    "pet",
+    "fun",
+    "tailwind",
+    "shadcn",
+    "animation",
+    "easter-egg"
+  ],
+  "author": "Deepak Jain",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deepujain/playskin.git"
+  },
+  "homepage": "https://github.com/deepujain/playskin#readme"
+}

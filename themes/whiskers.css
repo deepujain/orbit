@@ -1,0 +1,330 @@
+/* playskin: Whiskers. A cat that lives in the whole window and plays on the page's cards. <html data-playskin="whiskers">
+   gives the page its lavender room; startWhiskers() from playskin/whiskers brings out the cat, its toys, the fish and
+   the trick panel, all styled here. Their colours come from the --kc-* variables below. */
+:root{--kc-font:Inter,system-ui,sans-serif;--kc-ink:hsl(var(--foreground));--kc-ink-2:hsl(var(--foreground));--kc-muted:hsl(var(--muted-foreground));
+ --kc-line:hsl(var(--border));--kc-surface:hsl(var(--card));--kc-surface-2:hsl(var(--muted));--kc-surface-3:hsl(var(--accent));--kc-panel:hsl(var(--popover));
+ --kc-amethyst:#7c6bd6;--kc-amethyst-soft:#ede9fe;--kc-amethyst-ink:#5b21b6;--kc-radius:12px;--kc-ease:cubic-bezier(.2,.8,.2,1);--kc-shadow:0 4px 14px rgb(40 20 60/.16)}
+.dark{--kc-amethyst-soft:#2e1f5e;--kc-amethyst-ink:#c4b5fd}
+
+/* The page: a soft lavender room with a faint grid, as in Kokoro. */
+[data-playskin="whiskers"]{--background:252 100% 97%}
+.dark[data-playskin="whiskers"]{--background:250 44% 10%}
+[data-playskin="whiskers"] body{background:
+ linear-gradient(rgb(124 58 237/.06) 1px,transparent 1px) 0 0/24px 24px,
+ linear-gradient(90deg,rgb(124 58 237/.06) 1px,transparent 1px) 0 0/24px 24px,
+ radial-gradient(1200px 500px at 10% -10%,#ddd3ff,transparent 60%),hsl(var(--background));background-attachment:fixed}
+.dark[data-playskin="whiskers"] body{background:
+ linear-gradient(rgb(167 139 250/.07) 1px,transparent 1px) 0 0/24px 24px,
+ linear-gradient(90deg,rgb(167 139 250/.07) 1px,transparent 1px) 0 0/24px 24px,
+ radial-gradient(1200px 500px at 10% -10%,#2a1f55,transparent 60%),hsl(var(--background));background-attachment:fixed}
+.dark .tl-cat{--cat-line:#3b2414;filter:drop-shadow(0 3px 3px rgb(0 0 0/.4))}
+
+.tl-food{position:absolute;width:20px;height:13px;margin:-7px 0 0 -10px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 14'%3E%3Cpath d='M15 7 21 2v10z' fill='%23fdba74' stroke='%23c2410c' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cellipse cx='8.5' cy='7' rx='7.5' ry='5' fill='%23fdba74' stroke='%23c2410c' stroke-width='1.2'/%3E%3Cpath d='M11 3.5q2 3.5 0 7' fill='none' stroke='%23c2410c' stroke-width='1'/%3E%3Ccircle cx='4.6' cy='6' r='1.2' fill='%23222'/%3E%3C/svg%3E") center/contain no-repeat;filter:drop-shadow(0 1px 0 rgb(80 30 10/.3));transition:transform .25s,opacity .25s;animation:tl-food-bob 1.8s ease-in-out infinite}
+.tl-food.gold{width:28px;height:18px;margin:-9px 0 0 -14px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 14'%3E%3Cpath d='M15 7 21 2v10z' fill='%23fde047' stroke='%23a16207' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cellipse cx='8.5' cy='7' rx='7.5' ry='5' fill='%23fde047' stroke='%23a16207' stroke-width='1.2'/%3E%3Cpath d='M11 3.5q2 3.5 0 7' fill='none' stroke='%23a16207' stroke-width='1'/%3E%3Ccircle cx='4.6' cy='6' r='1.2' fill='%23222'/%3E%3C/svg%3E") center/contain no-repeat;animation:tl-food-bob 1.8s ease-in-out infinite,tl-food-glow 1.6s ease-in-out infinite}
+.tl-food.got{transform:translateY(-18px) scale(.3);opacity:0;animation:none}
+@keyframes tl-food-bob{50%{translate:0 -2px}}
+
+/* The cat (src/whiskers/cat.js). Every part turns on a registered custom property, so a pose is a set of angles
+   that transition smoothly, and an act animates only the parts it moves (--a, --dx and --dy, which are not inherited).
+   The SVG faces right; --face mirrors it and --tilt is its pitch in flight, both set from the physics. */
+@property --pitch{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --l1{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --l2{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --l3{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --l4{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --tail{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --ear{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --hr{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --roll{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --hx{syntax:'<length>';inherits:true;initial-value:0px}
+@property --hy{syntax:'<length>';inherits:true;initial-value:0px}
+@property --fy{syntax:'<length>';inherits:true;initial-value:0px}
+@property --tuck{syntax:'<number>';inherits:true;initial-value:1}
+@property --sq{syntax:'<number>';inherits:true;initial-value:1}
+@property --eye{syntax:'<number>';inherits:true;initial-value:1}
+@property --hk{syntax:'<number>';inherits:true;initial-value:1}
+@property --a{syntax:'<angle>';inherits:false;initial-value:0deg}
+@property --dx{syntax:'<length>';inherits:false;initial-value:0px}
+@property --dy{syntax:'<length>';inherits:false;initial-value:0px}
+.tl-cat{position:fixed;left:0;top:0;width:70px;height:52.5px;z-index:40;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
+ --cat-fur:#f7c891;--cat-shade:#eaa564;--cat-line:#8a5530;--cat-cream:#fff3e2;--cat-pink:#f49fb0;filter:drop-shadow(0 3px 2px rgb(60 30 10/.18));
+ transition:--pitch .22s,--l1 .18s,--l2 .18s,--l3 .18s,--l4 .18s,--tail .3s,--ear .15s,--hr .22s,--roll .35s,--hx .22s,--hy .22s,--fy .16s,--tuck .22s,--sq .12s,--eye .15s}
+.tl-cat[hidden],.tl-cat-say[hidden],.tl-cat-cap[hidden]{display:none}
+/* A station the cat shoves slides quickly and wobbles; let go, it springs back home. */
+@keyframes tl-cat-wobble{25%{rotate:-9deg}55%{rotate:6deg}80%{rotate:-2deg}}
+.tl-cat[data-pose=dangle]{cursor:grabbing}
+.tl-cat-svg{width:100%;height:100%;overflow:visible;display:block}
+.tl-cat .tl-cat-3d{position:absolute;pointer-events:none}
+.tl-cat.is-3d .tl-cat-svg{opacity:0}
+.tl-cat .ct-part{transform-box:view-box}
+.tl-cat .ct-flip{transform-origin:32px 36px;transform:translateY(var(--fy)) rotate(calc((var(--tilt,0deg) + var(--roll) + var(--a)) * var(--fs,1))) scaleX(var(--face,1)) scaleY(var(--sq)) translate(var(--dx),var(--dy))}
+.tl-cat .ct-torso{transform-origin:22px 38px;transform:translate(var(--dx),var(--dy)) rotate(calc(var(--pitch) + var(--a)))}
+.tl-cat .ct-head{transform-origin:48px 26px;transform:rotate(calc(-1*var(--pitch))) scaleX(var(--hk)) rotate(var(--pitch)) translate(calc(var(--hx) + var(--dx)),calc(var(--hy) + var(--dy))) rotate(calc(var(--hr) - var(--pitch) + var(--a)))}
+.tl-cat .ct-l1{transform-origin:20px 35px;transform:translate(var(--dx),var(--dy)) rotate(calc(var(--l1) + var(--a))) scaleY(var(--tuck))}
+.tl-cat .ct-l2{transform-origin:26px 35px;transform:translate(var(--dx),var(--dy)) rotate(calc(var(--l2) + var(--a))) scaleY(var(--tuck))}
+.tl-cat .ct-l3{transform-origin:42px 35px;transform:translate(var(--dx),var(--dy)) rotate(calc(var(--l3) + var(--a)))}
+.tl-cat .ct-l4{transform-origin:48px 35px;transform:translate(var(--dx),var(--dy)) rotate(calc(var(--l4) + var(--a)))}
+.tl-cat .ct-tail{transform-origin:16px 31px;transform:rotate(calc(var(--tail) + var(--a)));animation:ct-tail 2.6s ease-in-out infinite}
+.tl-cat .ct-ear1{transform-origin:44px 13px;transform:rotate(calc(-1*var(--ear) + var(--a)))}
+.tl-cat .ct-ear2{transform-origin:52px 13px;transform:rotate(calc(var(--ear) + var(--a)))}
+.tl-cat .ct-edge{fill:var(--cat-line);stroke:var(--cat-line);stroke-width:2.4;stroke-linejoin:round}
+.tl-cat .ct-fur{fill:var(--cat-fur)}
+.tl-cat .ct-belly{fill:var(--cat-cream)}
+.tl-cat .ct-body{fill:var(--cat-fur);stroke:var(--cat-line);stroke-width:1.2;stroke-linejoin:round}
+.tl-cat .ct-stripe{fill:none;stroke:var(--cat-shade);stroke-width:2.6;stroke-linecap:round}
+.tl-cat .ct-crease{fill:none;stroke:var(--cat-shade);stroke-width:1;stroke-linecap:round;opacity:.8}
+.tl-cat :is(.ct-brow,.ct-tail-band){fill:none;stroke:var(--cat-shade);stroke-width:1.3;stroke-linecap:round}
+.tl-cat .ct-tail-band{stroke-width:2.2}
+.tl-cat .ct-ear-in,.tl-cat .ct-nose{fill:var(--cat-pink)}
+.tl-cat .ct-blush{fill:var(--cat-pink);opacity:.45}
+.tl-cat .ct-pupil{fill:#2b1a10;transform-box:fill-box;transform-origin:center;transform:scale(var(--eye));animation:ct-blink 4.6s infinite}
+.tl-cat .ct-shine{fill:#fff}
+.tl-cat :is(.ct-shut,.ct-dizzy circle){fill:none;stroke:#2b1a10;stroke-width:1.1;stroke-linecap:round}
+.tl-cat :is(.ct-shut,.ct-dizzy,.ct-open,.ct-tear){opacity:0}
+.tl-cat .ct-dizzy circle{transform-box:fill-box;transform-origin:center;animation:ct-spin .6s linear infinite}
+.tl-cat .ct-open{fill:#9b2f45}
+.tl-cat .ct-tear{fill:#7cc4f4}
+.tl-cat :is(.ct-mouth,.ct-whisk){fill:none;stroke:var(--cat-line);stroke-width:.8;stroke-linecap:round}
+.tl-cat .ct-whisk{opacity:.7}
+.tl-cat .ct-limb{fill:var(--cat-fur);stroke:var(--cat-line);stroke-width:1.2;stroke-linejoin:round}
+.tl-cat .ct-far .ct-limb{fill:var(--cat-shade)}
+.tl-cat .ct-front{opacity:var(--fo,0)}
+.tl-cat .ct-chest{fill:var(--cat-fur);stroke:var(--cat-line);stroke-width:1.2}
+.tl-cat .ct-paw{fill:var(--cat-cream);stroke:var(--cat-line);stroke-width:.9}
+.tl-cat .ct-tail-edge{fill:none;stroke:var(--cat-line);stroke-width:9.4;stroke-linecap:round}
+.tl-cat .ct-tail-fur{fill:none;stroke:var(--cat-fur);stroke-width:7;stroke-linecap:round}
+.tl-cat .ct-tail-tip{fill:none;stroke:var(--cat-cream);stroke-width:6;stroke-linecap:round}
+@keyframes ct-blink{0%,92%,100%{transform:scale(var(--eye))}95%{transform:scale(var(--eye)) scaleY(.1)}}
+@keyframes ct-spin{to{transform:rotate(360deg)}}
+@keyframes ct-tail{0%,100%{--a:0deg}50%{--a:12deg}}
+@keyframes ct-gait{0%,100%{--a:24deg}50%{--a:-24deg}}
+@keyframes ct-bob{0%,100%{--dy:0px}50%{--dy:-1.4px}}
+
+/* Poses: standing is the default; the rest set the body's angles. */
+.tl-cat[data-pose=sit]{--pitch:-30deg;--tuck:.42;--l1:-8deg;--l2:-8deg;--l3:30deg;--l4:30deg;--hy:-1px;--tail:28deg}
+.tl-cat[data-pose=upright]{--pitch:-64deg;--tuck:.5;--l1:-6deg;--l2:-6deg;--l3:34deg;--l4:46deg;--hx:-2px;--hy:-2px;--tail:38deg}
+.tl-cat[data-pose=crouch]{--pitch:5deg;--sq:.8;--fy:1px;--hy:3px;--l1:12deg;--l2:12deg;--l3:-14deg;--l4:-14deg;--tail:-18deg;--ear:-6deg}
+.tl-cat[data-pose=jump]{--l1:48deg;--l2:52deg;--l3:-52deg;--l4:-46deg;--tail:-48deg}
+.tl-cat[data-pose=land]{--sq:.82;--fy:1px}
+.tl-cat[data-pose=land-hard]{--sq:.66;--fy:2px;--hy:4px;--l3:-10deg;--l4:-10deg}
+.tl-cat[data-pose=stretch]{--pitch:10deg;--hy:4px;--hx:3px;--l3:-68deg;--l4:-62deg;--tail:-36deg}
+.tl-cat[data-pose=sleep]{--sq:.74;--fy:2px;--hy:9px;--hx:-5px;--hr:14deg;--tail:95deg}
+.tl-cat[data-pose=sleep] .ct-leg{opacity:0}
+.tl-cat[data-pose=dangle]{--l1:4deg;--l2:-4deg;--l3:6deg;--l4:-6deg;--tail:72deg;--sq:1.08;--ear:14deg}
+.tl-cat[data-pose=back]{--roll:178deg;--fy:-12px;--l1:-30deg;--l2:20deg;--l3:30deg;--l4:-20deg;--tail:60deg}
+.tl-cat:is([data-pose=walk],[data-pose=run]) :is(.ct-l1,.ct-l4){animation:ct-gait .44s linear infinite}
+.tl-cat:is([data-pose=walk],[data-pose=run]) :is(.ct-l2,.ct-l3){animation:ct-gait .44s linear -.22s infinite}
+.tl-cat:is([data-pose=walk],[data-pose=run]) .ct-torso{animation:ct-bob .44s ease-in-out infinite}
+.tl-cat[data-pose=run] :is(.ct-leg,.ct-torso){animation-duration:.26s}
+.tl-cat[data-pose=run] .ct-l2,.tl-cat[data-pose=run] .ct-l3{animation-delay:-.13s}
+.tl-cat[data-pose=run]{--tail:-40deg}
+.tl-cat:is([data-pose=jump],[data-pose=run],[data-pose=dangle],[data-pose=back]) .ct-tail{animation:none}
+/* Eyes: closed when content, wide when surprised, spinning when dizzy. */
+.tl-cat:is([data-act=groom],[data-act=laugh],[data-act=selfhug],[data-act=tickle],[data-pose=sleep],[data-mood=nap]) .ct-eyes,.tl-cat[data-act=sneeze] .ct-eyes{opacity:0}
+.tl-cat:is([data-act=groom],[data-act=laugh],[data-act=selfhug],[data-act=tickle],[data-pose=sleep],[data-mood=nap]) .ct-shut{opacity:1}
+.tl-cat[data-act=dizzy] .ct-eyes{opacity:0}.tl-cat[data-act=dizzy] .ct-dizzy{opacity:1}
+.tl-cat:is([data-act=laugh],[data-act=sneeze],[data-act=say],[data-act=hello],[data-act=tickle],[data-act=beg]) .ct-open{opacity:1}
+.tl-cat:is([data-act=poke],[data-act=stalk],[data-mood=focus]){--eye:1.35}
+.tl-cat[data-act=poke]{--ear:28deg}
+
+/* Reactions. */
+@keyframes ct-wave{0%,100%{--a:0deg}20%,60%{--a:-172deg}40%,80%{--a:-138deg}}
+.tl-cat[data-act=hello] .ct-l4{animation:ct-wave 1.2s ease-in-out .15s}
+.tl-cat[data-act=hello]{--hr:-8deg}
+@keyframes ct-highfive{0%,100%{--a:0deg}25%,85%{--a:-168deg}}
+.tl-cat[data-act=highfive] .ct-l4{animation:ct-highfive 1.8s ease-out}
+@keyframes ct-earscratch{from{--a:-118deg}to{--a:-92deg}}
+.tl-cat[data-act=headscratch]{--hr:24deg;--hy:3px;--tuck:.9;--ear:18deg}
+.tl-cat[data-act=headscratch] .ct-l2{animation:ct-earscratch .12s ease-in-out infinite alternate}
+@keyframes ct-kick{from{--a:-24deg}to{--a:24deg}}
+@keyframes ct-wriggle{0%,100%{--a:-6deg}50%{--a:6deg}}
+.tl-cat[data-act=tickle] .ct-leg{animation:ct-kick .16s ease-in-out infinite alternate}
+.tl-cat[data-act=tickle] :is(.ct-l2,.ct-l3){animation-delay:-.08s}
+.tl-cat[data-act=tickle] .ct-flip{animation:ct-wriggle .3s ease-in-out infinite}
+@keyframes ct-palm{0%{--a:0deg}25%,85%{--a:-152deg}100%{--a:0deg}}
+.tl-cat[data-act=facepalm] .ct-l4{animation:ct-palm 2s ease-in-out}
+.tl-cat[data-act=facepalm]{--hr:20deg;--hy:3px;--ear:16deg}
+@keyframes ct-shrug-n{0%,100%{--a:0deg}30%,70%{--a:-112deg}}
+@keyframes ct-shrug-f{0%,100%{--a:0deg}30%,70%{--a:-80deg}}
+@keyframes ct-shoulders{0%,100%{--dy:0px}30%,70%{--dy:-2px}}
+.tl-cat[data-act=shrug] .ct-l4{animation:ct-shrug-n 1.6s ease-in-out}
+.tl-cat[data-act=shrug] .ct-l3{animation:ct-shrug-f 1.6s ease-in-out}
+.tl-cat[data-act=shrug] .ct-head{animation:ct-shoulders 1.6s ease-in-out}
+.tl-cat[data-act=shrug]{--hr:-14deg}
+@keyframes ct-thumb{0%,100%{--a:0deg}20%,85%{--a:-118deg}}
+@keyframes ct-nod{0%,100%{--a:0deg}50%{--a:9deg}}
+.tl-cat[data-act=thumbsup] .ct-l4{animation:ct-thumb 1.7s ease-out}
+.tl-cat[data-act=thumbsup] .ct-head{animation:ct-nod .45s ease-in-out .5s 2}
+@keyframes ct-sway{0%,100%{--a:-9deg;--dy:0px}25%,75%{--dy:-3px}50%{--a:9deg;--dy:0px}}
+@keyframes ct-armup{0%,100%{--a:0deg}50%{--a:-150deg}}
+.tl-cat[data-act=dance] .ct-flip{animation:ct-sway .6s ease-in-out infinite}
+.tl-cat[data-act=dance] .ct-l4{animation:ct-armup .6s ease-in-out infinite}
+.tl-cat[data-act=dance] .ct-l3{animation:ct-armup .6s ease-in-out -.3s infinite}
+.tl-cat[data-act=dance] .ct-tail{animation:ct-wriggle .3s ease-in-out infinite}
+@keyframes ct-pat{from{--a:-22deg}to{--a:-58deg}}
+.tl-cat[data-act=bellydrum] :is(.ct-l3,.ct-l4){animation:ct-pat .3s ease-in infinite alternate}
+.tl-cat[data-act=bellydrum] .ct-l3{animation-delay:-.3s}
+@keyframes ct-clap-n{0%,100%{--a:-62deg}50%{--a:-96deg}}
+@keyframes ct-clap-f{0%,100%{--a:-112deg}50%{--a:-78deg}}
+.tl-cat[data-act=slowclap] .ct-l4{animation:ct-clap-n .7s ease-in-out infinite}
+.tl-cat[data-act=slowclap] .ct-l3{animation:ct-clap-f .7s ease-in-out infinite}
+.tl-cat[data-act=slowclap]{--hr:6deg}
+@keyframes ct-peek{0%{--a:0deg}15%,58%{--a:-150deg}66%,100%{--a:-40deg}}
+@keyframes ct-peek-eye{0%,60%{--eye:1}66%,100%{--eye:1.5}}
+.tl-cat[data-act=peekaboo] :is(.ct-l3,.ct-l4){animation:ct-peek 2.2s ease-in-out forwards}
+.tl-cat[data-act=peekaboo] .ct-pupil{animation:ct-peek-eye 2.2s steps(1) forwards}
+.tl-cat[data-act=peekaboo]{--hr:8deg}
+@keyframes ct-squeeze{0%,100%{--dy:0px}50%{--dy:1px}}
+.tl-cat[data-act=selfhug]{--l3:-62deg;--l4:-38deg;--hr:10deg}
+.tl-cat[data-act=selfhug] .ct-torso{animation:ct-squeeze .5s ease-in-out infinite}
+@keyframes ct-pump{0%,100%{--a:-150deg}50%{--a:-122deg}}
+.tl-cat[data-act=flex] .ct-l4{animation:ct-pump .5s ease-in-out infinite}
+.tl-cat[data-act=flex]{--sq:1.06;--hr:-10deg}
+@keyframes ct-guffaw{0%,100%{--a:-16deg;--dy:0px}50%{--a:-24deg;--dy:-1.5px}}
+.tl-cat[data-act=laugh] .ct-head{animation:ct-guffaw .22s ease-in-out infinite}
+.tl-cat[data-act=laugh] .ct-torso{animation:ct-bob .22s ease-in-out infinite}
+@keyframes ct-achoo{0%{--a:0deg}55%{--a:-20deg}62%{--a:16deg}80%,100%{--a:0deg}}
+.tl-cat[data-act=sneeze] .ct-head{animation:ct-achoo 1.8s ease-in forwards}
+.tl-cat[data-act=sneeze] .ct-ear1,.tl-cat[data-act=sneeze] .ct-ear2{animation:ct-wriggle .12s 1.1s 3}
+/* Its own tricks and touches. */
+@keyframes ct-lick{0%,100%{--a:-122deg}50%{--a:-138deg}}
+.tl-cat[data-act=groom] .ct-l4{animation:ct-lick .5s ease-in-out infinite}
+.tl-cat[data-act=groom]{--hr:14deg;--hy:1px}
+@keyframes ct-swipe{0%,100%{--a:-60deg}50%{--a:-150deg}}
+.tl-cat .ct-arms{opacity:0}
+.tl-cat .ct-arm{transform-box:view-box;transform-origin:48px 31px}
+.tl-cat .ct-bean{fill:var(--cat-pink)}
+.tl-cat :is(.ct-body,.ct-torso>[clip-path],.ct-leg){opacity:calc(1 - var(--fo,0))}
+.tl-cat[data-act=scratch]{--pitch:-50deg;--tuck:1;--l1:0deg;--l2:0deg;--tail:55deg;--ear:4deg}
+.tl-cat[data-act=scratch] .ct-arms{opacity:1;transition:opacity .15s .12s}
+.tl-cat[data-act=hang]{--pitch:-58deg;--tuck:1;--l1:8deg;--l2:-8deg;--l3:10deg;--l4:-10deg;--tail:84deg;--ear:12deg}
+.tl-cat[data-act=hang] .ct-arms{opacity:1}
+.tl-cat[data-act=hang] .ct-tail{animation:none}
+.tl-cat[data-act=scratch] .ct-a1{animation:ct-pull .55s ease-in-out .42s infinite}
+.tl-cat[data-act=scratch] .ct-a2{animation:ct-pull .55s ease-in-out .695s infinite}
+@keyframes ct-pull{0%,100%{transform:translateY(0)}55%,62%{transform:translateY(4px)}}
+.tl-cat[data-act=swat] .ct-l4{animation:ct-swipe .32s ease-in-out 2}
+@keyframes ct-look{0%,100%{--a:0deg}30%{--a:-12deg}70%{--a:10deg}}
+.tl-cat[data-act=look] .ct-head{animation:ct-look 2.2s ease-in-out}
+@keyframes ct-wiggle{0%,100%{--dx:-1.2px}50%{--dx:1.2px}}
+.tl-cat[data-act=stalk] :is(.ct-l1,.ct-l2,.ct-tail){animation:ct-wiggle .16s ease-in-out infinite}
+.tl-cat[data-act=dizzy] .ct-flip{animation:ct-wriggle .8s ease-in-out infinite}
+.tl-cat[data-act=dizzy]{--ear:12deg}
+@keyframes ct-beg{0%,100%{--a:-30deg}50%{--a:-90deg}}
+.tl-cat[data-act=beg] .ct-l4{animation:ct-beg .5s ease-in-out infinite}
+/* Moods hold until tapped off. */
+@keyframes ct-ponder{0%,100%{--a:-136deg}50%{--a:-142deg}}
+.tl-cat[data-mood=thinking] .ct-l4{animation:ct-ponder 1.6s ease-in-out infinite}
+.tl-cat[data-mood=thinking]{--hr:-12deg}
+.tl-cat[data-mood=thinking] .ct-pupil{transform:translate(.6px,-.9px) scale(.9);animation:none}
+.tl-cat[data-mood=hype] :is(.ct-l3,.ct-l4){animation:ct-armup .34s ease-in-out infinite}
+.tl-cat[data-mood=hype] .ct-l3{animation-delay:-.17s}
+.tl-cat[data-mood=hype]{--tail:-30deg;--ear:-8deg}
+.tl-cat[data-mood=hype] .ct-tail{animation:ct-wriggle .14s infinite}
+.tl-cat[data-mood=sulk]{--ear:36deg;--hy:2px;--hr:10deg;--pitch:-22deg}
+@keyframes ct-flick{0%,80%,100%{--a:0deg}88%{--a:22deg}}
+.tl-cat[data-mood=sulk] .ct-tail{animation:ct-flick 1.4s ease-in-out infinite}
+.tl-cat[data-mood=focus]{--ear:-10deg}
+.tl-cat[data-mood=focus] :is(.ct-l1,.ct-l2){animation:ct-wiggle .18s ease-in-out infinite}
+.tl-cat[data-mood=focus] .ct-tail{animation:ct-flick .8s ease-in-out infinite}
+.tl-cat[data-mood=sad]{--ear:42deg;--hy:3px;--hr:12deg;--tail:60deg}
+.tl-cat[data-mood=sad] .ct-tail{animation:none}
+.tl-cat[data-mood=sad] .ct-pupil{transform:scale(1.15,.85)}
+@keyframes ct-tear{0%{opacity:0;transform:translateY(0)}15%{opacity:1}100%{opacity:0;transform:translateY(7px)}}
+.tl-cat.crying[data-mood=sad] .ct-tear{animation:ct-tear 1.6s ease-in}
+.tl-cat-z{position:absolute;right:-4px;top:-14px;font:700 12px/1 var(--kc-font,system-ui);color:#7c6bd6;opacity:0;pointer-events:none}
+.tl-cat-z b,.tl-cat-z i{font-style:normal;position:absolute;opacity:0}
+.tl-cat-z b{left:8px;top:-8px;font-size:10px}.tl-cat-z i{left:14px;top:-16px;font-size:8px}
+@keyframes ct-z{0%{opacity:0;transform:translate(0,4px)}30%{opacity:1}100%{opacity:0;transform:translate(6px,-10px)}}
+.tl-cat[data-pose=sleep] .tl-cat-z,.tl-cat[data-pose=sleep] .tl-cat-z :is(b,i){animation:ct-z 2.4s ease-out infinite}
+.tl-cat[data-pose=sleep] .tl-cat-z b{animation-delay:.8s}.tl-cat[data-pose=sleep] .tl-cat-z i{animation-delay:1.6s}
+
+/* What floats off it: words, notes, hearts, sparkles, dust, claw marks on the glass, and stars when it is dizzy. */
+.tl-cat-say,.tl-cat-cap{transform:var(--t,none)}
+.tl-cat-say{position:fixed;left:0;top:0;z-index:42;pointer-events:none;max-width:220px;padding:5px 10px;border-radius:12px;background:var(--kc-panel,#fff);color:var(--kc-ink,#1f1d2b);font:600 12px/1.35 var(--kc-font,system-ui);box-shadow:0 4px 14px rgb(40 20 60/.16),0 0 0 1px rgb(124 107 214/.22);animation:ct-pop .18s ease-out}
+.tl-cat-say::after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;margin-left:-5px;background:inherit;transform:rotate(45deg);box-shadow:2px 2px 0 0 rgb(124 107 214/.12)}
+.tl-cat-cap{position:fixed;left:0;top:0;z-index:42;pointer-events:none;white-space:nowrap;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--kc-amethyst,#7c6bd6) 88%,#000);color:#fff;font:700 10.5px/1.4 var(--kc-font,system-ui);letter-spacing:.02em;box-shadow:0 2px 8px rgb(40 20 60/.2);animation:ct-pop .18s ease-out}
+.tl-cat-say.think{border-radius:16px;letter-spacing:2px}
+.tl-cat-say.think::after{width:6px;height:6px;margin-left:-14px;bottom:-9px;border-radius:50%;transform:none}
+@keyframes ct-pop{from{opacity:0;transform:var(--t,none) scale(.7)}}
+.tl-cat-goal{position:fixed;left:-9px;top:-14px;z-index:40;width:18px;height:18px;pointer-events:none}
+.tl-cat-toy{position:fixed;left:0;top:0;z-index:39;padding:0;margin:0;border:0;background:none;cursor:pointer;transform-origin:50% 50%;filter:drop-shadow(0 2px 2px rgb(0 0 0/.18))}
+.tl-cat-toy svg{display:block;width:100%;height:100%;overflow:visible}
+.tl-cat-toy .toy-knot{transform:rotate(var(--rot,0rad));transform-box:view-box;transform-origin:32px 32px}
+.tl-cat-toy.toy-bell .toy-knot{transform-origin:9px 9px}
+.tl-cat-toy.loose .knot-tail,.tl-cat-toy[data-peel="1"] .knot-caps,.tl-cat-toy[data-peel="2"] :is(.knot-caps,.knot-sides){display:none}
+.tl-cat-yarn .yarn-pom{fill:#ff2f8a;stroke:#ffd166;stroke-width:2;stroke-dasharray:1.5 1.8}
+.tl-cat-yarn{position:fixed;left:0;top:0;width:100vw;height:100vh;overflow:visible;z-index:38;pointer-events:none}
+.tl-cat-yarn path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tl-cat-yarn .yarn-shade{stroke:#5e0f2a;stroke-width:4.4;opacity:.22;transform:translateY(1.5px)}
+.tl-cat-yarn .yarn-line{stroke:#e63946;stroke-width:2.8}
+.tl-cat-yarn :is(.yarn-c1,.yarn-c2,.yarn-c3){stroke-width:2.8;stroke-linecap:butt;stroke-dasharray:22 66}
+.tl-cat-yarn .yarn-c1{stroke:#fcbf49;stroke-dashoffset:-22}.tl-cat-yarn .yarn-c2{stroke:#43aa3b;stroke-dashoffset:-44}.tl-cat-yarn .yarn-c3{stroke:#1d8fd1;stroke-dashoffset:-66}
+.tl-cat-yarn .yarn-ply{stroke:#ffb3c6;stroke-width:1.1;stroke-dasharray:1.4 2.6;opacity:.85}
+.tl-cat-toy:focus-visible{outline:2px solid var(--kc-amethyst);outline-offset:2px;border-radius:50%}
+.tl-cat-goal::before{content:'';position:absolute;left:0;right:0;top:11px;height:6px;border-radius:50%;background:rgb(60 40 90/.2);filter:blur(1.5px);animation:tl-cat-goal 1.6s ease-in-out infinite}
+.tl-cat-goal .tl-cat-fish{left:9px;top:5px;transition:scale .18s ease-out,opacity .35s,transform .35s;animation:tl-food-bob 1.6s ease-in-out infinite}
+.tl-cat-goal[hidden]{display:none}
+@keyframes tl-cat-goal{50%{scale:1.15}}
+@media (prefers-reduced-motion:reduce){.tl-cat-goal::before{animation:none}}
+.tl-cat-fx{position:fixed;z-index:41;pointer-events:none;font:700 13px/1 var(--kc-font,system-ui);color:#7c6bd6;font-style:normal;animation:ct-float 1.6s ease-out forwards}
+.tl-cat-fx.fx-paw{color:#f59e0b;font-size:12px;animation:ct-burst 1s ease-out forwards}
+.tl-cat-fx.fx-head{color:#f0567a}
+.tl-cat-fx.fx-heart{color:#f0567a;font-size:15px;animation:ct-float 1.4s ease-out forwards}
+.tl-cat-fx.fx-smell{color:#f4a259;font-size:18px;animation:ct-smell 1.3s ease-in-out forwards}
+@keyframes ct-smell{0%{opacity:0;transform:translate(0,0) scale(.8)}25%{opacity:.9}100%{opacity:0;transform:translate(var(--dx,0),var(--dy,0)) scale(1.15)}}
+.tl-cat-fx.fx-dust{color:#b8a48c;font-size:16px;letter-spacing:4px;animation:ct-dust .5s ease-out forwards}
+@keyframes ct-float{0%{opacity:0;transform:translateY(0) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translateY(-32px) scale(1.1)}}
+@keyframes ct-burst{0%{opacity:0;transform:scale(.4)}25%{opacity:1;transform:scale(1.3)}100%{opacity:0;transform:translateY(-10px) scale(1)}}
+@keyframes ct-dust{0%{opacity:.9;transform:translateX(-50%) scaleX(.6)}100%{opacity:0;transform:translateX(-50%) scaleX(1.6) translateY(-4px)}}
+.tl-cat-claw{position:fixed;width:11px;height:22px;z-index:42;pointer-events:none;animation:ct-claw 7s ease-in forwards}
+.tl-cat-claw svg{width:100%;height:100%;overflow:visible;display:block}
+.tl-cat-claw path{fill:none;stroke-linecap:round;stroke-dasharray:18;stroke-dashoffset:18;animation:ct-draw .3s cubic-bezier(.3,.6,.4,1) forwards}
+.tl-cat-claw .hi{stroke:rgb(255 255 255/.95);stroke-width:.5;transform:translate(-.35px,-.2px)}
+.tl-cat-claw .sh{stroke:rgb(70 50 80/.5);stroke-width:.75}
+.tl-cat-fog{position:fixed;left:0;top:0;width:18px;height:13px;z-index:42;pointer-events:none;border-radius:50%;background:radial-gradient(closest-side,rgb(255 255 255/.55),rgb(255 255 255/.18) 60%,transparent);filter:blur(.6px);animation:ct-fog 1.3s ease-in-out infinite}
+.tl-cat-fog[hidden]{display:none}
+@keyframes ct-fog{0%,100%{opacity:.35;scale:.85}45%{opacity:.85;scale:1.08}}
+@keyframes ct-draw{to{stroke-dashoffset:0}}
+@keyframes ct-claw{0%,60%{opacity:1}100%{opacity:0}}
+.tl-cat-stars{position:fixed;z-index:41;width:32px;height:12px;pointer-events:none;animation:ct-spin 1s linear infinite;transform-origin:16px 6px}
+.tl-cat-stars b{position:absolute;color:#f5b301;font-size:10px;line-height:1}
+.tl-cat-stars b:nth-child(1){left:0;top:2px}.tl-cat-stars b:nth-child(2){left:13px;top:-4px}.tl-cat-stars b:nth-child(3){left:26px;top:2px}
+
+@media (prefers-reduced-motion:reduce){.tl-cat *,.tl-cat-fx,.tl-cat-stars,.tl-cat-say{animation:none!important;transition:none!important}}
+
+.tl-cat-panel{position:fixed;left:0;top:0;z-index:60;width:212px;display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--kc-line);border-radius:var(--kc-radius);background:var(--kc-surface);color:var(--kc-ink);box-shadow:0 16px 32px -16px #17142a55;animation:tl-cat-panel-in .18s var(--kc-ease)}
+.tl-cat-panel[hidden]{display:none}
+@keyframes tl-cat-panel-in{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.tl-cat-panel header{display:flex;align-items:center;justify-content:space-between}
+.tl-cat-panel header strong{font-size:13px}
+.tl-cat-name{flex:1;min-width:0;margin-right:6px;padding:3px 6px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--kc-ink);font:inherit;font-size:14px;font-weight:700;cursor:text}
+.tl-cat-name:hover{border-color:var(--kc-line)}
+.tl-cat-name:focus{outline:none;border-color:var(--kc-amethyst);background:var(--kc-surface-2)}
+.tl-cat-hunger{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--kc-muted)}
+.tl-cat-hunger>span:nth-child(2){flex:1}
+.tl-cat-bowl{letter-spacing:1px;font-size:11px;color:var(--kc-amethyst)}
+.tl-cat-hunger[data-level="2"],.tl-cat-hunger[data-level="3"]{color:#c2410c}
+.tl-cat-hunger[data-level="3"] .tl-cat-bowl{color:#c2410c}
+.tl-cat-hunger .tl-cat-trick{flex:none}
+.tl-cat-panel-close{width:22px;height:22px;border:0;border-radius:6px;background:transparent;color:var(--kc-muted);font-size:17px;line-height:1;cursor:pointer}
+.tl-cat-panel-close:hover{background:var(--kc-surface-3);color:var(--kc-ink)}
+.tl-cat-panel h3{font-size:10px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--kc-muted);margin:2px 0 5px}
+.tl-cat-tricks{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px}.tl-cat-trick{display:flex;align-items:center;gap:6px;padding:5px 7px;border:1px solid var(--kc-line);border-radius:8px;background:var(--kc-surface-2);color:var(--kc-ink-2);font:inherit;font-size:12px;font-weight:560;line-height:1.2;text-align:left;min-width:0;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}
+.tl-cat-trick span{font-size:14px}
+.tl-cat-trick:hover{background:var(--kc-amethyst-soft);border-color:var(--kc-amethyst);color:var(--kc-ink)}
+.tl-cat-trick:active{transform:scale(.97)}
+.tl-cat-trick:focus-visible{outline:2px solid var(--kc-amethyst);outline-offset:2px}
+.tl-cat-trick.on{background:var(--kc-amethyst-soft);border-color:var(--kc-amethyst);color:var(--kc-amethyst-ink)}
+@media (prefers-reduced-motion:reduce){.tl-cat-panel{animation:none}}
+/* The red dot the cat chases along a line chart (cat-charts.js). */
+.tl-cat-laser{position:fixed;left:0;top:0;z-index:39;width:10px;height:10px;border-radius:50%;pointer-events:none;background:#ff2d2d;box-shadow:0 0 6px 2px rgb(255 45 45/.75),0 0 16px 6px rgb(255 45 45/.35);transition:opacity .35s}
+.tl-cat-laser.gone{opacity:0}
+/* A round step or badge the cat rolls (cat.js) turns into a wheel while it spins: hub, spokes and a notched tread,
+   drawn in its own text colour so the turning reads on any circle. */
+.tl-cat-wheel::after{content:"";position:absolute;inset:2px;border-radius:50%;pointer-events:none;border:2px dashed currentColor;
+ background:repeating-conic-gradient(currentColor 0 6deg,transparent 6deg 60deg);
+ -webkit-mask:radial-gradient(circle closest-side,transparent 0 38%,#000 39%);mask:radial-gradient(circle closest-side,transparent 0 38%,#000 39%);
+ opacity:.4;animation:tl-cat-wheel-in .25s var(--kc-ease)}
+@keyframes tl-cat-wheel-in{from{opacity:0}}
+

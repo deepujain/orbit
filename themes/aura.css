@@ -1,0 +1,138 @@
+/* playskin: Aura. Soft white glass by day, graphite by night. Turn it on with <html data-playskin="aura">. */
+[data-playskin="aura"] {
+  --aura-mint: #b6efd0; --aura-peach: #ffd0b5; --aura-lilac: #d4c6ff; --aura-rose: #ffc6da; --aura-sky: #bfe0ff;
+  --aura-green: #059669; --aura-orange: #ea580c; --aura-violet: #7c3aed; --aura-pink: #db2777; --aura-blue: #0284c7;
+  --aura-glow: .8;
+  --aura-shadow: 0 1px 2px rgb(16 16 24 / .04), 0 14px 34px -16px rgb(16 16 24 / .12);
+  --radius: 1rem;
+  --background: 240 9% 96%;
+  --foreground: 240 10% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 8%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 8%;
+  --primary: 262 70% 58%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 5% 94%;
+  --secondary-foreground: 240 10% 8%;
+  --muted: 240 5% 94%;
+  --muted-foreground: 240 4% 46%;
+  --accent: 240 5% 93%;
+  --accent-foreground: 240 10% 8%;
+  --border: 240 6% 90%;
+  --input: 240 6% 87%;
+  --ring: 262 70% 72%;
+  --highlight: 146 55% 36%;
+  --highlight-foreground: 0 0% 100%;
+  --chart-1: 146 52% 46%;
+  --chart-2: 22 92% 64%;
+  --chart-3: 252 68% 68%;
+  --chart-4: 340 72% 68%;
+  --chart-5: 205 78% 58%;
+}
+[data-playskin="aura"].dark {
+  --aura-mint: #1c7a55; --aura-peach: #8a4422; --aura-lilac: #5240a6; --aura-rose: #872a52; --aura-sky: #1f5b8f;
+  --aura-green: #34d399; --aura-orange: #fb923c; --aura-violet: #a78bfa; --aura-pink: #f472b6; --aura-blue: #38bdf8;
+  --aura-glow: .5;
+  --aura-shadow: 0 1px 2px rgb(0 0 0 / .3), 0 18px 40px -18px rgb(0 0 0 / .6);
+  --background: 240 6% 7%;
+  --foreground: 240 5% 96%;
+  --card: 240 5% 10%;
+  --card-foreground: 240 5% 96%;
+  --popover: 240 5% 11%;
+  --popover-foreground: 240 5% 96%;
+  --primary: 262 85% 74%;
+  --primary-foreground: 240 6% 8%;
+  --secondary: 240 4% 15%;
+  --secondary-foreground: 240 5% 96%;
+  --muted: 240 4% 15%;
+  --muted-foreground: 240 5% 66%;
+  --accent: 240 4% 17%;
+  --accent-foreground: 240 5% 96%;
+  --border: 240 4% 18%;
+  --input: 240 4% 23%;
+  --ring: 262 55% 60%;
+  --highlight: 146 58% 62%;
+  --highlight-foreground: 240 6% 8%;
+  --chart-1: 146 55% 58%;
+  --chart-2: 22 92% 68%;
+  --chart-3: 252 80% 76%;
+  --chart-4: 340 80% 74%;
+  --chart-5: 205 85% 66%;
+}
+/* A clean sans, quiet labels and tight, confident headings */
+[data-playskin="aura"] body {
+  font-family: "SF Pro Text", "SF Pro Display", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(900px 520px at -6% -10%, color-mix(in srgb, var(--aura-mint) calc(var(--aura-glow) * 100%), transparent), transparent 62%),
+    radial-gradient(760px 480px at 104% 2%, color-mix(in srgb, var(--aura-peach) calc(var(--aura-glow) * 100%), transparent), transparent 60%),
+    radial-gradient(900px 600px at 70% 112%, color-mix(in srgb, var(--aura-lilac) calc(var(--aura-glow) * 100%), transparent), transparent 62%);
+  background-attachment: fixed;
+}
+[data-playskin="aura"] main { background-color: transparent; }
+[data-playskin="aura"] :where(h1, h2, .font-headline) { font-weight: 600; letter-spacing: -.025em; }
+[data-playskin="aura"] :where(h3, h4, [data-card-title]) { font-weight: 550; letter-spacing: -.012em; }
+[data-playskin="aura"] :where(th) { font-weight: 500; color: hsl(var(--muted-foreground)); }
+/* Page titles: a violet-to-pink wash over the words, the icon in violet */
+[data-playskin="aura"] main h1 {
+  width: fit-content;
+  max-width: 100%;
+  background-image: linear-gradient(95deg, var(--aura-violet), var(--aura-pink) 55%, var(--aura-orange));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+[data-playskin="aura"] main h1 svg { color: var(--aura-violet); }
+[data-playskin="aura"] main h1 :is(button, a, [data-button], [class*="bg-"]) { -webkit-text-fill-color: currentColor; }
+/* Glass cards, each catching a different soft glow in its corner */
+[data-playskin="aura"] [data-card] {
+  --aura-tint: var(--aura-mint);
+  border: 1px solid hsl(var(--border) / .75);
+  border-radius: 22px;
+  background-color: hsl(var(--card) / .82);
+  background-image: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--aura-tint) calc(var(--aura-glow) * 100%), transparent), transparent 52%);
+  box-shadow: var(--aura-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+[data-playskin="aura"] [data-card]:nth-of-type(5n+2) { --aura-tint: var(--aura-peach); }
+[data-playskin="aura"] [data-card]:nth-of-type(5n+3) { --aura-tint: var(--aura-lilac); }
+[data-playskin="aura"] [data-card]:nth-of-type(5n+4) { --aura-tint: var(--aura-rose); }
+[data-playskin="aura"] [data-card]:nth-of-type(5n) { --aura-tint: var(--aura-sky); }
+[data-playskin="aura"] [data-card] [data-card] { background-image: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* Hand-built panels outside the Card component get the same glass */
+[data-playskin="aura"] main :is(div, section):is(.rounded-lg, .rounded-xl, .rounded-2xl).border:is(.bg-card, .bg-background):not([data-card]):not([data-card] *) {
+  border-radius: 18px;
+  border-color: hsl(var(--border) / .75);
+  background-color: hsl(var(--card) / .82);
+  box-shadow: var(--aura-shadow);
+}
+/* Pill buttons, rounded fields, pill tabs and soft menus */
+[data-playskin="aura"] [data-button]:where(:not([data-button="link"])) { border-radius: 999px; font-weight: 550; transition: background-color .15s ease, box-shadow .15s ease, transform .12s ease; }
+[data-playskin="aura"] [data-button="default"] { box-shadow: 0 1px 2px rgb(0 0 0 / .12), 0 6px 16px -8px hsl(var(--primary) / .55); }
+[data-playskin="aura"] [data-button="outline"] { background-color: hsl(var(--card) / .9); border-color: hsl(var(--border)); }
+[data-playskin="aura"] [data-button="default"]:hover:not(:disabled) {
+  background-image: linear-gradient(100deg, var(--aura-violet), var(--aura-pink));
+  box-shadow: 0 1px 2px rgb(0 0 0 / .12), 0 10px 22px -8px color-mix(in srgb, var(--aura-pink) 60%, transparent);
+  transform: translateY(-1px);
+}
+[data-playskin="aura"] :is([data-button="outline"], [data-button="secondary"], [data-button="ghost"]):hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--aura-violet) 14%, hsl(var(--card)));
+  border-color: color-mix(in srgb, var(--aura-violet) 45%, transparent);
+  color: var(--aura-violet);
+}
+[data-playskin="aura"] [data-button="destructive"]:hover:not(:disabled) {
+  background-image: linear-gradient(100deg, hsl(var(--destructive)), var(--aura-orange));
+  transform: translateY(-1px);
+}
+[data-playskin="aura"] [data-button]:where(:not([data-button="link"])):active:not(:disabled) { transform: scale(.98); }
+[data-playskin="aura"] :is(input, textarea, select, [role="combobox"]):not([type="checkbox"]):not([type="radio"]) { border-radius: 12px; background-color: hsl(var(--card) / .9); }
+[data-playskin="aura"] :is([role="menu"], [role="listbox"]) { border-radius: 16px; padding: 6px; box-shadow: var(--aura-shadow); }
+[data-playskin="aura"] :is([role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"]) { border-radius: 10px; }
+@media (min-width: 640px) {
+  [data-playskin="aura"] :is([role="dialog"], [role="alertdialog"]).sm\:rounded-lg { border-radius: 24px; }
+}
+@media (forced-colors: active) {
+  [data-playskin="aura"] [data-card] { background-image: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}

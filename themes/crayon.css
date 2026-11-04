@@ -1,0 +1,190 @@
+/* playskin: Crayon. Cream ruled paper by day, a green chalkboard by night. Turn it on with <html data-playskin="crayon">. */
+[data-playskin="crayon"] {
+  --hand: "Chalkboard SE", "Marker Felt", "Comic Sans MS", "Segoe Print", "Bradley Hand", cursive;
+  --cr-red: #e63946; --cr-orange: #f77f00; --cr-yellow: #f2b705; --cr-green: #2a9d4b; --cr-blue: #2f6fdf; --cr-purple: #8e44ad;
+  --cr-gold: #d99a00;
+  --cr-ink: #3a3358;
+  --cr-line: color-mix(in srgb, var(--cr-ink) 72%, transparent);
+  --cr-shadow: color-mix(in srgb, var(--cr-ink) 24%, transparent);
+  --cr-paper: #fffdf6;
+  --cr-wobble: 18px 6px 16px 8px / 7px 16px 8px 18px;
+  --cr-wobble-sm: 14px 5px 12px 6px / 6px 12px 5px 14px;
+  --cr-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .15 .07 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --background: 43 71% 95%;
+  --foreground: 245 30% 22%;
+  --card: 45 100% 98.5%;
+  --card-foreground: 245 30% 22%;
+  --popover: 45 100% 98.5%;
+  --popover-foreground: 245 30% 22%;
+  --primary: 221 72% 40%;
+  --primary-foreground: 0 0% 100%;
+  --destructive: 0 70% 44%;
+  --destructive-foreground: 0 0% 100%;
+  --secondary: 42 60% 89%;
+  --secondary-foreground: 245 30% 22%;
+  --muted: 42 60% 89%;
+  --muted-foreground: 246 14% 40%;
+  --accent: 48 95% 82%;
+  --accent-foreground: 245 30% 22%;
+  --border: 38 35% 76%;
+  --input: 38 30% 70%;
+  --ring: 221 72% 45%;
+  --highlight: 145 66% 26%;
+  --highlight-foreground: 0 0% 100%;
+  --chart-1: 355 78% 56%;
+  --chart-2: 221 70% 50%;
+  --chart-3: 145 60% 36%;
+  --chart-4: 30 95% 50%;
+  --chart-5: 280 50% 48%;
+}
+[data-playskin="crayon"].dark {
+  --cr-red: #f6a5b4; --cr-orange: #f9be85; --cr-yellow: #f7e07a; --cr-green: #a8e6a3; --cr-blue: #9ad0f5; --cr-purple: #cbb0f5;
+  --cr-gold: #f7e07a;
+  --cr-ink: #f4f1e6;
+  --cr-line: color-mix(in srgb, var(--cr-ink) 62%, transparent);
+  --cr-shadow: #0d211a;
+  --cr-paper: #24473a;
+  --cr-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .16 -.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --background: 158 35% 17%;
+  --foreground: 48 40% 93%;
+  --card: 157 32% 21%;
+  --card-foreground: 48 40% 93%;
+  --popover: 157 32% 20%;
+  --popover-foreground: 48 40% 93%;
+  --primary: 46 88% 72%;
+  --primary-foreground: 158 40% 12%;
+  --destructive: 2 90% 78%;
+  --destructive-foreground: 158 40% 12%;
+  --secondary: 157 28% 26%;
+  --secondary-foreground: 48 40% 93%;
+  --muted: 157 28% 26%;
+  --muted-foreground: 140 18% 78%;
+  --accent: 157 30% 30%;
+  --accent-foreground: 48 40% 93%;
+  --border: 150 16% 40%;
+  --input: 150 16% 46%;
+  --ring: 46 88% 72%;
+  --highlight: 204 82% 78%;
+  --highlight-foreground: 158 40% 12%;
+  --chart-1: 340 80% 80%;
+  --chart-2: 204 82% 78%;
+  --chart-3: 115 55% 76%;
+  --chart-4: 30 90% 74%;
+  --chart-5: 268 75% 82%;
+}
+/* Paper with faint ruled lines and a margin line; the board with chalk dust and wiped smudges */
+[data-playskin="crayon"] body {
+  background-color: hsl(var(--background));
+  background-image: var(--cr-grain), linear-gradient(90deg, transparent 54px, #e6394630 54px 56px, transparent 56px), repeating-linear-gradient(180deg, transparent 0 31px, #6f9fd62e 31px 32px);
+  background-attachment: fixed;
+}
+[data-playskin="crayon"].dark body {
+  background-image: var(--cr-grain),
+    radial-gradient(42% 26% at 16% 24%, #ffffff14, transparent 70%),
+    radial-gradient(36% 20% at 74% 62%, #ffffff10, transparent 72%),
+    radial-gradient(28% 14% at 58% 10%, #ffffff0c, transparent 70%),
+    linear-gradient(168deg, transparent 30%, #ffffff0a 36%, transparent 41%, transparent 58%, #ffffff08 63%, transparent 68%),
+    radial-gradient(120% 90% at 50% 40%, transparent 60%, #0b1c1566);
+}
+[data-playskin="crayon"] main { background-color: transparent; padding-top: 2.4rem; }
+[data-playskin="crayon"].dark body::after { content: ""; position: fixed; inset: 0; z-index: 45; pointer-events: none; border: 8px solid #8b5a2b; border-image: repeating-linear-gradient(90deg, #9a6533 0 7px, #8a5829 7px 11px, #a8723d 11px 19px, #7d4f24 19px 22px) 8; box-shadow: inset 0 0 0 1px #5e3a1a, inset 0 0 22px #00000059; }
+/* Handwriting for headings, buttons and tabs; everything else stays readable */
+[data-playskin="crayon"] :where(h1, h2, h3, h4, [data-card-title], [role="tab"], .font-headline, [data-button]) { font-family: var(--hand); letter-spacing: .01em; }
+[data-playskin="crayon"] :where(h1, h2, h3, h4, [data-card-title]) { font-weight: 700; }
+[data-playskin="crayon"] :where(h2) { text-decoration-color: var(--cr-blue); }
+/* Hand-drawn shapes with a hard crayon shadow */
+[data-playskin="crayon"] [data-card] { border: 2.5px solid var(--cr-line); border-radius: var(--cr-wobble); box-shadow: 4px 5px 0 var(--cr-shadow); }
+[data-playskin="crayon"] [data-card]:nth-of-type(3n+2) { border-radius: 8px 18px 7px 16px / 16px 7px 18px 8px; }
+[data-playskin="crayon"] [data-card]:nth-of-type(3n) { border-radius: 14px 10px 20px 6px / 9px 18px 6px 15px; }
+[data-playskin="crayon"] :is(input, textarea, select, [role="combobox"]):not([type="checkbox"]):not([type="radio"]) { border-width: 2px; border-radius: var(--cr-wobble-sm); }
+[data-playskin="crayon"] [data-button] { font-weight: 700; }
+[data-playskin="crayon"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])) { border: 2px solid var(--cr-line); border-radius: var(--cr-wobble-sm); box-shadow: 3px 3px 0 var(--cr-shadow); transition: transform .12s ease, box-shadow .12s ease, background-color .15s ease; }
+[data-playskin="crayon"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])):hover:not(:disabled) { transform: translate(-1px, -1px) rotate(-.6deg); box-shadow: 4px 5px 0 var(--cr-shadow); }
+[data-playskin="crayon"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])):active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--cr-shadow); }
+[data-playskin="crayon"] [data-button]:disabled { box-shadow: none; }
+[data-playskin="crayon"] [data-button="default"] { background: repeating-linear-gradient(-45deg, #ffffff2e 0 2px, transparent 2px 6px), hsl(var(--primary)); border-color: #172f73; color: hsl(var(--primary-foreground)); }
+[data-playskin="crayon"] [data-button="destructive"] { background: repeating-linear-gradient(-45deg, #ffffff26 0 2px, transparent 2px 6px), hsl(var(--destructive)); }
+[data-playskin="crayon"].dark [data-button="default"] { background: repeating-linear-gradient(-45deg, #1c3a2f24 0 2px, transparent 2px 6px), hsl(var(--primary)); border-color: var(--cr-ink); }
+[data-playskin="crayon"] [data-button="ghost"]:hover { border-radius: var(--cr-wobble-sm); }
+[data-playskin="crayon"].dark :is(.text-rose-500, .text-rose-600, .text-rose-700, .text-red-500, .text-red-600, .text-red-700, .text-destructive) { color: #ffb3ad; }
+[data-playskin="crayon"] :is([role="menu"], [role="listbox"]) { border: 2px solid var(--cr-line); border-radius: var(--cr-wobble); box-shadow: 4px 5px 0 var(--cr-shadow); padding: 6px; }
+[data-playskin="crayon"] :is([role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"]) { border-radius: var(--cr-wobble-sm); }
+@keyframes crayon-wiggle {
+  from { transform: translateY(var(--y)) rotate(calc(var(--r) - 8deg)); }
+  to { transform: translateY(calc(var(--y) - 3px)) rotate(calc(var(--r) + 8deg)); }
+}
+@keyframes crayon-spin { to { transform: rotate(360deg); } }
+@keyframes crayon-twinkle { from { opacity: .45; transform: scale(.75); } to { opacity: 1; transform: scale(1.1); } }
+/* Doodles behind the content: bunting, clouds, corner drawings and a snail */
+.crayon-doodles { display: none; }
+[data-playskin="crayon"] .crayon-doodles { display: block; }
+.crayon-doodles > * { position: fixed; z-index: -1; pointer-events: none; }
+.crayon-doodles .cd-defs { position: absolute; }
+.crayon-doodles svg { overflow: visible; }
+.cd-bunting { position: absolute; top: 64px; left: 0; right: 0; height: 30px; display: flex; justify-content: space-between; padding: 0 12px; overflow: hidden; }
+.cd-bunting::before { content: ""; position: absolute; left: 0; right: 0; top: 2px; height: 2px; border-radius: 2px; background: var(--cr-line); }
+.cd-bunting i { --f: var(--cr-red); flex: none; width: 20px; height: 22px; margin-top: 3px; background: repeating-linear-gradient(-45deg, #ffffff40 0 2px, transparent 2px 5px), var(--f); clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: 50% 0; }
+.cd-bunting i:nth-child(6n+2) { --f: var(--cr-orange); }
+.cd-bunting i:nth-child(6n+3) { --f: var(--cr-yellow); }
+.cd-bunting i:nth-child(6n+4) { --f: var(--cr-green); }
+.cd-bunting i:nth-child(6n+5) { --f: var(--cr-blue); }
+.cd-bunting i:nth-child(6n) { --f: var(--cr-purple); }
+.cd-cloud { left: 0; width: 112px; transform: translateX(-160px); }
+.cd-cloud path { fill: var(--cr-paper); stroke: var(--cr-blue); stroke-width: 2.6; stroke-linejoin: round; filter: url(#cd-rough); }
+.dark .cd-cloud path { fill: #ffffff10; stroke: #f4f1e6b3; }
+.cd-cloud-1 { top: 118px; opacity: .9; }
+.cd-cloud-2 { top: 196px; width: 84px; opacity: .7; }
+.cd-cloud-3 { top: 150px; width: 96px; opacity: .8; }
+.cd-doodle { opacity: .8; filter: url(#cd-rough); }
+.dark .cd-doodle { opacity: .62; }
+.cd-doodle path { fill: none; stroke: currentColor; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.cd-heart path, .cd-star path { fill: currentColor; fill-opacity: .22; }
+.c-red { color: var(--cr-red); }
+.c-orange { color: var(--cr-orange); }
+.c-yellow { color: var(--cr-yellow); }
+.c-green { color: var(--cr-green); }
+.c-blue { color: var(--cr-blue); }
+.c-purple { color: var(--cr-purple); }
+.cd-rainbow { top: 104px; right: 22px; width: 128px; }
+.cd-spiral { top: 34vh; left: 14px; width: 46px; }
+.cd-heart { top: 56vh; left: 20px; width: 40px; }
+.cd-star { right: 28px; bottom: 150px; width: 50px; }
+.cd-hopscotch { left: 18px; bottom: 84px; width: 64px; }
+.cd-hopscotch path { stroke-width: 3; }
+.cd-hop-num text { font: 700 15px var(--hand); fill: var(--cr-ink); text-anchor: middle; opacity: .7; }
+.cd-snail-track { left: 0; right: 0; bottom: 66px; height: 34px; overflow: hidden; }
+.cd-snail { position: absolute; left: 0; bottom: 0; width: 52px; transform: translateX(14vw); filter: url(#cd-rough); }
+.cd-snail path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cd-snail-body { stroke: var(--cr-green); stroke-width: 4; }
+.cd-snail-eyes { stroke: var(--cr-green); stroke-width: 2; }
+.cd-snail-dot { fill: var(--cr-ink); }
+.cd-snail-shell { stroke: var(--cr-orange); stroke-width: 3.4; fill: var(--cr-yellow) !important; fill-opacity: .35; }
+@media (prefers-reduced-motion: no-preference) {
+  .cd-bunting i { animation: crayon-sway 2.8s ease-in-out infinite alternate; }
+  .cd-bunting i:nth-child(odd) { animation-delay: -1.4s; }
+  .cd-bunting i:nth-child(3n) { animation-duration: 3.4s; }
+  .cd-cloud { animation: crayon-drift 150s linear infinite; }
+  .cd-cloud-1 { animation-delay: -40s; }
+  .cd-cloud-2 { animation-duration: 190s; animation-delay: -120s; }
+  .cd-cloud-3 { animation-duration: 170s; animation-delay: -10s; }
+  .cd-heart { animation: crayon-bob 3.6s ease-in-out infinite alternate; }
+  .cd-star { animation: crayon-twinkle 3s ease-in-out infinite alternate; }
+  .cd-snail { animation: crayon-crawl 240s linear infinite; animation-delay: -30s; }
+  .cd-snail-eyes { animation: crayon-peek 2.2s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 0 100%; }
+}
+@keyframes crayon-sway { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+@keyframes crayon-drift { from { transform: translateX(-160px); } to { transform: translateX(calc(100vw + 40px)); } }
+@keyframes crayon-bob { from { transform: translateY(-4px) rotate(-6deg); } to { transform: translateY(4px) rotate(5deg); } }
+@keyframes crayon-crawl { from { transform: translateX(-70px); } to { transform: translateX(calc(100vw + 20px)); } }
+@keyframes crayon-peek { from { transform: rotate(-4deg); } to { transform: rotate(6deg); } }
+@media (max-width: 900px) {
+  .crayon-doodles :is(.cd-doodle, .cd-cloud) { display: none; }
+}
+@media (max-width: 640px) {
+  .cd-snail-track { display: none; }
+  .cd-bunting i { width: 14px; height: 16px; }
+}
+@media (forced-colors: active) {
+  [data-playskin="crayon"] .crayon-doodles { display: none; }
+  [data-playskin="crayon"].dark body::after { display: none; }
+}

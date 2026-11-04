@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>playskin: playful skins for any web page</title>
+<meta name="description" content="Aura glass, Crayon paper and chalkboard, and Whiskers, a cat that lives on your page. One attribute to turn on.">
+<script>(function(){try{var s=localStorage.getItem("playskin");if(["aura","crayon","whiskers"].indexOf(s)>-1)document.documentElement.setAttribute("data-playskin",s);if(localStorage.getItem("playskin-dark")==="1")document.documentElement.classList.add("dark");}catch(e){}})();</script>
+<link rel="stylesheet" href="./themes/aura.css">
+<link rel="stylesheet" href="./themes/crayon.css">
+<link rel="stylesheet" href="./themes/whiskers.css">
+<style>
+  /* The page's own look, written the way Tailwind and shadcn sites name their colours. Each skin repaints these. */
+  :root { --background: 0 0% 100%; --foreground: 240 10% 4%; --card: 0 0% 100%; --card-foreground: 240 10% 4%; --popover: 0 0% 100%;
+    --primary: 240 6% 10%; --primary-foreground: 0 0% 98%; --secondary: 240 5% 96%; --muted: 240 5% 96%; --muted-foreground: 240 4% 46%;
+    --accent: 240 5% 96%; --border: 240 6% 90%; --input: 240 6% 90%; --ring: 240 6% 10%; --destructive: 0 72% 51%; --destructive-foreground: 0 0% 98%; --radius: .6rem; }
+  .dark { --background: 240 10% 4%; --foreground: 0 0% 98%; --card: 240 10% 6%; --card-foreground: 0 0% 98%; --popover: 240 10% 6%;
+    --primary: 0 0% 98%; --primary-foreground: 240 6% 10%; --secondary: 240 4% 16%; --muted: 240 4% 16%; --muted-foreground: 240 5% 65%;
+    --accent: 240 4% 16%; --border: 240 4% 16%; --input: 240 4% 16%; --ring: 240 5% 84%; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.55 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; background: hsl(var(--background)); color: hsl(var(--foreground)); }
+  main { max-width: 1040px; margin: 0 auto; padding: 48px 20px 140px; }
+  h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; margin: 0 0 10px; }
+  h2 { font-size: 20px; margin: 0 0 6px; }
+  p { margin: 0 0 12px; color: hsl(var(--muted-foreground)); }
+  code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; background: hsl(var(--muted)); padding: 2px 6px; border-radius: 6px; color: hsl(var(--foreground)); }
+  pre { margin: 10px 0 0; padding: 14px; overflow-x: auto; border-radius: 10px; background: hsl(var(--muted)); color: hsl(var(--foreground)); font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .lead { font-size: 18px; max-width: 640px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 22px 0 34px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 26px; }
+  [data-card] { background: hsl(var(--card)); color: hsl(var(--card-foreground)); border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) + 4px); padding: 20px; }
+  [data-button] { font: inherit; font-weight: 600; cursor: pointer; padding: 9px 16px; border-radius: var(--radius); border: 1px solid transparent; }
+  [data-button="default"] { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+  [data-button="outline"] { background: transparent; color: hsl(var(--foreground)); border-color: hsl(var(--border)); }
+  [data-button="ghost"] { background: transparent; color: hsl(var(--foreground)); }
+  [data-button][aria-pressed="true"] { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+  input { font: inherit; padding: 9px 12px; border: 1px solid hsl(var(--input)); border-radius: var(--radius); background: hsl(var(--background)); color: hsl(var(--foreground)); width: 100%; }
+  .steps { display: flex; gap: 10px; margin-top: 14px; }
+  .steps button { width: 34px; height: 34px; border-radius: 9999px; border: 2px solid hsl(var(--ring)); background: transparent; color: hsl(var(--foreground)); font-weight: 700; cursor: pointer; }
+  .steps button:first-child { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 28px; padding: 14px; background: hsl(var(--card)); border-top: 1px solid hsl(var(--border)); }
+  .bar a { color: hsl(var(--muted-foreground)); text-decoration: none; font-weight: 600; font-size: 13px; }
+  .stat { font-size: 30px; font-weight: 700; color: hsl(var(--foreground)); }
+</style>
+</head>
+<body>
+<main>
+  <h1>playskin</h1>
+  <p class="lead">Playful skins for any web page. Turn one on with a single attribute, and your page becomes glass, crayon paper, or the home of a cat.</p>
+
+  <div class="row" role="group" aria-label="Skin">
+    <button data-button="outline" data-skin="">Plain</button>
+    <button data-button="outline" data-skin="aura">Aura</button>
+    <button data-button="outline" data-skin="crayon">Crayon</button>
+    <button data-button="outline" data-skin="whiskers">Whiskers</button>
+    <button data-button="ghost" id="dark">Dark mode</button>
+  </div>
+
+  <div class="grid">
+    <section data-card>
+      <h2>Aura</h2>
+      <p>Soft white glass by day, graphite by night. Cards catch a soft glow in their corners; buttons become pills.</p>
+      <div class="stat">₹1,36,520</div>
+    </section>
+    <section data-card>
+      <h2>Crayon</h2>
+      <p>Cream ruled paper by day, a green chalkboard by night, with bunting, drifting clouds and a slow snail.</p>
+      <button data-button="default">A crayon button</button>
+    </section>
+    <section data-card>
+      <h2>Whiskers</h2>
+      <p>A cat that hops between your cards, rolls round buttons like wheels and naps. Tap it for a trick.</p>
+      <div class="steps"><button>1</button><button>2</button><button>3</button><button>4</button></div>
+    </section>
+  </div>
+
+  <div class="grid">
+    <section data-card>
+      <h2>Use it on any page</h2>
+      <pre>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/playskin/themes/aura.css"&gt;
+&lt;html data-playskin="aura"&gt;</pre>
+    </section>
+    <section data-card>
+      <h2>Or from JavaScript</h2>
+      <pre>import { setTheme } from "playskin";
+setTheme("whiskers");</pre>
+    </section>
+    <section data-card>
+      <h2>A form</h2>
+      <p>Fields and buttons pick up the skin too.</p>
+      <input placeholder="Your name">
+    </section>
+  </div>
+</main>
+<nav class="bar" data-playskin-floor><a href="#">Home</a><a href="#">Cards</a><a href="https://github.com/deepujain/playskin">GitHub</a></nav>
+
+<script type="module">
+  import { createPlayskin } from "./src/index.js";
+  const skin = createPlayskin();
+  const buttons = [...document.querySelectorAll("[data-skin]")];
+  const mark = (theme) => buttons.forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.skin || null) === theme)));
+  skin.subscribe(mark);
+  mark(skin.get());
+  buttons.forEach((b) => b.addEventListener("click", () => skin.set(b.dataset.skin || null)));
+  document.getElementById("dark").addEventListener("click", () => {
+    const on = document.documentElement.classList.toggle("dark");
+    try { localStorage.setItem("playskin-dark", on ? "1" : "0"); } catch {}
+  });
+</script>
+</body>
+</html>
