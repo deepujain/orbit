@@ -4,20 +4,20 @@
 :root{--kc-font:Inter,system-ui,sans-serif;--kc-ink:hsl(var(--foreground));--kc-ink-2:hsl(var(--foreground));--kc-muted:hsl(var(--muted-foreground));
  --kc-line:hsl(var(--border));--kc-surface:hsl(var(--card));--kc-surface-2:hsl(var(--muted));--kc-surface-3:hsl(var(--accent));--kc-panel:hsl(var(--popover));
  --kc-amethyst:#7c6bd6;--kc-amethyst-soft:#ede9fe;--kc-amethyst-ink:#5b21b6;--kc-radius:12px;--kc-ease:cubic-bezier(.2,.8,.2,1);--kc-shadow:0 4px 14px rgb(40 20 60/.16)}
-.dark{--kc-amethyst-soft:#2e1f5e;--kc-amethyst-ink:#c4b5fd}
+:is(.dark,[data-theme="dark"]){--kc-amethyst-soft:#2e1f5e;--kc-amethyst-ink:#c4b5fd}
 
 /* The page: a soft lavender room with a faint grid, as in Kokoro. */
 [data-playskin="whiskers"]{--background:252 100% 97%}
-.dark[data-playskin="whiskers"]{--background:250 44% 10%}
+:is(.dark,[data-theme="dark"])[data-playskin="whiskers"]{--background:250 44% 10%}
 [data-playskin="whiskers"] body{background:
  linear-gradient(rgb(124 58 237/.06) 1px,transparent 1px) 0 0/24px 24px,
  linear-gradient(90deg,rgb(124 58 237/.06) 1px,transparent 1px) 0 0/24px 24px,
  radial-gradient(1200px 500px at 10% -10%,#ddd3ff,transparent 60%),hsl(var(--background));background-attachment:fixed}
-.dark[data-playskin="whiskers"] body{background:
+:is(.dark,[data-theme="dark"])[data-playskin="whiskers"] body{background:
  linear-gradient(rgb(167 139 250/.07) 1px,transparent 1px) 0 0/24px 24px,
  linear-gradient(90deg,rgb(167 139 250/.07) 1px,transparent 1px) 0 0/24px 24px,
  radial-gradient(1200px 500px at 10% -10%,#2a1f55,transparent 60%),hsl(var(--background));background-attachment:fixed}
-.dark .tl-cat{--cat-line:#3b2414;filter:drop-shadow(0 3px 3px rgb(0 0 0/.4))}
+:is(.dark,[data-theme="dark"]) .tl-cat{--cat-line:#3b2414;filter:drop-shadow(0 3px 3px rgb(0 0 0/.4))}
 
 .tl-food{position:absolute;width:20px;height:13px;margin:-7px 0 0 -10px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 14'%3E%3Cpath d='M15 7 21 2v10z' fill='%23fdba74' stroke='%23c2410c' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cellipse cx='8.5' cy='7' rx='7.5' ry='5' fill='%23fdba74' stroke='%23c2410c' stroke-width='1.2'/%3E%3Cpath d='M11 3.5q2 3.5 0 7' fill='none' stroke='%23c2410c' stroke-width='1'/%3E%3Ccircle cx='4.6' cy='6' r='1.2' fill='%23222'/%3E%3C/svg%3E") center/contain no-repeat;filter:drop-shadow(0 1px 0 rgb(80 30 10/.3));transition:transform .25s,opacity .25s;animation:tl-food-bob 1.8s ease-in-out infinite}
 .tl-food.gold{width:28px;height:18px;margin:-9px 0 0 -14px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 14'%3E%3Cpath d='M15 7 21 2v10z' fill='%23fde047' stroke='%23a16207' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cellipse cx='8.5' cy='7' rx='7.5' ry='5' fill='%23fde047' stroke='%23a16207' stroke-width='1.2'/%3E%3Cpath d='M11 3.5q2 3.5 0 7' fill='none' stroke='%23a16207' stroke-width='1'/%3E%3Ccircle cx='4.6' cy='6' r='1.2' fill='%23222'/%3E%3C/svg%3E") center/contain no-repeat;animation:tl-food-bob 1.8s ease-in-out infinite,tl-food-glow 1.6s ease-in-out infinite}
@@ -203,6 +203,16 @@
 .tl-cat[data-act=scratch] .ct-a1{animation:ct-pull .55s ease-in-out .42s infinite}
 .tl-cat[data-act=scratch] .ct-a2{animation:ct-pull .55s ease-in-out .695s infinite}
 @keyframes ct-pull{0%,100%{transform:translateY(0)}55%,62%{transform:translateY(4px)}}
+/* On a rope it hangs upright from both paws over its head, its back to the page; climbing, it pulls hand over hand. */
+.tl-cat:is([data-act=climb],[data-pose=rope]){--pitch:-62deg;--tuck:1;--l1:6deg;--l2:-6deg;--l3:8deg;--l4:-8deg;--tail:84deg;--ear:12deg}
+.tl-cat:is([data-act=climb],[data-pose=rope]) .ct-arms{opacity:1}
+.tl-cat:is([data-act=climb],[data-pose=rope]) .ct-tail{animation:none}
+.tl-cat[data-act=climb] .ct-a1{animation:ct-pull .8s ease-in-out infinite}
+.tl-cat[data-act=climb] .ct-a2{animation:ct-pull .8s ease-in-out .4s infinite}
+/* The rope it climbs glows while it holds on. */
+.tl-cat-rope{filter:drop-shadow(0 0 4px var(--kc-amethyst))}
+.tl-cat-rope:not(.jl-tl-link){transform-origin:50% 0;border-left-color:var(--kc-amethyst)!important;background:var(--kc-amethyst)!important;width:2.5px!important;margin-left:-1.25px}
+.jl-station.tl-cat-shoved .jl-gem{animation:tl-cat-wobble .5s ease-out}
 .tl-cat[data-act=swat] .ct-l4{animation:ct-swipe .32s ease-in-out 2}
 @keyframes ct-look{0%,100%{--a:0deg}30%{--a:-12deg}70%{--a:10deg}}
 .tl-cat[data-act=look] .ct-head{animation:ct-look 2.2s ease-in-out}
@@ -242,6 +252,8 @@
 /* What floats off it: words, notes, hearts, sparkles, dust, claw marks on the glass, and stars when it is dizzy. */
 .tl-cat-say,.tl-cat-cap{transform:var(--t,none)}
 .tl-cat-say{position:fixed;left:0;top:0;z-index:42;pointer-events:none;max-width:220px;padding:5px 10px;border-radius:12px;background:var(--kc-panel,#fff);color:var(--kc-ink,#1f1d2b);font:600 12px/1.35 var(--kc-font,system-ui);box-shadow:0 4px 14px rgb(40 20 60/.16),0 0 0 1px rgb(124 107 214/.22);animation:ct-pop .18s ease-out}
+:is(.dark,[data-theme="dark"]) .tl-cat-say{background:var(--kc-surface-3);box-shadow:0 6px 18px rgb(0 0 0/.45),0 0 0 1px var(--kc-line)}
+:is(.dark,[data-theme="dark"]) .tl-cat-say::after{box-shadow:1px 1px 0 0 var(--kc-line)}
 .tl-cat-say::after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;margin-left:-5px;background:inherit;transform:rotate(45deg);box-shadow:2px 2px 0 0 rgb(124 107 214/.12)}
 .tl-cat-cap{position:fixed;left:0;top:0;z-index:42;pointer-events:none;white-space:nowrap;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--kc-amethyst,#7c6bd6) 88%,#000);color:#fff;font:700 10.5px/1.4 var(--kc-font,system-ui);letter-spacing:.02em;box-shadow:0 2px 8px rgb(40 20 60/.2);animation:ct-pop .18s ease-out}
 .tl-cat-say.think{border-radius:16px;letter-spacing:2px}

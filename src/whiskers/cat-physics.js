@@ -141,9 +141,10 @@ export const TOYS=[
  {kind:'bell',label:'Bell ball',w:20,h:20,roll:true,bounce:.5,crr:.09,mass:1.6},
 ];
 // length: the cord wound on a full ball, in px; small: the bare core it is left as.
-// bite: how much cord one hit that catches the end pulls off, at most, before the ball rolls on without paying out.
-export const YARN={step:8,length:9000,small:12,bite:[120,360]};
+export const YARN={step:8,length:9000,small:12};
 export const ROLL={slip:18,sleep:4,airSpin:.6,impact:.6,wall:.6};
+// More than a shove moves a card in one frame (CHIP.reach): the page laid the cards out again.
+export const RELAID=CAT_W;
 /* A rope-knot yarn ball, as cat toys are made: twisted cotton cord wound in three bundles crossing at right angles,
    one running up the front, one round the sides and one capping the top and bottom, with a tail of cord ending in a
    pompom. It is wound from many colours, each cord its own. Only the knot (.toy-knot) turns as it rolls; the light and
@@ -191,11 +192,13 @@ export function toyOn(spec,p,at=.5){return {...spec,x:p.l+(p.r-p.l)*at,y:p.y,vx:
    on it, left, runs from 1 down to 0, and the ball shrinks with it, its cross-section going as the cord does, down to
    the bare core. */
 // Measured from where the ball was when it laid the last point, not from that point: the rope moves its points.
-// A loose ball dropping off a card spools cord down after it, its end lying up above, whether or not the hit paid.
-function unwind(t){if(!t.thread||!t.loose||t.left<=0||!t.paying&&!(t.thread.length&&!t.on&&t.vy>0&&t.y>(t.fromY??Infinity)+4))return;const at={x:t.x,y:t.y-CORD.lift},last=t.thread.length?t.laid:null;
+function unwind(t){if(!t.thread||!t.loose||t.left<=0)return;const at={x:t.x,y:t.y-CORD.lift},last=t.thread.length?t.laid:null;
  const d=last?Math.hypot(at.x-last.x,at.y-last.y):0;if(last&&d<YARN.step)return;
- if(last){t.spent=Math.min(YARN.length,(t.spent||0)+d);t.bite=(t.bite||0)-d;if(t.bite<=0)t.paying=false;}t.laid=at;
- t.thread.push({...at,px:at.x,py:at.y,len:Math.min(d,YARN.step*1.5)});t.cordAwake=true;t.left=1-(t.spent||0)/YARN.length;
+ if(last)t.spent=Math.min(YARN.length,(t.spent||0)+d);t.laid=at;
+ // A fast ball covers several links between frames: each gets its own point, so the cord is as long as the ground it
+ // was laid over and the rope does not pull it back into the ball.
+ const n=last?Math.ceil(d/YARN.step):1;
+ for(let k=1;k<=n;k++){const u=k/n,x=last?last.x+(at.x-last.x)*u:at.x,y=last?last.y+(at.y-last.y)*u:at.y;t.thread.push({x,y,px:x,py:y,len:last?d/n:0});}t.cordAwake=true;t.left=1-(t.spent||0)/YARN.length;
  t.w=t.h=YARN.small+(TOYS[0].w-YARN.small)*Math.sqrt(t.left);}
 /* Pulled tight between where it last lies on something and the ball, the cord does not hang there strung through the
    air: the ball gives, unrolling more of it, so it goes slack and comes down onto whatever is below. */
@@ -215,7 +218,9 @@ function grip(t,k){const r=t.w/2,slip=t.vx-t.spin*r;t.vx-=slip*2/7*k;t.spin+=sli
    bounds are the walls either side and the depth it is lost past. Returns 'rest', 'air', 'land' or 'lost'. */
 export function toyStep(t,plats,dt,{left,right,bottom}){
  const r=t.w/2;
- if(t.on){const p=plats.find(q=>q.key===t.on);
+ if(t.on){let p=plats.find(q=>q.key===t.on);
+  // A card that jumps further than a shove moves it was laid out again: what lay on it stays put and falls.
+  if(p&&t.onL!=null&&Math.abs(p.l-t.onL)>RELAID)p=null;
   if(p){
    if(t.onL!=null)t.x+=p.l-t.onL;t.onL=p.l;t.y=p.y;
    if(t.roll){grip(t,Math.min(1,ROLL.slip*dt));
@@ -237,9 +242,9 @@ export function toyStep(t,plats,dt,{left,right,bottom}){
 }
 
 // A bat from the cat: away the way it faces and up off the card, slower for a heavier toy, the paw putting a little
-// topspin on a ball. pays: whether this hit pulls cord off the yarn as it rolls; one that does frees the end for good,
-// and a later hit that does not just sends the ball rolling with its cord trailing.
-export function batToy(t,dir,power=1,pays=true){const m=t.mass||1;t.on=null;t.onL=null;t.fromY=t.y;if(t.thread){t.paying=pays;if(pays){t.loose=true;t.bite=YARN.bite[0]+Math.random()*(YARN.bite[1]-YARN.bite[0]);}}
+// topspin on a ball. pays: whether this hit frees the yarn's end; once it is free, the ball lays cord wherever it goes
+// until none is left, so its cord is never towed back after it.
+export function batToy(t,dir,power=1,pays=true){const m=t.mass||1;t.on=null;t.onL=null;t.fromY=t.y;if(t.thread&&pays)t.loose=true;
  t.vx=dir*(220+Math.random()*180)*power/m;t.vy=-(180+Math.random()*200)*power/Math.sqrt(m);
  t.spin=t.roll?t.vx/(t.w/2)*(.2+Math.random()*.4):0;}
 /* The cord off the yarn is a rope: a chain of points a link apart, each falling under gravity, the links holding them
@@ -247,7 +252,7 @@ export function batToy(t,dir,power=1,pays=true){const m=t.mass||1;t.on=null;t.on
    an edge. It lies on whatever a toy can rest on (cards, the toolbar, the filters) and never on air: a point coming
    down onto a surface stops on it and holds there by friction, riding along when the card is shoved. One end is tied to
    the ball where it meets the ground; the other, with the pompom, is free. Once nothing moves it sleeps. */
-export const CORD={lift:2,damp:.985,grip:.08,hold:.08,passes:8,still:.04};
+export const CORD={lift:2,damp:.985,grip:.08,hold:.08,stick:1.5,passes:8,still:.04};
 export function cordTip(t){const back=t.vx>4?-1:t.vx<-4?1:(t.back||-1);t.back=back;return {x:t.x+back*t.w*.28,y:t.y-Math.max(CORD.lift,t.h*.18)};}
 /* The cat's paws in the cord. Walking through it, the feet push the strands they tread on along with them and lift
    them a little, so the cord gets dragged and scattered and falls back where it lands. A swat flicks the strands under
@@ -271,7 +276,7 @@ export function cordStep(t,plats,dt,{bottom=Infinity,hold=null}={}){
  const held=hold&&pts[hold.i];if(held){held.on=null;}
  const by=new Map(plats.map(p=>[p.key,p]));
  // Points on a card go where the card went.
- for(const q of pts)if(q.on){const p=by.get(q.on);if(!p||q.x<p.l||q.x>p.r){q.on=null;continue;}const dx=p.l-q.onL,y=p.y-CORD.lift;q.x+=dx;q.px+=dx;q.y=q.py=y;q.onL=p.l;}
+ for(const q of pts)if(q.on){const p=by.get(q.on);if(!p||q.x<p.l||q.x>p.r||Math.abs(p.l-q.onL)>RELAID){q.on=null;continue;}const dx=p.l-q.onL,y=p.y-CORD.lift;q.x+=dx;q.px+=dx;q.y=q.py=y;q.onL=p.l;}
  const h=Math.min(dt,1/30),g=G*h*h,start=pts.map(q=>q.y);
  for(const q of pts){const vx=(q.x-q.px)*CORD.damp,vy=(q.y-q.py)*CORD.damp;q.px=q.x;q.py=q.y;
   if(q.on){q.x+=vx*CORD.grip;continue;}q.x+=vx;q.y+=vy+g;}
@@ -279,9 +284,10 @@ export function cordStep(t,plats,dt,{bottom=Infinity,hold=null}={}){
   for(const p of plats){const s=p.y-CORD.lift;if(q.x>=p.l&&q.x<=p.r&&start[i]<=s+.5&&q.y>=s){q.y=s;q.on=p.key;q.onL=p.l;q.px=q.x-(q.x-q.px)*CORD.grip;q.py=s;break;}}
   if(q.y>bottom){q.y=bottom;q.py=bottom;}};
  // A point lying on a surface gives way to a pull far less than one in the air: friction holds the cord there.
- const give=q=>q.on?CORD.hold:1;
+ // Below a pull of CORD.stick it does not give at all, so the weight of cord hanging off an edge cannot drag the rest in.
+ const give=(q,over)=>q.on?(over>CORD.stick?CORD.hold:0):1;
  const pull=(a,b,len,fixA)=>{const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);if(d<=len||!d)return;
-  const wa=fixA?0:give(a),wb=give(b),k=(d-len)/d/(wa+wb);a.x+=dx*k*wa;a.y+=dy*k*wa;b.x-=dx*k*wb;b.y-=dy*k*wb;};
+  const wa=fixA?0:give(a,d-len),wb=give(b,d-len);if(!(wa+wb))return;const k=(d-len)/d/(wa+wb);a.x+=dx*k*wa;a.y+=dy*k*wa;b.x-=dx*k*wb;b.y-=dy*k*wb;};
  for(let n=0;n<CORD.passes;n++){
   const last=pts.at(-1);if(held){held.x=hold.x;held.y=hold.y;}pull(tip,last,YARN.step,true);
   for(let i=pts.length-1;i>0;i--)pull(pts[i],pts[i-1],pts[i].len||YARN.step,false);
@@ -295,7 +301,7 @@ export function cordStep(t,plats,dt,{bottom=Infinity,hold=null}={}){
 export function cordStrain(t,i){const pts=t.thread;if(!pts?.[i])return 0;let len=0;for(let k=i+1;k<pts.length;k++)len+=pts[k].len||YARN.step;
  const tip=t.cordTip||cordTip(t);len+=YARN.step;return Math.max(0,Math.hypot(tip.x-pts[i].x,tip.y-pts[i].y)-len);}
 // Wound back up: the thread gone and the ball full size again.
-export function rewind(t){if(!t.thread)return;t.thread=[];t.laid=null;t.loose=false;t.paying=false;t.spent=0;t.left=1;t.w=t.h=TOYS[0].w;}
+export function rewind(t){if(!t.thread)return;t.thread=[];t.laid=null;t.loose=false;t.spent=0;t.left=1;t.w=t.h=TOYS[0].w;}
 
 // The thread as one path, its points moved by (dx,dy), each segment a soft curve through the midpoints.
 export function threadPath(pts,dx=0,dy=0){if(pts.length<2)return '';const f=n=>n.toFixed(1);

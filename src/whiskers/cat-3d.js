@@ -54,9 +54,9 @@ vec2 head(vec3 h){
  if(uEye.w>.05)r=U(r,vec2(sdSph(h-vec3(-4.9,4.,10.),1.*uEye.w),6.));
  return r;}
 // Paws pressed flat on the glass, toe beans showing.
-vec2 armPaw(vec3 p,vec3 s,vec3 w){vec2 r=vec2(sdRC(p,s,w-vec3(0.,0.,1.4),3.5,3.1),10.);vec3 q=p-w;float pd=max(sdEll(q,vec3(4.8,4.3,2.8)),q.z-.2);
+vec2 armPaw(vec3 p,vec3 s,vec3 w){vec2 r=vec2(sdRC(p,s,w-vec3(0.,0.,1.4),3.5,3.1),10.);vec3 q=p-w;float pd=uMisc.z>.5?sdEll(q,vec3(3.4,3.8,3.4)):max(sdEll(q,vec3(4.8,4.3,2.8)),q.z-.2);
  if(pd<r.x){vec2 b=q.xy;float bean=min(min(length(b-vec2(-2.3,-1.9)),length(b-vec2(-.8,-2.8))),min(min(length(b-vec2(.8,-2.8)),length(b-vec2(2.3,-1.9))),length((b-vec2(0.,1.))*vec2(.55,.8))*.95));
-  r=vec2(smin(r.x,pd,.8),q.z>-.5&&bean<1.?3.:2.);}else r.x=smin(r.x,pd,.8);return r;}
+  r=vec2(smin(r.x,pd,.8),uMisc.z<.5&&q.z>-.5&&bean<1.?3.:2.);}else r.x=smin(r.x,pd,.8);return r;}
 vec2 map(vec3 p){
  vec3 q=toUp(p),c=toCat(q),b=toBody(c);
  float body=sdEll(b-${V3(M.body)},${V3(M.bodyR)});body=smin(body,sdSph(b-${V3(M.haunch)},${f(M.haunchR)}),4.);body=smin(body,sdSph(b-${V3(M.chest)},${f(M.chestR)}),4.);
@@ -126,24 +126,29 @@ export function contactOffset(v,{sleep=false,arms=false}={}){
 const num=(cs,k)=>parseFloat(cs.getPropertyValue(k))||0;
 const rad=d=>d*Math.PI/180;
 // The pose, read from the SVG cat's parts every frame, as the shader's uniforms.
-export function poseUniforms({vis=1,tilt=0,fs=1,sleep=false,root,parts}){
+export function poseUniforms({vis=1,back=false,tilt=0,fs=1,sleep=false,root,parts}){
  const cs=parts.cs(root),own=k=>{const e=parts.el(k);return e?parts.cs(e):null;};
  const a=k=>{const c=own(k);return c?num(c,'--a'):0;},dx=k=>{const c=own(k);return c?num(c,'--dx'):0;},dy=k=>{const c=own(k);return c?num(c,'--dy'):0;};
  const opa=k=>{const c=own(k);return c?parseFloat(c.opacity)||0:0;};
- const yaw=Math.acos(Math.max(-1,Math.min(1,vis))),pitch=rad(num(cs,'--pitch')+a('torso')),bob=[dx('torso'),dy('torso')];
+ // Turned the other way round, past facing the viewer, it shows its back: on a rope it faces the rope, not the page.
+ const yaw=Math.acos(Math.max(-1,Math.min(1,vis)))*(back?-1:1),pitch=rad(num(cs,'--pitch')+a('torso')),bob=[dx('torso'),dy('torso')];
  const v={uYaw:yaw,uTilt:rad((tilt+num(cs,'--roll')+a('flip'))*fs),uSq:num(cs,'--sq')||1,uFy:num(cs,'--fy')+dy('flip'),uPitch:pitch,uTuck:Math.max(.3,num(cs,'--tuck')||1),
   uTail:rad(num(cs,'--tail')+a('tail')),uLegs:[rad(num(cs,'--l1')+a('l1')),rad(num(cs,'--l2')+a('l2')),rad(num(cs,'--l3')+a('l3')),rad(num(cs,'--l4')+a('l4'))],uBob:bob};
  const {bodyToCat,catToUp}=frames(v),hc=bodyToCat(M.head);
  v.uHC=catToUp([hc[0]+num(cs,'--hx')+dx('head'),hc[1]+num(cs,'--hy')+dy('head'),0]);
- v.uHA=[rad((num(cs,'--hr')+a('head'))*fs),(Math.PI/2-yaw)*.4];
+ v.uHA=[rad((num(cs,'--hr')+a('head'))*fs),back?Math.PI:(Math.PI/2-Math.abs(yaw))*.4];
  const ear=num(cs,'--ear');v.uEar=[rad(ear-a('ear1')),rad(ear+a('ear2'))];
  const shut=opa('shut')>.5;v.uEye=[(num(cs,'--eye')||1)*parts.blink()*(shut?0:1),shut?1:0,opa('open'),opa('tear')];
- const arms=opa('arms')>.5;v.uMisc=[sleep?0:1,arms?1:0,0,0];
+ const arms=opa('arms')>.5;v.uMisc=[sleep?0:1,arms?1:0,back&&arms?1:0,0];
  return {v,arms,sleep};
 }
 // The arms reaching to the glass: from the shoulders to paws pressed flat in front of the face, pulled down in turn.
-export function armPoints(v,pulls){
+// Gripping a rope, the paws close round it just over the head instead, one above the other as it pulls.
+export function armPoints(v,pulls,{grip=false}={}){
  const {bodyToCat,catToUp,upToPage}=frames(v),glass=v.uHC[2]+13.5,out={};
+ if(grip){for(const [i,z] of [[1,-1],[2,1]]){out[`uS${i}`]=upToPage(catToUp(bodyToCat([M.front[0],M.front[1]-2.4,z*M.legZ])));
+   out[`uP${i}`]=upToPage([32+z*3.4,v.uHC[1]-20-(i===1?7:0)+pulls[i-1]*3,v.uHC[2]]);}
+  out.uGlass=v.uHC[2];out.nose=upToPage([v.uHC[0],v.uHC[1]+3.5,v.uHC[2]]);return out;}
  // Each paw goes on its own shoulder's side of the face, which side that is depending on how the body is turned.
  for(const [i,z] of [[1,-1],[2,1]]){const s=catToUp(bodyToCat([M.front[0],M.front[1]-2.4,z*M.legZ])),side=Math.sign(s[0]-v.uHC[0])||z;out[`uS${i}`]=upToPage(s);
   out[`uP${i}`]=upToPage([v.uHC[0]+side*7.8,v.uHC[1]-16+pulls[i-1]*4.6,glass]);}
@@ -176,7 +181,7 @@ export function cat3d(root,{win=window,doc=document}={}){
   const {v,arms,sleep}=poseUniforms({...state,root,parts});
   // On a surface the pose's own lift is dropped, so the cat rests on the bar in every trick; in the air it is kept.
   const want=state.grounded?contactOffset(v,{sleep,arms}):0,k=state.grounded?.45:.2;settle+=(want-settle)*k;held+=((state.grounded?1:0)-held)*k;v.uFy=v.uFy*(1-held)+settle;
-  const ap=arms?armPoints(v,[ty('a1'),ty('a2')]):{uS1:[0,0,0],uP1:[0,0,-99],uS2:[0,0,0],uP2:[0,0,-99],uGlass:0};
+  const ap=arms?armPoints(v,[ty('a1'),ty('a2')],{grip:Boolean(state.back)}):{uS1:[0,0,0],uP1:[0,0,-99],uS2:[0,0,0],uP2:[0,0,-99],uGlass:0};
   paws=arms?{paws:[ap.uP1,ap.uP2].map(p=>({x:p[0]*PX,y:p[1]*PX})),nose:{x:ap.nose[0]*PX,y:ap.nose[1]*PX}}:null;
   gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
   gl.uniform2f(u('uRes'),canvas.width,canvas.height);gl.uniform4f(u('uView'),...VIEW);

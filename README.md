@@ -159,6 +159,23 @@ Keeps the attribute on `<html>` in step with the chosen skin and runs each skin'
 
 Brings out the cat. It shows while `show()` returns true (by default, while the skin is `"whiskers"`) and leaves when it returns false. Options: `floor` and `ignore` (CSS selectors), `storage` (prefix for its saved name and hunger, default `"playskin.cat"`), `global` (window property for its controls, default `"playskinCat"`), `meow` (URL of its meow recording), `music` (an object whose `on` is true while page music plays), `reducedMotion` (a function).
 
+An app can make the cat its own:
+
+| Option | Default | What it does |
+|---|---|---|
+| `scenes` | `[]` | Functions that each return a scene for the current page (its ledges, boxes and floor) or null. The first that answers is used. |
+| `room` | `true` | Play in the whole window when no scene answers. Set `false` to keep the cat to your scenes. |
+| `pet` | `true` | Give it a name and hunger, and a food bowl in its panel. |
+| `label` | | What screen readers hear for the cat. |
+| `jokes` | built in | The lines it says when tapped. |
+| `aloud` | `false` | Speak its lines while `music.on` is true. |
+| `slide` | `false` | Shoved boxes slide sideways and settle back, instead of only bumping up. |
+| `follow` | `false` | Scroll the cat back into view when it leaves the window. |
+| `game` | `null` | A game module (rules, foes, levels) for the cat to play. |
+| `line`, `read`, `home` | | Where its speech bubble points, the text it reads out, and its home spot. |
+
+`playskin/whiskers/physics` holds the cat's physics on its own, for games and tests.
+
 ### `startRecord(options)` from `playskin/record`
 
 Adds the Record button. It shows while `show()` returns true (by default, while the skin is `"record"`) and the page has a script. Options: `script` (a function returning `{ title, steps }` for the current page, or null), `intro` (steps that lead every script), `voice` (async text to an `ArrayBuffer` of audio), `headings` (where heading steps look, default `main h1, main h2, main h3`), `sectionOf` (the part to ring for a heading), `offset` (pixels left above a part when scrolling to it), `label`, and `onMessage(text, tone)`. Returns `{ refresh, start, stop, running, destroy }`; call `refresh()` after the page changes. Colours come from `--playskin-record-accent`, `-surface`, `-ink` and `-line`, or the variables above.

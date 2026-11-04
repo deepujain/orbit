@@ -6,12 +6,15 @@
 import { startTimelineCat } from "./cat.js";
 
 export { MEOWS } from "./cat-voice.js";
+export { JOKES, REVIEW_JOKES, STATION_LINES, catLine } from "./cat.js";
 
 /**
  * Options: root and attribute (where the skin is read from), show (a function saying whether the cat should be out;
  * defaults to the skin being "whiskers"), global (the window property for its controls), storage (prefix for its saved
  * name and hunger), floor and ignore (selectors), meow (URL of the meow recording), music ({ on } while page music
  * plays), reducedMotion (a function; defaults to the visitor's setting).
+ * A host app can also give it its own pages and a game: scenes, room, game, boss, pet, label, jokes, aloud, slide and
+ * follow, as described on startTimelineCat in cat.js.
  */
 export function startWhiskers({
   root = document.documentElement,

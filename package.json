@@ -14,6 +14,7 @@
       "types": "./src/whiskers/index.d.ts",
       "default": "./src/whiskers/index.js"
     },
+    "./whiskers/physics": "./src/whiskers/cat-physics.js",
     "./record": {
       "types": "./src/record.d.ts",
       "default": "./src/record.js"

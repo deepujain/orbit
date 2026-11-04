@@ -4,12 +4,11 @@
 // for a trick, double-tap it for the trick panel, grab it by the scruff to carry it, and double-click an empty spot to
 // drop a fish there. You give it a name, and it gets hungry and asks to be fed.
 // Its timeline, journey and game scenes stay inert unless a page has their elements.
-import {CAT_W,CAT_H,G,STEP,MAX_UP,BIG_UP,WALK,TROT,RUN,launch,crouchFor,surfaces,route,canHop,hopPoints,standingOn,platformsIn,walkStep,frictionStep,flyStep,carryStep,capSpeed,shakeMeter,edgeSpots,HANG,upFrom,CHIP,chipSpring,chipAtRest,TOYS,TOY_SVG,toyOn,toyStep,batToy,threadPath,cordStep,cordTip,pawCord,cordStrain,payOut} from './cat-physics.js'
+// A host app can swap its own scenes in for the room, give it a game to run on the timeline, and turn its pet side off.
+import {CAT_W,CAT_H,G,STEP,MAX_UP,BIG_UP,WALK,TROT,RUN,launch,crouchFor,surfaces,route,canHop,hopPoints,standingOn,platformsIn,walkStep,frictionStep,flyStep,carryStep,capSpeed,shakeMeter,edgeSpots,HANG,upFrom,CHIP,chipSpring,chipAtRest,bump,RELAID,TOYS,TOY_SVG,toyOn,toyStep,batToy,threadPath,cordStep,cordTip,pawCord,cordStrain,payOut} from './cat-physics.js'
 import {catVoice,MEOWS} from './cat-voice.js'
 import {cat3d} from './cat-3d.js';
 import {chartFx} from './cat-charts.js';
-const GAME=null;
-const {LIVES,CLEAR_BONUS,buildCourse,surfacesOf,placeFood,stepPlayer,player,collect,points,fellOut:outOfCourse,cleared,safeSpot,nextStage,recordBest,camera}=GAME||{};
 
 // What real cats do: a burst of zoomies, a long stretch, a wash, claws on the scratching spot, a swat, and the one
 // trick people teach them, a high five.
@@ -23,12 +22,13 @@ const TRICK_ICON={run:'\u{1F4A8}',groom:'\u{1F445}',scratch:'\u{1FAB5}',swat:'\u
    run, every touch, and the PR's line read aloud. */
 const PANEL_MOODS=['nap','focus','sulk'];
 export const HUNGER_SAY=['Full','Peckish','Hungry','Starving'];
-export function trickPanelMarkup({mood=null,name='',hunger=0}={}){
+export function trickPanelMarkup({mood=null,name='',hunger=0,pet=true}={}){
  const item=(kind,id,label,on=false)=>`<button type="button" class="tl-cat-trick${on?' on':''}" data-cat-kind="${kind}" data-cat-id="${id}"${kind==='mood'?` aria-pressed="${on}"`:''}><span aria-hidden="true">${TRICK_ICON[id]||'\u2728'}</span>${esc(label)}</button>`;
  const group=(title,items)=>`<section>${title?`<h3>${esc(title)}</h3>`:''}<div class="tl-cat-tricks">${items.join('')}</div></section>`;
  const level=Math.max(0,Math.min(3,Math.floor(hunger*2)));
- return `<header><input class="tl-cat-name" type="text" maxlength="16" value="${esc(name)}" aria-label="Your cat's name" title="Type a name for your cat" spellcheck="false" autocomplete="off"><button type="button" class="tl-cat-panel-close" data-cat-kind="close" aria-label="Close">\u00D7</button></header>
-<div class="tl-cat-hunger" data-level="${level}"><span class="tl-cat-bowl" aria-hidden="true">${'\u25CF'.repeat(3-Math.min(3,level))}${'\u25CB'.repeat(Math.min(3,level))}</span><span>${HUNGER_SAY[level]}</span><button type="button" class="tl-cat-trick" data-cat-kind="feed" data-cat-id="feed"><span aria-hidden="true">\u{1F41F}</span>Feed</button></div>
+ const head=pet?`<header><input class="tl-cat-name" type="text" maxlength="16" value="${esc(name)}" aria-label="Your cat's name" title="Type a name for your cat" spellcheck="false" autocomplete="off"><button type="button" class="tl-cat-panel-close" data-cat-kind="close" aria-label="Close">\u00D7</button></header>`:`<header><strong>Tricks</strong><button type="button" class="tl-cat-panel-close" data-cat-kind="close" aria-label="Close">\u00D7</button></header>`;
+ const bowl=pet?`<div class="tl-cat-hunger" data-level="${level}"><span class="tl-cat-bowl" aria-hidden="true">${'\u25CF'.repeat(3-Math.min(3,level))}${'\u25CB'.repeat(Math.min(3,level))}</span><span>${HUNGER_SAY[level]}</span><button type="button" class="tl-cat-trick" data-cat-kind="feed" data-cat-id="feed"><span aria-hidden="true">\u{1F41F}</span>Feed</button></div>`:'';
+ return `${head}${bowl}
 ${group('',REACTIONS.filter(([id])=>id!=='run').map(([id,label])=>item('trick',id,label)))}
 ${group('Moods',MOODS.filter(([id])=>PANEL_MOODS.includes(id)).map(([id,label])=>item('mood',id,label,mood===id)))}
 ${group('Play',[item('trick','run','Run'),...TOUCH.map(([id,label])=>item('touch',id,id==='say'?'Talk':label)),item('line','line','Read PR')])}`;
@@ -128,7 +128,7 @@ export function barInfo({text='',title='',cls=''}){
  const own=text.replace(dur,'').replace(/[\u00D7\u2026]|\d+$/g,'').trim();
  return {name:KIND[kind]||own||'this',dur,tone,open:/\bopen\b/.test(cls)};
 }
-export function catLine({bar,status,station,work='author',r=Math.random}={}){
+export function catLine({bar,status,station,work='author',r=Math.random,jokes=JOKES}={}){
  const pick=list=>list[Math.min(list.length-1,Math.floor(r()*list.length))],pool=[],review=work==='review';
  if(bar){const {name,tone,open}=bar,d=spoken(bar.dur);
   if(open)pool.push(`My ${name} bar is still running${d?`, ${d} so far`:''}. I am keeping it warm.`,`${name} is still going on my push. I will sit right here until it is done.`);
@@ -140,14 +140,22 @@ export function catLine({bar,status,station,work='author',r=Math.random}={}){
  const phase=String(status?.phase||'').replace(/ on [0-9a-f]{7,40}\b/g,'').replace(/ \(.*$/,'').replace(/\.$/,'');
  if(phase){const round=status.round?`Round ${status.round}${status.max?` of ${status.max}`:''}. `:'';
   pool.push(...review?[`${phase}. I am reviewing carefully.`,`${phase}. Nothing gets past these whiskers.`]:[`${round}${phase}. I am on it.`,`${phase}. I will mark it ready when it is green.`]);}
- return !pool.length||r()<.3?pick(review?REVIEW_JOKES:JOKES):pick(pool);
+ return !pool.length||r()<.3?pick(review?REVIEW_JOKES:jokes):pick(pool);
 }
 
-export function startTimelineCat({doc=document,win=window,reducedMotion=()=>false,waiting=()=>false,line=()=>null,read=()=>'',home=()=>null,music=null,global='playskinCat',storage='playskin.cat',floor='[data-playskin-floor]',ignore='[data-playskin-ignore]',meow=MEOWS[0]}={}){
+/* Host options: game (a game module, as cat-game.js, played on the timeline) and boss (whether a PR's stage has a
+   boss); scenes (functions that each return a scene for the page or null, tried before the room) and room (false keeps
+   it to those scenes); pet (false drops its name, hunger and feeding); label (what it is called for screen readers);
+   jokes (its own jokes); aloud (read its lines aloud while the music is on); slide (shoves push cards along their row
+   too, not just down); follow (scroll the page to keep it in sight). */
+export function startTimelineCat({doc=document,win=window,reducedMotion=()=>false,waiting=()=>false,line=()=>null,read=()=>'',home=()=>null,music=null,global='playskinCat',storage='playskin.cat',floor='[data-playskin-floor]',ignore='[data-playskin-ignore]',meow=MEOWS[0],
+ game=null,boss=()=>null,scenes=[],room=true,pet=true,label='',jokes=JOKES,aloud=false,slide=false,follow=false}={}){
  if(win[global]?.voice)return win[global];
+ const GAME=game;
+ const {LIVES,CLEAR_BONUS,buildCourse,surfacesOf,placeFood,stepPlayer,player,collect,points,fellOut:outOfCourse,cleared,safeSpot,nextStage,recordBest,camera,placeFoes,stepFoes,touchFoes,stomp,bossLeft,placePickups,shoot,stepShots,SHOT_COOL,placeFlags,flagReached,keepFoes,HAZARD,FOOD,placeBoxes,keepBoxes,arenaPower,bumpBox,openBox,grabPower,powerAfter,hurtPower,chainPoints,kick:kickFoe,hitFoe,stageTime,STAR,COINS_LIFE}=GAME||{};
  const el=doc.createElement('div');
  el.className='tl-cat';el.hidden=true;el.innerHTML=`${CAT_SVG}<span class="tl-cat-z" aria-hidden="true">z<b>z</b><i>z</i></span>`;
- el.setAttribute('role','img');el.setAttribute('aria-label','A cat playing on the page. Tap it for its next trick, double-tap it to pick one, drag to carry it.');
+ el.setAttribute('role','img');el.setAttribute('aria-label',label||'A cat playing on the page. Tap it for its next trick, double-tap it to pick one, drag to carry it.');
  const bubble=doc.createElement('div');bubble.className='tl-cat-say';bubble.hidden=true;bubble.setAttribute('aria-live','polite');
  const fog=doc.createElement('i');fog.className='tl-cat-fog';fog.hidden=true;
  // The caption over its head names the trick or move it is doing.
@@ -162,7 +170,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  let voiceFree=0;
  const CUTE_OF={chirp:'chirp',trill:'trill',meow:'meow',mew:'mew',mrrp:'trill',protest:'meow',sad:'sad',grumble:'mew',yawn:'mew'};
  const voice={cue:(n,o)=>Boolean(music?.cue?.(n,o)),sfx:(n,o)=>Boolean(music?.on&&speech.cute(n,o)),call(n,o){if(!music?.on||now()<voiceFree)return false;const said=speech.meow(CUTE_OF[n]||'mew',o);if(said)voiceFree=now()+900;return Boolean(said);},purrOn(){},purrOff(){},sneeze(){voice.call('chirp');},scritch(){},
-  speak:()=>Promise.resolve(false),warm(){},stopTalk:()=>speech.stopTalk(),get on(){return Boolean(music?.on);}};
+  speak:t=>aloud&&music?.on?speech.speak(t):Promise.resolve(false),warm(){if(aloud&&music?.on)speech.warm();},stopTalk:()=>speech.stopTalk(),get on(){return Boolean(music?.on);}};
  const TRICKS=new Set(REACTIONS.map(([n])=>n));
  let r3d=null;try{r3d=cat3d(el,{win,doc});}catch(e){win.console?.warn?.(e);}
  const charts=chartFx({doc,win,reducedMotion});
@@ -176,16 +184,18 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  const store=(()=>{try{return win.localStorage;}catch{return null;}})(),keep=(k,v)=>{try{store?.setItem(k,v);}catch{}};
  const NAME_KEY=`${storage}.name`,FED_KEY=`${storage}.fed`,HUNGER={full:20*60e3,ask:[45000,75000]};
  let catName=String(store?.getItem(NAME_KEY)||'').trim().slice(0,16)||'Biscuit',fedAt=Number(store?.getItem(FED_KEY))||0,askAt=now()+rand(8000,15000),asked=0;
- if(!fedAt){fedAt=Date.now()-HUNGER.full*.85;keep(FED_KEY,String(fedAt));}
+ if(pet&&!fedAt){fedAt=Date.now()-HUNGER.full*.85;keep(FED_KEY,String(fedAt));}
  const hunger=()=>Math.max(0,(Date.now()-fedAt)/HUNGER.full);
- const named=()=>el.setAttribute('aria-label',`${catName}, your cat, playing on the page. Tap for a trick, double-tap to name, feed or pick a trick, drag to carry.`);
+ const named=()=>pet&&!label&&el.setAttribute('aria-label',`${catName}, your cat, playing on the page. Tap for a trick, double-tap to name, feed or pick a trick, drag to carry.`);
  function setName(v){const n=String(v||'').replace(/\s+/g,' ').trim().slice(0,16);if(!n||n===catName)return false;catName=n;keep(NAME_KEY,n);named();return true;}
  function fed(){const was=hunger();fedAt=Date.now();keep(FED_KEY,String(fedAt));askAt=now()+rand(...HUNGER.ask);asked=0;return was>=1;}
  named();
  const set=(k,v)=>{if(v)el.dataset[k]=v;else delete el.dataset[k];};
  const pose=p=>set('pose',p);
+ // A host's own scenes, each given what it needs to lay out boxes the cat shoves (chipY: how far one is pushed down).
+ function hostScene(){for(const f of scenes){const v=f({doc,win,chipY:e=>chips.get(e)?.y||0,onScreen,CAT_W,CAT_H});if(v)return v;}return null;}
  function scene(){
-  const tl=doc.querySelector('.jl-tl[data-tl-id]'),view=tl?.querySelector('.jl-rg-scroll,.jl-tl-view');if(!view)return journeyScene()||homeScene();
+  const tl=doc.querySelector('.jl-tl[data-tl-id]'),view=tl?.querySelector('.jl-rg-scroll,.jl-tl-view');if(!view)return journeyScene()||hostScene()||(room?homeScene():null);
   const box=tl.getBoundingClientRect(),v=view.getBoundingClientRect();if(!onScreen(v))return null;
   const bars=[...view.querySelectorAll('.jl-tl-seg')].map(e=>{const r=barRect(e);return {el:e,key:barKey(e),left:r.left,right:r.right,top:r.top,width:r.width,open:e.classList.contains('open'),info:barInfo({text:e.querySelector('span')?.textContent||'',title:e.title||'',cls:e.className})};});
   const plats=platformsIn(bars,v,box),left=v.left-box.left+CAT_W/2,right=v.right-box.left-CAT_W/2;
@@ -274,7 +284,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  const PICKS='.jl-pick[data-do="jlLivePick"]',RJ_PICKS='.jl-pick[data-do="rjPick"]',HOME_PICKS='[data-card]';
  function picks(box,floor,left,right,scope=doc,sel=PICKS){const out=[];
   scope.querySelectorAll(sel).forEach((e,i)=>{const r=e.getBoundingClientRect(),cx=r.left+r.width/2-box.left,y=r.top-box.top,home=y-(chips.get(e)?.y||0);
-   if(r.width>=40&&r.height>=12&&home>floor+8&&home<floor+CAT_H*6&&cx>=left&&cx<=right)out.push({l:r.left-box.left,r:r.right-box.left,y,home,perch:'pick',chip:e,key:`perch:pick:${i}`});});
+   if(r.width>=40&&r.height>=12&&home>floor+8&&home<floor+CAT_H*6&&cx>=left&&cx<=right)out.push({l:r.left-box.left,r:r.right-box.left,y,home,perch:'pick',chip:e,key:`perch:pick:${e.dataset.id??i}`});});
   // Only the first row, by where each chip rests: the rows below sit too close under it to hop between.
   const top=Math.min(...out.map(p=>p.home));return out.filter(p=>p.home<top+8);}
  function perches(box,v,left,right,scope=doc){
@@ -362,7 +372,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
   later(1760,()=>{if(fish)fish.classList.add('got');win.setTimeout(()=>{if(s.feast===q){s.feast=false;placeMark();}},400);
    if(s.act?.name!=='eat')return;
    // Yummy: a happy meow, hearts, a lick of the lips, then a trick and the PR's line.
-   say(fed()?`Thank you! ${catName} is full`:YUM[Math.floor(Math.random()*YUM.length)],1500);voice.call('meow',{pitch:1.08});for(let i=0;i<3;i++)later(i*180,()=>glyph('heart','\u2665'));
+   say(pet&&fed()?`Thank you! ${catName} is full`:YUM[Math.floor(Math.random()*YUM.length)],1500);voice.call('meow',{pitch:1.08});for(let i=0;i<3;i++)later(i*180,()=>glyph('heart','\u2665'));
    act('groom',1100);later(1080,()=>{if(s.act?.name!=='groom')return;const [name,label,ms]=REACTIONS[Math.floor(Math.random()*REACTIONS.length)];if(act(name,ms))caption(label,ms);
     later(ms-40,()=>{if(s.act?.name===name&&s.mode==='idle')readLine();});});});
   return true;}
@@ -408,7 +418,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  /* The timeline's upright lines, where each round starts, now and the stops, are ropes. It walks to one that runs past
     its bar, grabs it and climbs hand over hand: down, now and then up a little first, letting go to drop onto the bar
     below, or up and onto the bar above. */
- const ROPES='.jl-tl-link,.jl-tl-push,.jl-tl-stop,.jl-tl-now,.jl-tl-future-tick,.jl-rg-thru',CLIMB={speed:40,pull:2.4,sway:7,grip:CAT_H*.45,clear:14};
+ const ROPES='.jl-tl-link,.jl-tl-push,.jl-tl-stop,.jl-tl-now,.jl-tl-future-tick,.jl-rg-thru',CLIMB={speed:40,pull:2.4,sway:7,grip:CAT_H*1.3,clear:14};
  // A link between a push and its checks is drawn by its left border; the other lines by their middle.
  const lineX=(e,r)=>(e.classList.contains('jl-tl-link')?r.left:r.left+r.width/2);
  function ropeLines(){if(!sc)return [];return joinRopes([...sc.view.querySelectorAll(ROPES)].map(e=>{const r=e.getBoundingClientRect();return {el:e,x:lineX(e,r)-sc.box.left,top:r.top-sc.box.top,bot:r.bottom-sc.box.top};}))
@@ -435,7 +445,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  function grabRope(){const c=s.climb;if(!c||!s.surf||!c.el.isConnected){dropRope();return;}const y=s.surf.y,{bar,down,foot}=c.to,top=c.el.getBoundingClientRect().top-sc.box.top;
   // Legs: where its feet go, one after another. Going down it sometimes climbs a little way up first.
   c.legs=down?[...(Math.random()<.35&&y-top>CAT_H*1.6?[y-rand(14,Math.min(40,y-top-CAT_H))]:[]),Math.max(y+CLIMB.grip,foot)]:[bar.y];
-  b.y=y+(down?CLIMB.grip:0);b.x=ropeX(c);b.vx=b.vy=0;s.surf=null;s.mode='climb';s.front=true;c.t0=now();for(const p of pieces(c.el)){p.classList.add('tl-cat-rope');if(p!==c.el)p.style.transformOrigin=`${p.classList.contains('jl-tl-link')?'0':'50%'} ${(top-(p.getBoundingClientRect().top-sc.box.top)).toFixed(1)}px`;}swing(c.el,(Math.random()<.5?-1:1)*SWAY.kick);set('act','climb');pose('stand');
+  b.y=y+(down?CLIMB.grip:0);b.x=ropeX(c);b.vx=b.vy=0;s.surf=null;s.mode='climb';s.front=true;s.back=true;c.t0=now();for(const p of pieces(c.el)){p.classList.add('tl-cat-rope');if(p!==c.el)p.style.transformOrigin=`${p.classList.contains('jl-tl-link')?'0':'50%'} ${(top-(p.getBoundingClientRect().top-sc.box.top)).toFixed(1)}px`;}swing(c.el,(Math.random()<.5?-1:1)*SWAY.kick);set('act','climb');pose('stand');
   voice.call('mrrp');caption(down?'Down the rope':'Up the rope',1600);}
  function climbStep(t,dt){const c=s.climb;if(!c?.legs||!c.el.isConnected){dropRope();s.mode='air';pose('jump');return;}
   const k=(t-c.t0)/1000,beat=Math.sin(k*CLIMB.pull*Math.PI),goal=c.legs[0],d=goal-b.y;
@@ -446,7 +456,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
   const {bar,down}=c.to,p=bar&&(all.find(q=>q.key===bar.key)||bar);dropRope();s.tilt=0;
   if(down){s.mode='air';s.surf=null;s.hop=null;b.vx=0;b.vy=0;pose('jump');caption('Wheee!',1100);voice.call('chirp');}
   else{b.y=p.y;land(p,200);caption('Made it!',1200);}}
- function dropRope(){const c=s.climb;s.climb=null;s.front=false;if(!s.act)set('act',null);if(c?.el){for(const p of pieces(c.el))p.classList.remove('tl-cat-rope');if(c.el.isConnected)swing(c.el,(Math.random()<.5?-1:1)*SWAY.kick);}}
+ function dropRope(){const c=s.climb;s.climb=null;s.front=false;s.back=false;if(!s.act)set('act',null);if(c?.el){for(const p of pieces(c.el))p.classList.remove('tl-cat-rope');if(c.el.isConnected)swing(c.el,(Math.random()<.5?-1:1)*SWAY.kick);}}
  // A slip is a real fall: nothing catches it on the way down, and it drops out of the timeline.
  function slip(){const e=s.edge;s.edge=null;if(!e)return;s.face=e.side;b.x=e.x;b.vx=e.side*60;b.vy=-120;s.mode='air';s.surf=null;s.falling=true;s.fallFrom=b.y;pose('jump');glyph('head','!');voice.call('protest');caption('Whoops!',1400);}
  // To the end of the bar that runs out of view, where the timeline scrolls to show the rounds beyond it.
@@ -533,13 +543,18 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
     controls, in CHIP_ROW, are perches that stay put. */
  const CHIP_ROW='.jl-tl[data-tl-id] .jl-tl-key > span, .jl-tl[data-tl-id] .jl-tl-mode .segmented, .jl-tl[data-tl-id] .jl-cat-pick, .jl-tl[data-tl-id] .jl-tl-span .segmented';
  const chips=new Map();
- // Only up and down: a box pushed sideways reads as the page's layout breaking, so the cat's weight dips it in place.
+ // Only up and down unless the host lets cards slide: a box pushed sideways in a free layout reads as the page breaking.
  function nudge(e,vx,vy){if(!e?.isConnected||reducedMotion())return;const c=chips.get(e)||{x:0,y:0,vx:0,vy:0},m=CHIP.most;
-  c.vy+=Math.max(-m,Math.min(m,vy+Math.abs(vx)*.15));chips.set(e,c);}
+  if(slide){c.vx+=Math.max(-m,Math.min(m,vx));c.vy+=Math.max(-m,Math.min(m,vy));}else c.vy+=Math.max(-m,Math.min(m,vy+Math.abs(vx)*.15));chips.set(e,c);}
+ const homeOf=e=>{const r=e.getBoundingClientRect(),c=chips.get(e)||{x:0,y:0,vx:0,vy:0};return {e,c,l:r.left-c.x,r:r.right-c.x,t:r.top-c.y,b:r.bottom-c.y};};
  function chipsStep(dt){if(!chips.size||!dt)return;
   for(const [e,c] of chips){if(!e.isConnected){chips.delete(e);continue;}chipSpring(c,dt,s.surf?.chip===e&&!['air','carry','peek','hang','climb'].includes(s.mode)?CHIP.sag:0);}
+  // Sliding cards in a row knock into the next one along.
+  if(slide){const row=[...doc.querySelectorAll(`${PICKS},${RJ_PICKS},${HOME_PICKS}`)].map(homeOf).sort((a,c)=>Math.round(a.t/12)-Math.round(c.t/12)||a.l-c.l);
+   for(let i=0;i+1<row.length;i++){const a=row[i],n=row[i+1];if(a.b<=n.t||n.b<=a.t||!(chips.has(a.e)||chips.has(n.e)))continue;
+    if(bump(a,n)){chips.set(a.e,a.c);chips.set(n.e,n.c);}}}
   for(const [e,c] of chips){const on=s.surf?.chip===e&&!['air','carry','peek','hang','climb'].includes(s.mode);
-   c.x=c.vx=0;if(!on&&chipAtRest(c)){e.style.translate='';chips.delete(e);continue;}e.style.translate=`0 ${c.y.toFixed(2)}px`;}}
+   if(!slide)c.x=c.vx=0;if(!on&&chipAtRest(c)){e.style.translate='';chips.delete(e);continue;}e.style.translate=`${c.x.toFixed(2)}px ${c.y.toFixed(2)}px`;}}
  function unchipAll(){for(const e of chips.keys())e.style.translate='';chips.clear();for(const e of rolls.keys()){e.style.rotate='';wheel(e,false);}rolls.clear();}
  /* Log rolling, as on a log in the water: a round shape it lands on spins with the landing, its paws turn it as it
     walks or jumps off, and its top carries the cat along, so the cat treads against the spin to stay up or tumbles
@@ -587,23 +602,26 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  /* Its toys on the Projects page. They stay out while the cat is wanted there, even when it is away for a while; it
     bats one as it walks or lands into it, goes after them, the yarn most, and plays with one it reaches: a few swats
     in a row that knock it about. The yarn unwinds as it goes, and its thread is left strewn over the cards. A click
-    tosses a toy up. The thread stays out until the page changes. */
+    tosses a toy up and away from the side it was hit on. The thread stays out until the page changes. */
  /* Some of its hits catch the yarn's end and pull cord off as it rolls; most just send the ball rolling. A swat in play
     does so more than a bump in passing. A toss of yours always does. */
  const TOY_PAYS={swat:.3,bump:.15};
  // Where the toys are found: each on its own card in view where there are enough, anywhere along it, new every visit.
- function scatterToys(cards){const H=win.innerHeight,seen=cards.filter(p=>{const y=sc.box.top+p.y;return y>90&&y<H-40;}),pool=[...(seen.length?seen:cards)];
+ // A host scene can ask for them on its first row of cards instead (firstRow).
+ function scatterToys(cards){if(sc.firstRow){const top=Math.min(...cards.map(p=>p.home??p.y)),pool=cards.filter(p=>(p.home??p.y)<top+8);
+   return TOYS.map(spec=>{const i=Math.floor(Math.random()*pool.length),p=pool[i];if(pool.length>1)pool.splice(i,1);return toyOn(spec,p,rand(.15,.85));});}
+  const H=win.innerHeight,seen=cards.filter(p=>{const y=sc.box.top+p.y;return y>90&&y<H-40;}),pool=[...(seen.length?seen:cards)];
   return TOYS.map(spec=>{const i=Math.floor(Math.random()*pool.length),p=pool[i];if(pool.length>1)pool.splice(i,1);return toyOn(spec,p,rand(.15,.85));});}
  let toys=[],yarnEl=null,toysAfter=0;const toyEls=new Map(),TOY_SAY=['Mine!','Got it','Yarn!','Squeak','Again!'],MESS_SAY=['Oops','What mess?','Not me','Tangled'];
  function toyEl(t){let e=toyEls.get(t.kind);if(e)return e;e=doc.createElement('button');e.type='button';e.className=`tl-cat-toy toy-${t.kind}`;
   e.setAttribute('aria-label',t.kind==='yarn'?`${t.label}: click to toss`:`${t.label}: toss it`);e.innerHTML=TOY_SVG[t.kind];e.dataset.kind=t.kind;
   const mine=()=>toys.find(x=>x.kind===e.dataset.kind);
-  e.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();const k=mine();if(k){batToy(k,Math.random()<.5?-1:1,1.6);voice.cue?.('swat');jingle(k,1);}});
+  e.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();const k=mine();if(k){const r=e.getBoundingClientRect();batToy(k,ev.clientX<r.left+r.width/2?1:-1,1.6);voice.cue?.('swat');jingle(k,1);}});
   // Quick clicks on a toy are just more tosses: they never wind the cord back up, nor reach the page's double-click.
   e.addEventListener('dblclick',ev=>{ev.preventDefault();ev.stopPropagation();});
   doc.body.append(e);toyEls.set(t.kind,e);return e;}
  // The bell ball rings when it is hit and when it lands hard; the others are quiet.
- function jingle(t,gain){if(t.kind==='bell'&&music?.on)speech.bell({gain});}
+ function jingle(t,gain){if(t.kind!=='bell')return;if(music?.ring)music.ring('bell',{gain});else if(music?.on)speech.bell({gain});}
  function toysOff(){toys=[];for(const e of toyEls.values())e.remove();toyEls.clear();yarnEl?.remove();yarnEl=null;}
  function drawYarn(t){if(!yarnEl){yarnEl=doc.createElementNS('http://www.w3.org/2000/svg','svg');yarnEl.setAttribute('class','tl-cat-yarn');yarnEl.setAttribute('aria-hidden','true');
    yarnEl.innerHTML='<path class="yarn-shade"/><path class="yarn-line"/><path class="yarn-c1"/><path class="yarn-c2"/><path class="yarn-c3"/><path class="yarn-ply"/><circle class="yarn-pom" r="4.5"/>';doc.body.append(yarnEl);}
@@ -620,7 +638,9 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
   beat();return true;}
  function toysStep(dt){
   if(!dt)return;
-  if(sc?.id!=='home'||!want()||reducedMotion()){if(toys.length)toysOff();return;}
+  if(sc?.id!=='home'){if(toys.length)toysOff();return;}
+  // Away for a while, the toys are only put out of sight: the yarn keeps the cord it has lost.
+  const out=!want()||reducedMotion();for(const e of toyEls.values())e.hidden=out;if(yarnEl)yarnEl.style.display=out?'none':'';if(out)return;
   const cards=all.filter(p=>p.perch==='pick');if(!toys.length&&(!cards.length||now()<toysAfter||!settled()))return;
   if(!toys.length)toys=scatterToys(cards);
   // Toys and their cord rest on the page, not on the floor that follows the window.
@@ -752,7 +772,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
   return {top:ok(doc.querySelector('.jl-station:not([hidden]) .jl-gem')?.getBoundingClientRect()),timeline:ok(sc?.view?.getBoundingClientRect()),chips:all.some(p=>p.perch==='pick')?1:0};}
  for(const ev of ['wheel','touchmove','keydown'])win.addEventListener?.(ev,()=>{userScrollAt=Date.now();},{passive:true});
  win.addEventListener?.('scroll',()=>{if(Date.now()>pageScrollAt+300)userScrollAt=Date.now();},{passive:true});
- function keepInView(){return;if(showStill&&showing()||!sc||el.hidden||g||s.mode==='carry'||s.mode==='peek'||s.leaving)return;const t=Date.now();if(t<pageScrollAt||t-userScrollAt<FOLLOW_USER)return;
+ function keepInView(){if(!follow)return;if(showStill&&showing()||!sc||el.hidden||g||s.mode==='carry'||s.mode==='peek'||s.leaving)return;const t=Date.now();if(t<pageScrollAt||t-userScrollAt<FOLLOW_USER)return;
   const top=sc.box.top+b.y-CAT_H,bot=sc.box.top+b.y,H=win.innerHeight;let dy=0;
   if(top<60)dy=top-150;else if(bot>H-30)dy=bot-H+170;
   if(dy){pageScrollAt=t+1400;win.scrollBy?.({top:dy,behavior:'smooth'});}}
@@ -771,7 +791,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
   beat();return true;}
  /* Hungry, it asks: every so often it sits up and begs, meows and says so with a fish over its head, more often and
     sadder the longer it goes without. Its first ask says how to feed it. */
- function askFood(){const h=hunger();if(h<1||now()<askAt||s.mood||s.feast||showing())return false;const starving=h>=1.5;
+ function askFood(){const h=hunger();if(!pet||h<1||now()<askAt||s.mood||s.feast||showing())return false;const starving=h>=1.5;
   if(!act(starving&&asked%2?'sad':'beg',2400))return false;askAt=now()+rand(...HUNGER.ask)/(starving?1.6:1);
   const lines=starving?['So hungry...','My bowl is empty',`Please feed ${catName}!`]:[`${catName} is hungry`,'Feed me?','Is it dinner time?','Fish, please?'],line=lines[Math.floor(Math.random()*lines.length)];
   voice.call('meow');glyph('head','\u{1F41F}');const first=!asked++;later(600,()=>say(first?`${line} Double-click near me to drop a fish.`:line,first?3600:2000));return true;}
@@ -814,7 +834,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  function land(hit,vy){
   const vx=b.vx;s.surf=hit;s.mode='land';b.vx*=.4;b.vy=0;const hard=vy>1050;s.landUntil=now()+(hard?320:150);pose(hard?'land-hard':'land');set('act',null);
   voice.sfx('pat',{gain:hard?1:.75});if(hard)glyph('dust','\u2219\u2219\u2219',{x:sc.box.left+b.x,y:sc.box.top+b.y-6});
-  if(!hinted){hinted=true;try{if(!win.sessionStorage?.getItem(`${storage}.hint`)){win.sessionStorage?.setItem(`${storage}.hint`,'1');later(500,()=>s.mode==='idle'&&say(`Hi, I'm ${catName}. Tap me for a trick, double-click me for more.`,3600));}}catch{}}
+  if(!hinted){hinted=true;try{if(!win.sessionStorage?.getItem(`${storage}.hint`)){win.sessionStorage?.setItem(`${storage}.hint`,'1');later(500,()=>s.mode==='idle'&&say(pet?`Hi, I'm ${catName}. Tap me for a trick, double-click me for more.`:'Psst. Tap me for a trick. Double-click me to pick one.',3600));}}catch{}}
   if(hit.li)kick(hit.li,vy,b.vx);if(hit.el)jiggle(hit.el,vy,b.x);if(hit.chip)nudge(hit.chip,vx*.25+Math.sign(vx||1)*15,vy*.25);
   if(hit.roll){spin(hit.roll,vx*ROLL.grip+(Math.random()<.5?-1:1)*rand(70,130));if(Math.random()<.4)caption(hit.chart?'Wheee!':'Log roll!',1200);}
   if(hit.chart)charts.land(hit,vy,sc.box.left+b.x);
@@ -838,7 +858,9 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
    if(!hit&&b.vy>0&&b.y>sc.bottom+6){fellOut();return;}
    if(Math.abs(b.vx)>20)s.face=b.vx>0?1:-1;if(hit){land(hit,vy);s.tilt=0;if(s.after){const f=s.after;s.after=null;later(s.landUntil-t+20,f);}}return;}
   // A station sliding under it carries it along.
-  if(s.surf?.li||s.surf?.chip||s.surf?.perch==='pick'||s.surf?.ride||s.surf?.rides){const p=all.find(q=>q.key===s.surf.key);if(p){const dx=(p.l+p.r-s.surf.l-s.surf.r)/2,dy=p.y-s.surf.y;b.x+=dx;if(s.walk)s.walk.x+=dx;b.y+=dy;if(s.ride&&Math.abs(dx)+Math.abs(dy)>.3)s.ride.moved=t;}}
+  // A jump further than a shove moves it is the page laying the cards out again: the cat stays where it was. The floor
+  // that rides along with the window is the one thing that may jump.
+  if(s.surf?.li||s.surf?.chip||s.surf?.perch==='pick'||s.surf?.ride||s.surf?.rides){const p=all.find(q=>q.key===s.surf.key);if(p){const dx=(p.l+p.r-s.surf.l-s.surf.r)/2,dy=p.y-s.surf.y;if(!s.surf.rides&&(Math.abs(dx)>RELAID||Math.abs(dy)>CAT_H)){s.surf=null;}else{b.x+=dx;if(s.walk)s.walk.x+=dx;b.y+=dy;if(s.ride&&Math.abs(dx)+Math.abs(dy)>.3)s.ride.moved=t;}}}
   else if(s.surf?.el){const p=all.find(q=>q.key===s.surf.key);if(p)b.y+=p.y-s.surf.y;}
   s.tilt=0;const on=standingOn(all,b.x,b.y);
   if(!on){s.mode='air';s.surf=null;pose('jump');if(s.act&&s.act.name!=='poke')endAct();return;}
@@ -881,7 +903,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
   el.style.transform=`translate(${(sc.box.left+b.x-CAT_W/2).toFixed(1)}px,${(sc.box.top+b.y+dip-CAT_H+1).toFixed(1)}px)`;
   const k=Math.max(.3,Math.abs(s.vis));el.style.setProperty('--face',(s.vis<0?-k:k).toFixed(3));el.style.setProperty('--hk',(1/k).toFixed(3));el.style.setProperty('--fs',s.vis<0?-1:1);el.style.setProperty('--fo',Math.max(0,Math.min(1,(.8-Math.abs(s.vis))/.4)).toFixed(2));if(s.mode==='peek')clipToGem();el.style.setProperty('--tilt',`${(s.tilt+(plank?plank.th*180/Math.PI:0)).toFixed(1)}deg`);
   const grounded=Boolean(s.surf)&&!['air','carry','peek','hang','climb'].includes(s.mode)&&el.dataset.pose!=='jump';
-  if(r3d)try{r3d.render({vis:s.vis,tilt:s.tilt,fs:s.vis<0?-1:1,sleep:el.dataset.pose==='sleep',grounded});}catch(e){win.console?.warn?.(e);r3d.canvas.remove();el.classList.remove('is-3d');r3d=null;}
+  if(r3d)try{r3d.render({vis:s.vis,back:Boolean(s.back),tilt:s.tilt,fs:s.vis<0&&!s.back?-1:1,sleep:el.dataset.pose==='sleep',grounded});}catch(e){win.console?.warn?.(e);r3d.canvas.remove();el.classList.remove('is-3d');r3d=null;}
   const at=s.act?.name==='scratch'&&r3d?.paws();fog.hidden=!at;if(at){const o=el.getBoundingClientRect();fog.style.transform=`translate(${(o.left+at.nose.x-9).toFixed(1)}px,${(o.top+at.nose.y-7).toFixed(1)}px)`;}
   placeTalk();
  }
@@ -950,7 +972,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  const layer=doc.createElement('div');layer.className='tl-game';layer.hidden=true;
  layer.innerHTML='<div class="tl-game-track"></div><div class="tl-game-hud" aria-live="polite"></div><div class="tl-game-card" role="status" hidden></div>';
  doc.body.append(layer);
- const [track,hud,card]=layer.children,keys={left:false,right:false,jump:false,down:false,pressed:false};
+ const [track,hud,card]=layer.children,keys={left:false,right:false,jump:false,down:false,pressed:false,fire:false};
  let g=null,landT=0;
  const loadBest=()=>{try{return JSON.parse(win.localStorage?.getItem(`${storage}.best`)||'null');}catch{return null;}};
  const saveBest=v=>{try{win.localStorage?.setItem(`${storage}.best`,JSON.stringify(v));}catch{}};
@@ -960,30 +982,88 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  const clock=ms=>{const t=Math.round(ms/1000);return t>=60?`${Math.floor(t/60)}m ${t%60}s`:`${t}s`;};
  function gameView(tl){const view=tl?.querySelector('.jl-rg-scroll');return view?{view,lw:tl.querySelector('.jl-rg-name')?.offsetWidth||0}:null;}
  function readCourse(tl){const gv=gameView(tl);if(!gv)return null;const {view,lw}=gv,vr=view.getBoundingClientRect(),sl=view.scrollLeft;
-  const segs=[...view.querySelectorAll('.jl-tl-seg')].map(e=>{const r=e.getBoundingClientRect();return {l:r.left-vr.left+sl,r:r.right-vr.left+sl,y:r.top-vr.top,tone:(e.className.match(/\btone-(\w+)/)||[])[1]||''};});
+  const segs=[...view.querySelectorAll('.jl-tl-seg')].map(e=>{const r=e.getBoundingClientRect();return {l:r.left-vr.left+sl,r:r.right-vr.left+sl,y:r.top-vr.top,tone:(e.className.match(/\btone-(\w+)/)||[])[1]||'',kind:(e.className.match(/\bk-(\w+)/)||[])[1]||''};});
   return {sig:`${segs.length}:${view.scrollWidth}`,course:buildCourse(segs,{width:view.scrollWidth,height:view.clientHeight,inset:lw})};}
  function paintFood(){const c=g.course;
   track.style.width=`${c.width}px`;track.style.height=`${c.height}px`;
   track.innerHTML=c.ropes.map(r=>`<b class="tl-rope" data-rope="${esc(r.key)}" data-len="${r.len.toFixed(1)}" style="animation-delay:${(-(r.x%3.2)).toFixed(2)}s;left:${r.x.toFixed(1)}px;top:${r.top.toFixed(1)}px;height:${r.len.toFixed(1)}px"></b>`).join('')
    +g.food.map(f=>`<i class="tl-food ${f.kind}${g.got.has(f.id)?' got':''}" data-food="${esc(f.id)}" style="left:${f.x.toFixed(1)}px;top:${f.y.toFixed(1)}px"></i>`).join('')
-   +`<span class="tl-bowl" style="left:${c.end.toFixed(1)}px;top:${c.goal.y.toFixed(1)}px" aria-hidden="true"></span>`;}
+   +(g.flags||[]).map(f=>`<b class="tl-flag${g.flagsSeen?.has(f.id)?' up':''}" data-flag="${esc(f.id)}" style="left:${f.x.toFixed(1)}px;top:${f.y.toFixed(1)}px" aria-hidden="true"></b>`).join('')
+   +(g.boxes||[]).map(b=>`<b class="tl-box${b.used?' used':''}" data-box="${esc(b.id)}" style="left:${b.x.toFixed(1)}px;top:${b.top.toFixed(1)}px" aria-hidden="true"></b>`).join('')
+   +(g.pows||[]).filter(i=>i.alive).map(powMarkup).join('')
+   +`<span class="tl-bowl" style="left:${c.end.toFixed(1)}px;top:${c.goal.y.toFixed(1)}px" aria-hidden="true"></span>`
+   +(g.foes||[]).map(foeMarkup).join('');}
+ const POW_FACE={catnip:'\u{1F33F}',laser:'<i class="gc-laser"></i>',fish:'\u{1F420}'};
+ const powMarkup=i=>`<i class="tl-pow ${i.kind}" data-pow="${esc(i.id)}" style="left:${i.x.toFixed(1)}px;top:${i.y.toFixed(1)}px" aria-hidden="true">${POW_FACE[i.kind]}</i>`;
+ const POW_SAY={catnip:'Catnip! Big cat.',laser:'Laser pointer! X to shoot.',fish:'Golden fish!'};
+ // A coin from a box or the cat food: every COINS_LIFE of them a life back.
+ function addCoins(n){const was=g.coins||0;g.coins=was+n;if(Math.floor(g.coins/COINS_LIFE)>Math.floor(was/COINS_LIFE)){g.lives=Math.min(LIVES,g.lives+1);caption('Extra life!',1200);voice.call('trill');}}
+ // A hit that is not a stomp: a big cat shrinks and blinks for a moment, a small one loses a life.
+ function hurt(say){const next=hurtPower?hurtPower(g.power):null;if(!next){caption(say,1400);loseLife();return;}
+  g.power=next;g.safeUntil=now()+1500;caption('Shrunk!',1000);voice.call('protest');}
+ const foodOf=(c,foes)=>[...placeFood(c),...(placePickups?placePickups(c,foes):[])];
+/* The cast, drawn facing right (a foe going left is flipped): a Glitch, a pixel block whose colours tear apart, walks
+    the failed checks; a camera Drone on two rotors swoops over them; an Armadillo trots along and, stomped, rolls into
+    a ball to kick; a spring-legged robot Bunny hops on CodeRabbit's; and the Merge Kraken, crowned, waits at the bowl. */
+ const CAST={
+  glitch:'<svg viewBox="0 0 24 20"><g class="gl-tear"><rect x="2" y="2" width="18" height="13" rx="2" fill="#22d3ee"/><rect x="4" y="3" width="18" height="13" rx="2" fill="#f472b6"/></g><rect x="3" y="2.5" width="18" height="13" rx="2" fill="#4338ca"/><rect x="5" y="4.5" width="5" height="2" fill="#818cf8"/><rect x="6.5" y="7.5" width="4" height="4" fill="#fff"/><rect x="13.5" y="7.5" width="4" height="4" fill="#fff"/><rect class="gl-eye" x="8.5" y="8.5" width="2" height="2.5" fill="#0f172a"/><rect class="gl-eye" x="15.5" y="8.5" width="2" height="2.5" fill="#0f172a"/><path d="M7 13.4h1.6v-1h1.6v1h1.6v-1h1.6v1h1.6v-1h1.6v1" stroke="#c7d2fe" fill="none" stroke-width=".9"/><rect class="ft-a" x="5.5" y="15.5" width="4" height="3.5" rx="1" fill="#1e1b4b"/><rect class="ft-b" x="14.5" y="15.5" width="4" height="3.5" rx="1" fill="#1e1b4b"/></svg>',
+  drone:'<svg viewBox="0 0 30 20"><path d="M3 5h24" stroke="#64748b" stroke-width="1.6" stroke-linecap="round"/><ellipse class="dr-rotor" cx="4.5" cy="3" rx="4.5" ry="1.1" fill="#cbd5e1"/><ellipse class="dr-rotor" cx="25.5" cy="3" rx="4.5" ry="1.1" fill="#cbd5e1"/><rect x="8" y="5" width="14" height="10" rx="5" fill="#334155"/><rect x="9.5" y="6" width="6" height="2" rx="1" fill="#475569"/><circle cx="17" cy="10" r="3.8" fill="#0f172a"/><circle class="dr-eye" cx="17.6" cy="10" r="2.3" fill="#ef4444"/><circle cx="16.9" cy="9.2" r=".8" fill="#fff"/><path d="M11 15l-2 3.4M19 15l2 3.4" stroke="#64748b" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  dillo:'<svg class="dl-walk" viewBox="0 0 28 18"><path d="M4 9.5 1 12.5" stroke="#a16207" stroke-width="1.6" stroke-linecap="round"/><path d="M3 14C3 5.5 8.5 2 13.5 2S22.5 5.5 22.5 11v3Z" fill="#b45309"/><path d="M8 3.6V14M11.8 2.3V14M15.6 2.4V14M19.3 4.4V14" stroke="#78350f" stroke-width="1.3"/><path d="M5 12.5h17" stroke="#fbbf24" stroke-width="1" opacity=".5"/><path d="M21 8.5c3.4 0 6.2 2.2 6.4 4.4.1.8-.5 1.1-1.2 1.1H21Z" fill="#e7b47a"/><path d="M21.4 8.8 22.6 5.8 23.8 8.9Z" fill="#e7b47a"/><circle cx="23.4" cy="10.6" r="1" fill="#111"/><circle cx="27.2" cy="12.9" r=".7" fill="#7c2d12"/><rect class="ft-a" x="6" y="13.5" width="3.2" height="4" rx="1.2" fill="#78350f"/><rect class="ft-b" x="16" y="13.5" width="3.2" height="4" rx="1.2" fill="#78350f"/></svg><svg class="dl-ball" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8.4" fill="#b45309"/><path d="M2.4 5.6Q9 3 15.6 5.6M1 9.4Q9 6.6 17 9.4M2.4 13Q9 10.4 15.6 13" stroke="#78350f" stroke-width="1.3" fill="none"/><circle cx="6" cy="5" r="1.6" fill="#fbbf24" opacity=".45"/></svg>',
+  rabbit:'<svg viewBox="0 0 22 26"><g class="hp-ears"><rect x="5" y="0" width="3.4" height="10" rx="1.7" fill="#fb923c"/><rect x="11.5" y="-.5" width="3.4" height="10" rx="1.7" fill="#fb923c" transform="rotate(12 13 9)"/><rect x="6" y="1.5" width="1.4" height="6" rx=".7" fill="#fed7aa"/></g><rect x="2" y="7" width="17" height="12" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/><rect x="6" y="10" width="11" height="4.4" rx="2.2" fill="#0f172a"/><circle class="hp-eye" cx="14" cy="12.2" r="1.4" fill="#22d3ee"/><circle cx="18.6" cy="15" r="1.1" fill="#f472b6"/><path class="hp-spring" d="M7 19l7 1.4-7 1.4 7 1.4-7 1.4" stroke="#64748b" stroke-width="1.2" fill="none"/></svg>',
+ };
+ const KRAKEN='<svg viewBox="0 -8 64 60"><defs><radialGradient id="kr-skin" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="#d8b4fe"/><stop offset=".55" stop-color="#9333ea"/><stop offset="1" stop-color="#581c87"/></radialGradient></defs>'
+  +'<g class="kr-arms" fill="#7e22ce">'+[8,17,26,35,44,53].map((x,i)=>`<path class="kr-arm kr-a${i%3}" d="M${x} 32c-4 6-5 11-2 16 1.4 2.2 4 1.6 3.4-.8-1-3.6.4-8 3.6-12Z"/>`).join('')+'</g>'
+  +'<path d="M7 34C2 14 15 3 32 3s30 11 25 31c-6 7-44 7-50 0Z" fill="url(#kr-skin)"/><circle cx="15" cy="15" r="2.6" fill="#c084fc"/><circle cx="21" cy="9" r="1.7" fill="#c084fc"/><circle cx="12" cy="24" r="1.5" fill="#c084fc"/>'
+  +'<path d="M21 6 23 -4l5 6 4-8 4 8 5-6 2 10Z" fill="#facc15" stroke="#a16207" stroke-width="1"/><circle cx="32" cy="-1" r="1.6" fill="#ef4444"/>'
+  +'<circle cx="36" cy="19" r="6.4" fill="#fff"/><circle cx="50" cy="19" r="6.4" fill="#fff"/><circle class="kr-eye" cx="38.4" cy="20" r="3.2" fill="#111"/><circle class="kr-eye" cx="52.4" cy="20" r="3.2" fill="#111"/><circle cx="37.2" cy="18.6" r="1" fill="#fff"/><circle cx="51.2" cy="18.6" r="1" fill="#fff"/>'
+  +'<path class="kr-brow" d="M29.5 10.5 41 15M57 10.5 45.5 15" stroke="#3b0764" stroke-width="3.2" stroke-linecap="round"/>'
+  +'<g class="kr-mouth"><ellipse cx="46" cy="31" rx="6.5" ry="3.6" fill="#1c1917"/><ellipse cx="46.5" cy="32" rx="3.6" ry="1.8" fill="#f97316"/><path d="M40.5 28.6l1.8 2.6 1.8-2.6M47.5 28.6l1.8 2.6 1.8-2.6" fill="#fff"/></g></svg>';
+ const FOE_FACE={fire:'\u{1F525}'};
+ function foeMarkup(f){
+  if(f.kind==='jet')return `<i class="tl-foe jet" data-foe="${esc(f.id)}" style="left:${f.x.toFixed(1)}px;top:${f.y.toFixed(1)}px" title="PR Advisor finding" aria-hidden="true"></i>`;
+  if(f.kind==='spike')return `<i class="tl-foe spike" data-foe="${esc(f.id)}" style="left:${f.x.toFixed(1)}px;top:${f.y.toFixed(1)}px" title="PR Advisor finding" aria-hidden="true"></i>`;
+  if(f.goon)return `<i class="tl-foe roll goon g-${f.bar.kind}${f.alive?'':' gone'}" data-foe="${esc(f.id)}" style="left:${f.x.toFixed(1)}px;top:${f.y.toFixed(1)}px" aria-hidden="true"><span class="goon"><b></b></span></i>`;
+  if(f.kind==='king')return `<i class="tl-foe king${f.alive?'':' gone'}" data-foe="${esc(f.id)}" style="left:${f.x.toFixed(1)}px;top:${f.y.toFixed(1)}px" aria-hidden="true"><b class="tl-boss-bar" aria-label="${f.hp} of ${f.max}"><i style="width:${(100*f.hp/f.max).toFixed(0)}%"></i></b><span class="kraken">${KRAKEN}</span></i>`;
+  return `<i class="tl-foe ${f.kind}${f.icon?` i-${f.bar.kind||'ball'}`:''}${f.alive?'':' gone'}" data-foe="${esc(f.id)}" style="left:${f.x.toFixed(1)}px;top:${f.y.toFixed(1)}px" aria-hidden="true">${f.word?`<code>${esc(f.icon)}</code>`:`<span>${CAST[f.kind]||f.icon||FOE_FACE[f.kind]}</span>`}</i>`;}
+ function paintFoes(){
+  for(const f of g.foes){let e=track.querySelector(`[data-foe="${CSS.escape(f.id)}"]`);
+   if(!e&&f.alive){track.insertAdjacentHTML('beforeend',foeMarkup(f));e=track.lastElementChild;}if(!e)continue;
+   e.style.left=`${f.x.toFixed(1)}px`;e.style.top=`${f.y.toFixed(1)}px`;e.classList.toggle('gone',!f.alive);
+   if(f.dir)e.classList.toggle('left',f.dir<0);if(f.shell){e.classList.add('shell');e.classList.toggle('rolling',Boolean(f.vx));}if(f.kind==='jet')e.classList.toggle('on',f.on);if(f.icon){e.classList.toggle('off',f.on===false&&!f.warn);e.classList.toggle('warn',Boolean(f.warn));if(f.warn)e.style.setProperty('--drop',`${(f.bar.y-f.y).toFixed(0)}px`);}
+   if(f.kind==='king'){e.classList.toggle('hurt',f.hurt>0);e.classList.toggle('low',Boolean(f.low));e.classList.toggle('breath',f.breath>0);e.classList.toggle('angry',Boolean(f.angry));const hp=e.querySelector('.tl-boss-bar i');if(hp)hp.style.width=`${(100*Math.max(0,f.hp)/f.max).toFixed(0)}%`;}}
+  for(const e of track.querySelectorAll('.tl-foe.fire'))if(!g.foes.some(f=>f.id===e.dataset.foe))e.remove();
+  for(const y of g.balls){let e=track.querySelector(`[data-shot="${CSS.escape(y.id)}"]`);if(!e){track.insertAdjacentHTML('beforeend',`<i class="tl-shot${y.vx<0?' left':''}" data-shot="${esc(y.id)}" aria-hidden="true">\u2713</i>`);e=track.lastElementChild;}
+   e.style.left=`${y.x.toFixed(1)}px`;e.style.top=`${y.y.toFixed(1)}px`;}
+  for(const e of track.querySelectorAll('.tl-shot'))if(!g.balls.some(y=>y.id===e.dataset.shot))e.remove();}
  function showCard(kind,html,ms=0){g.card={kind,until:ms?now()+ms:Infinity};card.innerHTML=html;card.hidden=false;keys.pressed=false;}
  function startStage(tl){const rc=readCourse(tl);if(!rc||!rc.course.bars.length)return false;const ids=pills().map(e=>e.dataset.id);
-  Object.assign(g,{id:tl.dataset.tlId,sig:rc.sig,course:rc.course,food:placeFood(rc.course),got:new Set(),base:g.score,p:player(rc.course),t0:now(),pending:null,card:null,respawn:0,
+  const foes=placeFoes?placeFoes(rc.course,{boss:boss(tl.dataset.tlId)}):[];
+  Object.assign(g,{id:tl.dataset.tlId,sig:rc.sig,course:rc.course,food:foodOf(rc.course,foes),foes,flags:placeFlags?placeFlags(rc.course,foes):[],flagsSeen:new Set(),check:null,balls:[],thrown:0,coolUntil:0,got:new Set(),base:g.score,p:player(rc.course),t0:now(),pending:null,card:null,respawn:0,
+   boxes:placeBoxes?placeBoxes(rc.course):[],pows:arenaPower?arenaPower(rc.course):[],chain:0,starUntil:0,clock:stageTime?stageTime(rc.course):0,
    n:Math.max(1,ids.indexOf(tl.dataset.tlId)+1),of:Math.max(1,ids.length)});
-  g.safe={...rc.course.start};card.hidden=true;hide();el.hidden=false;layer.hidden=false;pose('jump');paintFood();caption(`Stage ${g.n} · ${prNum(g.id)}`,1600);return true;}
- function newGame(tl){g={lives:LIVES,score:0};doc.activeElement?.blur?.();
-  if(tl&&startStage(tl))showCard('ready',`<strong>Stage ${g.n} of ${g.of} · ${esc(prNum(g.id))}</strong><span>Stay on the bars, eat the food and reach the bowl at the end. Falling off costs a life.</span><small>Space jumps · ← → run · ↓ drops · Esc stops</small><small>Ropes: jump to catch one, ← → swing, Space lets go</small><small>Press Space to start</small>`);}
+  g.timeLeft=g.clock;g.safe={...rc.course.start};card.hidden=true;hide();el.hidden=false;layer.hidden=false;pose('jump');paintFood();caption(`Stage ${g.n} · ${prNum(g.id)}`,1600);return true;}
+ const cast=k=>`<i class="gc-cast">${CAST[k]}</i>`,FOE_ICON={glitch:cast('glitch'),drone:cast('drone'),dillo:cast('dillo'),rabbit:cast('rabbit'),spike:'<i class="gc-spike"></i>',jet:'\u{1F525}',king:`<i class="gc-cast gc-kraken">${KRAKEN}</i>`};
+ function foeIcons(foes){const n=k=>foes.filter(f=>f.kind===k).length,d=foes.find(f=>f.kind==='king'),obs=new Map();
+  for(const f of foes)if(f.icon||f.goon){const k=f.goon?'<i class="gc-goon"></i>':f.icon;obs.set(k,(obs.get(k)||0)+1);}
+  const fails=Object.keys(FOE_ICON).filter(k=>k!=='king'&&n(k)).map(k=>`<span>${FOE_ICON[k]}<b>\u00D7${n(k)}</b></span>`);
+  return [...fails,...[...obs].map(([i,c])=>`<span>${i}<b>\u00D7${c}</b></span>`),d?`<span>${FOE_ICON.king}<b>HP ${d.max}</b></span>`:''].join('');}
+ const beatSay=f=>f.goon?'Squashed!':f.bar?.kind==='e2e'&&f.icon?'Caught the mouse!':f.kind==='rabbit'?'Got the rabbit!':'Squashed!';
+ const kbd=(...k)=>k.map(x=>`<kbd>${x}</kbd>`).join('');
+ function stageCard(){showCard('ready',`<em class="gc-tag">${esc(prNum(g.id))}</em><strong>Stage ${g.n}<small>/${g.of}</small></strong>${(g.foes||[]).length?`<div class="gc-foes">${foeIcons(g.foes)}</div>`:''}<div class="gc-keys"><span>${kbd('Space')}jump</span><span>${kbd('\u2190','\u2192')}run</span><span>${kbd('\u2193')}drop</span><span>${kbd('X')}shoot, with a laser</span></div><p class="gc-go">Press Space</p>`);}
+ function newGame(tl){g={lives:LIVES,score:0,coins:0,power:'small'};doc.activeElement?.blur?.();if(tl&&startStage(tl))stageCard();}
+ // Out of lives: all nine back, at the last flag reached on this stage, or its start, with the score it had there.
+ function continueGame(){const at=g.check||{...g.course.start,score:g.base};
+  Object.assign(g,{lives:LIVES,score:at.score,safe:{x:at.x,y:at.y,on:at.on},respawn:now()+300});el.hidden=true;}
  function advance(){const next=nextStage(pills().map(e=>e.dataset.id),g.id);
   if(!next){finish();return;}g.pending=next;g.waitUntil=now()+4000;card.hidden=true;g.card=null;pills().find(e=>e.dataset.id===next)?.click();}
  function finish(){const best=recordBest(loadBest(),{total:g.score});saveBest(best);
-  showCard('done',`<strong>Course complete</strong><span>${g.of} PR${g.of===1?'':'s'} run</span><dl><div><dt>Score</dt><dd>${g.score}</dd></div><div><dt>Lives</dt><dd>${g.lives}</dd></div><div><dt>Best</dt><dd>${best.total}</dd></div></dl><small>Space to play again · Esc to stop</small>`);caption('All done!',2400);}
- function clearStage(){const stage=g.score-g.base+CLEAR_BONUS;g.score+=CLEAR_BONUS;saveBest(recordBest(loadBest(),{id:g.id,stage,total:g.score}));voice.call('trill');
-  showCard('clear',`<strong>Stage clear!</strong><span>${esc(prNum(g.id))} · stage ${g.n} of ${g.of}</span><dl><div><dt>Food</dt><dd>${g.got.size}/${g.food.length}</dd></div><div><dt>Lives</dt><dd>${g.lives}</dd></div><div><dt>Time</dt><dd>${clock(now()-g.t0)}</dd></div><div><dt>Score</dt><dd>${g.score}</dd></div></dl><small>${nextStage(pills().map(e=>e.dataset.id),g.id)?'Next PR in a moment · Space to go now':'Space to see your total'}</small>`,2800);caption('Stage clear!',2400);}
- function loseLife(){g.lives--;voice.call('protest');
-  if(g.lives<=0){saveBest(recordBest(loadBest(),{total:g.score}));showCard('over',`<strong>Out of lives</strong><span>Even a cat gets nine.</span><dl><div><dt>Score</dt><dd>${g.score}</dd></div><div><dt>Best</dt><dd>${loadBest()?.total||g.score}</dd></div></dl><small>Space to start again · Esc to stop</small>`);return;}
+  showCard('done',`<strong>You win!</strong><dl><div><dt>Score</dt><dd>${g.score}</dd></div><div><dt>Lives</dt><dd>${g.lives}</dd></div><div><dt>Best</dt><dd>${best.total}</dd></div></dl><p class="gc-go">Space to play again</p>`);caption('All done!',2400);}
+ function clearStage(){const bonus=CLEAR_BONUS+Math.ceil(g.timeLeft||0),stage=g.score-g.base+bonus;g.score+=bonus;saveBest(recordBest(loadBest(),{id:g.id,stage,total:g.score}));voice.call('trill');
+  showCard('clear',`<em class="gc-tag">${esc(prNum(g.id))}</em><strong>Stage clear!</strong><dl><div><dt>Lives</dt><dd>${g.lives}</dd></div><div><dt>Time</dt><dd>${clock(now()-g.t0)}</dd></div><div><dt>Score</dt><dd>${g.score}</dd></div></dl><p class="gc-go">${nextStage(pills().map(e=>e.dataset.id),g.id)?'Next stage':'Space'}</p>`,2800);caption('Stage clear!',2400);}
+ function loseLife(){g.lives--;g.power='small';g.starUntil=0;g.chain=0;g.timeLeft=g.clock;voice.call('protest');
+  if(g.lives<=0){saveBest(recordBest(loadBest(),{total:g.score}));showCard('over',`<strong>Game over</strong><dl><div><dt>Score</dt><dd>${g.score}</dd></div><div><dt>Best</dt><dd>${loadBest()?.total||g.score}</dd></div></dl><p class="gc-go">Space: continue from ${g.check?'\u{1F6A9}':'stage start'}</p>`);return;}
   g.respawn=now()+900;el.hidden=true;}
- function endGame(){g=null;layer.hidden=true;card.hidden=true;for(const k in keys)keys[k]=false;el.hidden=true;hide();awayUntil=0;}
+ function endGame(){g=null;el.classList.remove('big','laser','star','blink');layer.hidden=true;card.hidden=true;for(const k in keys)keys[k]=false;el.hidden=true;hide();awayUntil=0;}
  // One frame of the game; false when the game has nothing to show yet.
  function gameFrame(dt,tl){
   if(!g){if(!tl)return false;newGame(tl);return true;}
@@ -991,38 +1071,66 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
   if(!tl)return true;
   if(tl.dataset.tlId!==g.id||g.pending){if(!startStage(tl)){if(now()>(g.waitUntil||0)){g.id=tl.dataset.tlId;advance();}return true;}}
   const gv=gameView(tl);if(!gv)return true;const {view,lw}=gv;
-  if(`${view.querySelectorAll('.jl-tl-seg').length}:${view.scrollWidth}`!==g.sig){const r=readCourse(tl);if(r?.course.bars.length){g.sig=r.sig;g.course=r.course;g.food=placeFood(r.course);paintFood();}}
+  if(`${view.querySelectorAll('.jl-tl-seg').length}:${view.scrollWidth}`!==g.sig){const r=readCourse(tl);if(r?.course.bars.length){g.sig=r.sig;g.course=r.course;if(placeFoes&&keepFoes)g.foes=keepFoes(placeFoes(r.course,{boss:boss(g.id)}),g.foes);g.food=foodOf(r.course,g.foes);g.flags=placeFlags?placeFlags(r.course,g.foes):[];if(placeBoxes)g.boxes=keepBoxes(placeBoxes(r.course),g.boxes);paintFood();}}
   const c=g.course,t=now();
-  if(g.card){if(keys.pressed||t>=g.card.until){keys.pressed=false;const k=g.card.kind;card.hidden=true;g.card=null;if(k==='ready')g.t0=t;else if(k==='clear')advance();else newGame(tl);}}
-  else if(g.respawn){if(t>=g.respawn){g.respawn=0;Object.assign(g.p,{x:g.safe.x,y:g.safe.y,vx:0,vy:0,ground:g.safe.on||null,rope:null});el.hidden=false;
+  if(g.card){if(keys.pressed||t>=g.card.until){keys.pressed=false;const k=g.card.kind;card.hidden=true;g.card=null;if(k==='ready')g.t0=t;else if(k==='clear')advance();else if(k==='over')continueGame();else newGame(tl);}}
+  else if(g.respawn){if(t>=g.respawn){g.respawn=0;g.safeUntil=now()+1500;Object.assign(g.p,{x:g.safe.x,y:g.safe.y,vx:0,vy:0,ground:g.safe.on||null,rope:null});el.hidden=false;
    say(g.lives===8?'Cats have nine lives. I have eight left.':g.lives===1?'Last life. Careful now.':`${g.lives} lives left.`,2200);}}
-  else{const surf=surfacesOf(c);acc+=dt;
-   while(acc>=STEP){const r=stepPlayer(g.p,keys,STEP,surf,{left:c.inset+CAT_W/2,right:c.width-CAT_W/2,ropes:c.ropes});keys.pressed=false;acc-=STEP;if(r.landed)landT=t;}
+  else{const live=(g.boxes||[]),surf=[...surfacesOf(c),...live.map(b=>b.surf)];acc+=dt;
+   while(acc>=STEP){const y0=g.p.y,r=stepPlayer(g.p,keys,STEP,surf,{left:c.inset+CAT_W/2,right:c.width-CAT_W/2,ropes:c.ropes});keys.pressed=false;acc-=STEP;if(r.landed)landT=t;if(g.p.ground||g.p.rope)g.chain=0;
+    const hitBox=bumpBox?.(g.p,live,y0);if(hitBox){const e=track.querySelector(`[data-box="${CSS.escape(hitBox.id)}"]`);e?.classList.remove('bump');void e?.offsetWidth;e?.classList.add('bump');
+     const out=openBox(hitBox,g.power);if(out){e?.classList.add('used');voice.call('chirp');
+      if(out.kind==='coin'){g.score+=FOOD.kibble;addCoins(1);e?.insertAdjacentHTML('beforeend','<i class="tl-coin-pop"></i>');}else{g.pows.push(out);track.insertAdjacentHTML('beforeend',powMarkup(out));}}}}
+   if(!g.card&&!g.respawn&&g.clock){g.timeLeft-=dt;if(g.timeLeft<=0){caption('Time up!',1400);loseLife();}}
+   const pow=grabPower?.(g.p,g.pows);if(pow){pow.alive=false;track.querySelector(`[data-pow="${CSS.escape(pow.id)}"]`)?.remove();g.score+=100;voice.call('trill');caption(POW_SAY[pow.kind],1400);
+    if(pow.kind==='fish')g.starUntil=t+STAR*1000;else g.power=powerAfter(g.power,pow.kind);}
    const held=g.p.rope?.key||null,ropeEl=k=>track.querySelector(`[data-rope="${CSS.escape(k)}"]`);
    if(held!==g.held){const was=g.held&&ropeEl(g.held);if(was){was.classList.remove('held');was.style.removeProperty('transform');was.style.height=`${was.dataset.len}px`;}g.held=held;}
    if(held){const el=ropeEl(held);if(el){el.classList.add('held');el.style.height=`${g.p.ropeLen.toFixed(1)}px`;el.style.transform=`rotate(${(-g.p.th).toFixed(3)}rad)`;}}
    if(g.p.ground)g.safe={...safeSpot(g.p,g.p.ground),on:g.p.ground};
-   const got=collect(g.p,g.food,g.got);if(got.length){g.score+=points(got);for(const f of got)track.querySelector(`[data-food="${CSS.escape(f.id)}"]`)?.classList.add('got');
-    if(got.some(f=>f.kind==='gold')){caption('Gold!',900);voice.call('chirp');}else if(Math.random()<.18)caption(['Yum!','Crunch','Nom'][Math.floor(Math.random()*3)],700);}
-   if(outOfCourse(g.p,c))loseLife();else if(cleared(g.p,c))clearStage();}
+   const flag=flagReached?.(g.p,g.flags||[],g.flagsSeen);if(flag){g.flagsSeen.add(flag.id);g.check={x:flag.x+16,y:flag.y,on:g.p.ground,score:g.score};
+    track.querySelector(`[data-flag="${CSS.escape(flag.id)}"]`)?.classList.add('up');caption('Checkpoint!',1200);voice.call('chirp');}
+   const got=collect(g.p,g.food,g.got);if(got.length){g.score+=points(got);addCoins(got.filter(f=>f.kind==='kibble').length+5*got.filter(f=>f.kind==='gold').length);for(const f of got)track.querySelector(`[data-food="${CSS.escape(f.id)}"]`)?.classList.add('got');
+    const heart=got.some(f=>f.kind==='heart');if(heart)g.lives=Math.min(LIVES,g.lives+1);
+    if(heart){caption('Extra life!',1200);voice.call('trill');}
+    else if(got.some(f=>f.kind==='gold')){caption('Gold!',900);voice.call('chirp');}else if(Math.random()<.18)caption(['Yum!','Crunch','Nom'][Math.floor(Math.random()*3)],700);}
+   if(keys.fire&&shoot&&g.power==='laser'&&t>=g.coolUntil&&!g.p.rope){g.coolUntil=t+SHOT_COOL*1000;g.balls.push(shoot(g.p,++g.thrown));}
+   if(g.balls.length&&stepShots)for(const h of stepShots(g.balls,dt,g.foes||[])){g.score+=h.points;const f=h.foe;
+    if(f.kind==='king'){if(!f.alive){caption('Kraken defeated!',2400);voice.call('trill');}else if(f.angry&&!g.toldAngry){g.toldAngry=true;caption('It is angry!',1200);}}
+    else caption(f.kind==='fire'?'Put it out!':beatSay(f),800);}
+   if(g.foes?.length||g.balls.length){const knocked=[];stepFoes(g.foes,dt,g.p,{view:view.clientWidth-lw,knocked});for(const k of knocked){g.score+=20;caption('Bowled over!',700);}
+    const star=t<g.starUntil,hit=!star&&t<(g.safeUntil||0)?null:touchFoes(g.p,g.foes);
+    // With the golden fish, whatever the cat runs into is knocked out, all but the Merge Kraken, which it just passes.
+    if(hit&&star){const f=hit.foe;if(f.kind!=='king'&&f.kind!=='spike'&&f.kind!=='jet'){g.score+=hitFoe(f);caption('Knocked out!',700);voice.call('chirp');}}
+    else if(hit?.hit==='stomp'){const f=hit.foe,pts=stomp(g.p,f);voice.call('chirp');
+     if(f.kind==='king'){g.score+=pts;caption(f.alive?'Ouch, Kraken!':'Kraken defeated!',f.alive?900:2400);}
+     else{const ch=chainPoints?chainPoints(g.chain++):{points:pts,life:false};if(ch.life){g.lives=Math.min(LIVES,g.lives+1);caption('Extra life!',1200);}else{g.score+=ch.points;caption(f.shell?'Shell!':`${beatSay(f)} +${ch.points}`,800);}}}
+    else if(hit?.hit==='kick'){g.score+=kickFoe(g.p,hit.foe);voice.call('chirp');caption('Kick!',600);}
+    else if(hit){if(hit.foe.kind==='fire')hit.foe.alive=false;hurt(hit.foe.kind==='spike'?'Spikes!':hit.foe.kind==='jet'||hit.foe.kind==='fire'?'Too hot!':'Ouch!');}
+    paintFoes();}
+   if(g.respawn||g.card){}
+   else if(outOfCourse(g.p,c))loseLife();else if(cleared(g.p,c)){if(bossLeft?.(g.foes||[])){if(!g.toldBoss||now()-g.toldBoss>3000){g.toldBoss=now();caption('Beat the Kraken first!',1600);}}else clearStage();}}
   const sl=camera(g.p.x,view.clientWidth,view.scrollWidth,lw);if(Math.abs(view.scrollLeft-sl)>.5)view.scrollLeft=sl;
   const vr=view.getBoundingClientRect(),box=tl.getBoundingClientRect();sc={id:g.id,view,box,plats:[],floor:vr.bottom-box.top,left:vr.left-box.left+lw,right:vr.right-box.left};
   layer.style.transform=`translate(${vr.left.toFixed(1)}px,${vr.top.toFixed(1)}px)`;layer.style.width=`${vr.width}px`;layer.style.height=`${vr.height}px`;layer.style.clipPath=`inset(0 0 0 ${lw}px)`;
   track.style.transform=`translateX(${(-view.scrollLeft).toFixed(1)}px)`;
-  hud.innerHTML=`<span class="food">${g.score}</span><span class="lives" title="Lives">${'\u2665'.repeat(Math.max(0,g.lives))}</span><span>Stage ${g.n}/${g.of} · ${esc(prNum(g.id))}</span>`;
+  el.classList.toggle('big',g.power!=='small');el.classList.toggle('laser',g.power==='laser');el.classList.toggle('star',t<g.starUntil);el.classList.toggle('blink',t<(g.safeUntil||0));
+  const left=Math.max(0,Math.ceil(g.timeLeft||0));
+  hud.innerHTML=`<span class="food">${g.score}</span><span class="coins" title="Coins">${g.coins||0}</span><span class="lives" title="Lives">${'\u2665'.repeat(Math.max(0,g.lives))}</span>${g.clock?`<span class="clock${left<=30?' low':''}" title="Time left">${left}</span>`:''}<span>Stage ${g.n}/${g.of} · ${esc(prNum(g.id))}</span>`;
   if(el.hidden)return true;
   const p=g.p;b.x=vr.left-box.left+p.x-view.scrollLeft;b.y=vr.top-box.top+p.y;
-  if(Math.abs(p.vx)>12)s.face=p.vx>0?1:-1;s.vis+=Math.max(-dt*TURN,Math.min(dt*TURN,s.face-s.vis));s.surf=p.ground;s.mode=p.ground?'idle':'air';
-  s.tilt=p.ground?0:p.rope?-p.th*40:Math.max(-22,Math.min(22,Math.atan2(p.vy,Math.abs(p.vx)+60)*20));
-  pose(p.rope?'dangle':!p.ground?'jump':t-landT<120?'land':Math.abs(p.vx)>150?'run':Math.abs(p.vx)>10?'walk':'stand');
+  // On a rope it turns to face the rope, its back to the page; off it, the way it runs.
+  if(Math.abs(p.vx)>12&&!p.rope)s.face=p.vx>0?1:-1;s.back=Boolean(p.rope);const aim=p.rope?0:s.face;s.vis+=Math.max(-dt*TURN,Math.min(dt*TURN,aim-s.vis));s.surf=p.ground;s.mode=p.ground?'idle':'air';
+  s.tilt=p.ground?0:p.rope?-p.th*180/Math.PI:Math.max(-22,Math.min(22,Math.atan2(p.vy,Math.abs(p.vx)+60)*20));
+  pose(p.rope?'rope':!p.ground?'jump':t-landT<120?'land':Math.abs(p.vx)>150?'run':Math.abs(p.vx)>10?'walk':'stand');
   draw();return true;
  }
  const typing=e=>e.target?.closest?.('input,textarea,select,[contenteditable=""],[contenteditable="true"]');
- const KEY={' ':'jump',ArrowUp:'jump',w:'jump',W:'jump',ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',ArrowDown:'down',s:'down',S:'down'};
+ const KEY={' ':'jump',ArrowUp:'jump',w:'jump',W:'jump',ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',ArrowDown:'down',s:'down',S:'down',x:'fire',X:'fire',f:'fire',F:'fire'};
  doc.addEventListener('keydown',e=>{if(!g||typing(e)||e.metaKey||e.ctrlKey||e.altKey)return;const k=KEY[e.key];
   if(e.key==='Escape'){doc.querySelector('[data-do="tlGame"][aria-pressed="true"]')?.click();return;}
   if(e.key==='Enter'&&g.card){e.preventDefault();keys.pressed=true;return;}
-  if(!k)return;e.preventDefault();if(k==='jump'&&!e.repeat)keys.pressed=true;keys[k]=true;});
+  if(!k)return;e.preventDefault();if(k==='fire'){if(!g.card)keys.fire=true;return;}if(k==='jump'&&!e.repeat)keys.pressed=true;keys[k]=true;});
  doc.addEventListener('keyup',e=>{if(!g)return;const k=KEY[e.key];if(!k)return;e.preventDefault();keys[k]=false;});
  win.addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
  let lostAt=0;const LOST_MS=1500;
@@ -1056,7 +1164,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  function stopAll(){}
  // It thinks for a moment (the voice takes a second or two to make the line), then says it as it speaks, or after 2.5 s
  // without waiting longer for the voice.
- async function talk(given){if(!act('say',9000))return;const text=given||catLine({bar:s.surf?.info,status:line(sc?.id),station:s.surf?.li?.querySelector('.jl-label strong')?.textContent?.trim(),work:workOf(sc?.id)});say('\u00B7 \u00B7 \u00B7',0,true);
+ async function talk(given){if(!act('say',9000))return;const text=given||catLine({bar:s.surf?.info,status:line(sc?.id),station:s.surf?.li?.querySelector('.jl-label strong')?.textContent?.trim(),work:workOf(sc?.id),jokes});say('\u00B7 \u00B7 \u00B7',0,true);
   let shown=false;const show=()=>{if(shown||s.act?.name!=='say')return;shown=true;const ms=Math.max(2600,text.length*70);say(text,ms);s.act.until=now()+ms;};
   later(2500,show);await voice.speak(text);show();}
  // A double-click reads the PR's line out loud; without one it falls back to its usual chatter.
@@ -1073,7 +1181,7 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
   if(tapTimer){win.clearTimeout(tapTimer);tapTimer=0;openPanel();return;}
   tapTimer=win.setTimeout(()=>{tapTimer=0;trick();},TAP_GAP);});
  const panel=doc.createElement('aside');panel.className='tl-cat-panel';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Cat tricks');doc.body.append(panel);
- const paintPanel=()=>{if(!panel.hidden&&!panel.contains(doc.activeElement?.closest?.('.tl-cat-name')))panel.innerHTML=trickPanelMarkup({mood:s.mood,name:catName,hunger:hunger()});};
+ const paintPanel=()=>{if(!panel.hidden&&!panel.contains(doc.activeElement?.closest?.('.tl-cat-name')))panel.innerHTML=trickPanelMarkup({mood:s.mood,...pet&&{name:catName,hunger:hunger()},pet});};
  // A new name is kept once you press Enter or leave the field, and the cat answers to it.
  const rename=f=>{if(setName(f.value)&&sc&&!el.hidden){say(`I'm ${catName}!`,1800);voice.call('trill');}f.value=catName;};
  panel.addEventListener('keydown',e=>{if(!e.target.matches?.('.tl-cat-name'))return;e.stopPropagation();if(e.key==='Enter'){e.preventDefault();e.target.blur();}else if(e.key==='Escape'){e.target.value=catName;e.target.blur();closePanel();}});
@@ -1125,8 +1233,8 @@ export function startTimelineCat({doc=document,win=window,reducedMotion=()=>fals
  win.requestAnimationFrame(frame);
  /* A new page: the cat and its toys go, and come back on the new page's boxes once it has drawn, somewhere new. */
  function reset(){toysOff();charts.reset();el.hidden=true;hide();unchipAll();awayUntil=toysAfter=now()+700;gate={from:now(),at:0,sig:'',since:0,done:false};}
- win[global]={reset,playable:Boolean(GAME),perform:(ms,o)=>show(ms,o),performing:()=>showing(),toys:()=>toys.map(({kind,x,y,vx,vy,rot,spin,on,thread,cordAwake,catBats,cordSwats,trod,snags})=>({kind,x,y,vx,vy,rot,spin,on,catBats:catBats||0,cordSwats:cordSwats||0,trod:trod||0,snags:snags||0,cord:thread?{points:thread.length,resting:thread.filter(q=>q.on).length,awake:Boolean(cordAwake)}:null})),climb:()=>Boolean(sc&&s.mode==='idle'&&climb()),ropes:()=>ropeLines().length,ride:()=>ride(),riding:()=>Boolean(s.ride?.on&&s.surf?.perch==='ticket'),where:()=>({zone:s.zone,climb:s.climb&&{down:s.climb.to.down,legs:s.climb.legs?.map(v=>v|0)},y:b.y|0,here:zoneOf(s.surf),mode:s.mode,surf:s.surf?.key,act:s.act?.name,quest:s.quest&&{key:s.quest.key,x:s.quest.x|0,detours:s.quest.detours},feast:Boolean(s.feast),route:s.route?.map(p=>p.key)}),zone:z=>{s.zone=z;s.zoneUntil=now()+40000;s.zoneMiss=0;},voice,paws:()=>r3d?.paws(),turn:()=>{s.face=-s.face;},show:(on=true)=>{force=on;},replay:()=>{el.hidden=true;hide();},act:name=>{const r=REACTIONS.find(x=>x[0]===name);return r?act(r[0],r[2]):act(name,2400);},mood,touch,menuItems:()=>menuMarkup({nap:s.mood==='nap'}),menuDo,readLine,openPanel,closePanel,feed,logs:()=>all.filter(p=>p.roll).map(p=>({key:p.key,spin:Math.round(rolls.get(p.roll)?.w||0),turn:Math.round(rolls.get(p.roll)?.a||0)})),toLog:i=>{const to=all.filter(p=>p.roll)[i||0];return Boolean(to&&s.mode==='idle'&&goTo(to));},charts:()=>all.filter(p=>p.chart).map(p=>({key:p.key,kind:p.chart.kind,l:p.l|0,r:p.r|0,y:p.y|0})),toChart:kind=>{const t=all.filter(p=>p.chart?.kind===kind).sort((a,c)=>Math.abs(a.y-b.y)-Math.abs(c.y-b.y))[0];return Boolean(t&&s.surf&&goTo(t,{chart:true}));},chartTrick:()=>chartTrick(),name:()=>catName,hunger:()=>hunger(),starve:(h=1.2)=>{fedAt=Date.now()-h*HUNGER.full;keep(FED_KEY,String(fedAt));askAt=0;},panelOpen:()=>!panel.hidden,mischief:()=>mischief(),edge:kind=>Boolean(s.surf&&sc&&overEdge(kind)),scout:()=>Boolean(s.surf&&sc&&s.mode==='idle'&&scout()),bars:()=>({all:all.map(({l,r,y})=>({l,r,y})),left:sc?.left,right:sc?.right,surf:s.surf&&{l:s.surf.l,r:s.surf.r,y:s.surf.y}}),
-  goTo:i=>{const t=all[i];return t&&s.surf?goTo(t):false;},game:()=>g&&{id:g.id,n:g.n,of:g.of,score:g.score,lives:g.lives,card:g.card?.kind||null,pending:g.pending,x:g.p?.x,y:g.p?.y,ground:Boolean(g.p?.ground),end:g.course?.end,height:g.course?.height,ropes:g.course?.ropes?.length||0,rope:g.p?.rope?.key||null,food:g.food?.length||0,got:g.got?.size||0},state:()=>({...s,...b,hidden:el.hidden,pose:el.dataset.pose,surfaces:all.length})};
+ win[global]={reset,playable:Boolean(GAME),perform:(ms,o)=>show(ms,o),performing:()=>showing(),toys:()=>toys.map(({kind,x,y,vx,vy,rot,spin,on,thread,cordAwake,catBats,cordSwats,trod,snags})=>({kind,x,y,vx,vy,rot,spin,on,catBats:catBats||0,cordSwats:cordSwats||0,trod:trod||0,snags:snags||0,cord:thread?{points:thread.length,resting:thread.filter(q=>q.on).length,awake:Boolean(cordAwake)}:null})),climb:()=>Boolean(sc&&s.mode==='idle'&&climb()),climbNow:()=>{if(!sc||!s.surf||s.mode==='climb')return false;clearTimers();endAct();s.walk=null;s.route=null;s.mode='idle';return climb();},ropes:()=>ropeLines().length,ride:()=>ride(),riding:()=>Boolean(s.ride?.on&&s.surf?.perch==='ticket'),where:()=>({zone:s.zone,climb:s.climb&&{down:s.climb.to.down,legs:s.climb.legs?.map(v=>v|0)},y:b.y|0,here:zoneOf(s.surf),mode:s.mode,surf:s.surf?.key,act:s.act?.name,quest:s.quest&&{key:s.quest.key,x:s.quest.x|0,detours:s.quest.detours},feast:Boolean(s.feast),route:s.route?.map(p=>p.key)}),zone:z=>{s.zone=z;s.zoneUntil=now()+40000;s.zoneMiss=0;},voice,paws:()=>r3d?.paws(),turn:()=>{s.face=-s.face;},show:(on=true)=>{force=on;},replay:()=>{el.hidden=true;hide();},act:name=>{const r=REACTIONS.find(x=>x[0]===name);return r?act(r[0],r[2]):act(name,2400);},mood,touch,menuItems:()=>menuMarkup({nap:s.mood==='nap'}),napping:()=>s.mood==='nap',menuDo,readLine,openPanel,closePanel,feed,logs:()=>all.filter(p=>p.roll).map(p=>({key:p.key,spin:Math.round(rolls.get(p.roll)?.w||0),turn:Math.round(rolls.get(p.roll)?.a||0)})),toLog:i=>{const to=all.filter(p=>p.roll)[i||0];return Boolean(to&&s.mode==='idle'&&goTo(to));},charts:()=>all.filter(p=>p.chart).map(p=>({key:p.key,kind:p.chart.kind,l:p.l|0,r:p.r|0,y:p.y|0})),toChart:kind=>{const t=all.filter(p=>p.chart?.kind===kind).sort((a,c)=>Math.abs(a.y-b.y)-Math.abs(c.y-b.y))[0];return Boolean(t&&s.surf&&goTo(t,{chart:true}));},chartTrick:()=>chartTrick(),name:()=>catName,hunger:()=>hunger(),starve:(h=1.2)=>{fedAt=Date.now()-h*HUNGER.full;keep(FED_KEY,String(fedAt));askAt=0;},panelOpen:()=>!panel.hidden,mischief:()=>mischief(),edge:kind=>Boolean(s.surf&&sc&&overEdge(kind)),scout:()=>Boolean(s.surf&&sc&&s.mode==='idle'&&scout()),bars:()=>({all:all.map(({l,r,y})=>({l,r,y})),left:sc?.left,right:sc?.right,surf:s.surf&&{l:s.surf.l,r:s.surf.r,y:s.surf.y}}),
+  goTo:i=>{const t=all[i];return t&&s.surf?goTo(t):false;},game:()=>g&&{id:g.id,n:g.n,of:g.of,score:g.score,lives:g.lives,card:g.card?.kind||null,pending:g.pending,x:g.p?.x,y:g.p?.y,ground:Boolean(g.p?.ground),end:g.course?.end,height:g.course?.height,ropes:g.course?.ropes?.length||0,shots:g.balls?.length||0,check:Boolean(g.check),flags:g.flags?.length||0,foes:(g.foes||[]).map(f=>f.kind),rope:g.p?.rope?.key||null,food:g.food?.length||0,got:g.got?.size||0},state:()=>({...s,...b,hidden:el.hidden,pose:el.dataset.pose,surfaces:all.length})};
  return win[global];
 }
 
