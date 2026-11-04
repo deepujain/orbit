@@ -1,14 +1,15 @@
 # playskin
 
-Playful skins for any web page. Turn one on with a single attribute, and your page becomes soft glass, crayon paper, or the home of a cat.
+Playful skins for any web page. Turn one on with a single attribute, and your page becomes soft glass, crayon paper, the home of a cat, or a narrated tour you can film.
 
 | Skin | What it does |
 |---|---|
 | **Aura** | Soft white glass by day, graphite by night. Cards catch a soft glow in their corners, buttons become pills, page titles get a violet-to-pink wash. |
 | **Crayon** | Cream ruled paper by day, a green chalkboard in a wooden frame by night. Hand-drawn borders, handwriting headings, and doodles behind the page: bunting, drifting clouds, a rainbow and a slow snail. |
 | **Whiskers** | A cat that lives in the whole window. It hops between your cards under real physics, rolls round buttons like wheels, chases a ball of yarn, naps, gets hungry and asks to be fed. Tap it for a trick; double-tap for its trick panel. |
+| **Record** | Keeps your page's look and adds a Record button. It films the tab while it scrolls to each part of the page, rings it, captions a line about it and plays a voice for it, then downloads the video. Each page brings its own script. |
 
-All three follow light and dark mode (a `dark` class on `<html>`), respect `prefers-reduced-motion`, and step aside in forced-colors mode.
+Aura, Crayon and Whiskers follow light and dark mode (a `dark` class on `<html>`), respect `prefers-reduced-motion`, and step aside in forced-colors mode.
 
 ## Screenshots
 
@@ -93,6 +94,30 @@ export function SkinPicker() {
 }
 ```
 
+### Record a narrated tour
+
+Give Record a script for the page you are on. Each step names a heading on the page (or a CSS selector as `target`) and the line to say. `voice` is optional: return audio for a line, from any text-to-speech you run, and it goes into the video. Without it the lines show as captions.
+
+```js
+import "playskin/record.css";
+import { createPlayskin } from "playskin";
+
+const scripts = {
+  home: { title: "Home tour", steps: [
+    { heading: "Dashboard", say: "This is the dashboard. It shows today's orders." },
+    { heading: "Revenue", say: "Revenue is the sum of paid orders this month." },
+    { heading: "Settings", press: '[data-tab="settings"][aria-pressed="false"]', say: "Settings hold the rules." },
+  ]},
+};
+createPlayskin({ record: {
+  script: () => scripts[location.pathname.slice(1) || "home"] || null,
+  intro: [{ target: ".logo", say: "Acme helps shops sell online." }],
+  voice: async (text) => (await fetch("/tts", { method: "POST", body: text })).arrayBuffer(),
+}}).set("record");
+```
+
+A step's `press` clicks a control before its line, and the tour presses it back at the end. Chrome and Edge record the tab; the browser asks once to share it. Esc stops early.
+
 `<PlayskinRoot />` applies the saved skin without any picker. To avoid a flash of the plain look on load, put the output of `bootScript()` in an inline `<script>` in `<head>`.
 
 ## How your page is read
@@ -120,18 +145,23 @@ Keeps the attribute on `<html>` in step with the chosen skin and runs each skin'
 
 | Option | Default | Meaning |
 |---|---|---|
-| `themes` | `["aura", "crayon", "whiskers"]` | Skins that may be turned on |
+| `themes` | `["aura", "crayon", "whiskers", "record"]` | Skins that may be turned on |
 | `storageKey` | `"playskin"` | `localStorage` key for the visitor's choice; `null` to not save it |
 | `attribute` | `"data-playskin"` | Attribute set on the root element |
 | `root` | `document.documentElement` | Element that carries the attribute |
 | `effects` | `true` | Set `false` to run Crayon's doodles and the cat yourself |
 | `whiskers` | `{}` | Options passed to `startWhiskers` |
+| `record` | `null` | Options passed to `startRecord`; Record shows nothing without a script |
 
 `setTheme(name)` and `getTheme()` do the same with the default options. `bootScript(options)` returns the no-flash script text.
 
 ### `startWhiskers(options)` from `playskin/whiskers`
 
 Brings out the cat. It shows while `show()` returns true (by default, while the skin is `"whiskers"`) and leaves when it returns false. Options: `floor` and `ignore` (CSS selectors), `storage` (prefix for its saved name and hunger, default `"playskin.cat"`), `global` (window property for its controls, default `"playskinCat"`), `meow` (URL of its meow recording), `music` (an object whose `on` is true while page music plays), `reducedMotion` (a function).
+
+### `startRecord(options)` from `playskin/record`
+
+Adds the Record button. It shows while `show()` returns true (by default, while the skin is `"record"`) and the page has a script. Options: `script` (a function returning `{ title, steps }` for the current page, or null), `intro` (steps that lead every script), `voice` (async text to an `ArrayBuffer` of audio), `headings` (where heading steps look, default `main h1, main h2, main h3`), `sectionOf` (the part to ring for a heading), `offset` (pixels left above a part when scrolling to it), `label`, and `onMessage(text, tone)`. Returns `{ refresh, start, stop, running, destroy }`; call `refresh()` after the page changes. Colours come from `--playskin-record-accent`, `-surface`, `-ink` and `-line`, or the variables above.
 
 ### `mountCrayonDoodles(target)` from `playskin/crayon-doodles`
 

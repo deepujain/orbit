@@ -1,0 +1,72 @@
+/* playskin: Record. Keeps the page's own look and adds a Record button, a ring and captions for a narrated tour. The
+   colours come from the page: --playskin-record-accent, -surface, -ink and -line, or else the Tailwind-style
+   variables the other skins read. The button stays out of the video while it records. */
+.playskin-record {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 70;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px 10px 13px;
+  border: 1px solid var(--playskin-record-line, hsl(var(--border, 240 6% 85%)));
+  border-radius: 999px;
+  background: var(--playskin-record-surface, hsl(var(--card, 0 0% 100%)));
+  color: var(--playskin-record-ink, hsl(var(--card-foreground, 240 10% 10%)));
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
+  cursor: pointer;
+}
+.playskin-record[hidden] { display: none; }
+.playskin-record:hover { border-color: #ef4444; }
+.playskin-record.is-busy { cursor: progress; }
+.playskin-record-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgb(239 68 68 / 0.22);
+}
+.playskin-record.is-busy .playskin-record-dot { animation: playskin-record-pulse 1s ease-in-out infinite; }
+@keyframes playskin-record-pulse { 50% { opacity: 0.35; } }
+[data-playskin-recording] .playskin-record { display: none; }
+.playskin-record-ring {
+  position: fixed;
+  z-index: 65;
+  pointer-events: none;
+  border: 3px solid var(--playskin-record-accent, hsl(var(--ring, 262 83% 58%)));
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--playskin-record-accent, hsl(var(--ring, 262 83% 58%))) 22%, transparent),
+    0 0 40px color-mix(in srgb, var(--playskin-record-accent, hsl(var(--ring, 262 83% 58%))) 35%, transparent);
+}
+.playskin-record-ring[hidden], .playskin-record-caption[hidden] { display: none; }
+.playskin-record-caption {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 66;
+  width: min(920px, calc(100vw - 48px));
+  transform: translateX(-50%);
+  padding: 14px 22px;
+  border-radius: 14px;
+  background: rgb(10 12 20 / 0.86);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: center;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.3);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .playskin-record.is-busy .playskin-record-dot { animation: none; }
+}
+@media (forced-colors: active) {
+  .playskin-record-ring { border-color: Highlight; box-shadow: none; }
+  .playskin-record-caption { background: Canvas; color: CanvasText; border: 1px solid CanvasText; }
+}

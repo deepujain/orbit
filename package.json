@@ -1,7 +1,7 @@
 {
   "name": "playskin",
   "version": "0.1.0",
-  "description": "Playful skins for any web page: Aura glass, Crayon paper and chalkboard, and Whiskers, a cat that lives on your page.",
+  "description": "Playful skins for any web page: Aura glass, Crayon paper and chalkboard, Whiskers, a cat that lives on your page, and Record, a narrated tour filmed as a video.",
   "type": "module",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
@@ -14,6 +14,10 @@
       "types": "./src/whiskers/index.d.ts",
       "default": "./src/whiskers/index.js"
     },
+    "./record": {
+      "types": "./src/record.d.ts",
+      "default": "./src/record.js"
+    },
     "./crayon-doodles": {
       "types": "./src/crayon-doodles.d.ts",
       "default": "./src/crayon-doodles.js"
@@ -25,6 +29,7 @@
     "./aura.css": "./themes/aura.css",
     "./crayon.css": "./themes/crayon.css",
     "./whiskers.css": "./themes/whiskers.css",
+    "./record.css": "./themes/record.css",
     "./meow.m4a": "./src/whiskers/meow.m4a",
     "./package.json": "./package.json"
   },

@@ -4,11 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>playskin: playful skins for any web page</title>
-<meta name="description" content="Aura glass, Crayon paper and chalkboard, and Whiskers, a cat that lives on your page. One attribute to turn on.">
-<script>(function(){try{var s=localStorage.getItem("playskin");if(["aura","crayon","whiskers"].indexOf(s)>-1)document.documentElement.setAttribute("data-playskin",s);if(localStorage.getItem("playskin-dark")==="1")document.documentElement.classList.add("dark");}catch(e){}})();</script>
+<meta name="description" content="Aura glass, Crayon paper and chalkboard, Whiskers, a cat that lives on your page, and Record, a narrated tour filmed as a video. One attribute to turn on.">
+<script>(function(){try{var s=localStorage.getItem("playskin");if(["aura","crayon","whiskers","record"].indexOf(s)>-1)document.documentElement.setAttribute("data-playskin",s);if(localStorage.getItem("playskin-dark")==="1")document.documentElement.classList.add("dark");}catch(e){}})();</script>
 <link rel="stylesheet" href="./themes/aura.css">
 <link rel="stylesheet" href="./themes/crayon.css">
 <link rel="stylesheet" href="./themes/whiskers.css">
+<link rel="stylesheet" href="./themes/record.css">
 <style>
   /* The page's own look, written the way Tailwind and shadcn sites name their colours. Each skin repaints these. */
   :root { --background: 0 0% 100%; --foreground: 240 10% 4%; --card: 0 0% 100%; --card-foreground: 240 10% 4%; --popover: 0 0% 100%;
@@ -40,19 +41,21 @@
   .steps button:first-child { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
   .bar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 28px; padding: 14px; background: hsl(var(--card)); border-top: 1px solid hsl(var(--border)); }
   .bar a { color: hsl(var(--muted-foreground)); text-decoration: none; font-weight: 600; font-size: 13px; }
+  .playskin-record { bottom: 72px; }
   .stat { font-size: 30px; font-weight: 700; color: hsl(var(--foreground)); }
 </style>
 </head>
 <body>
 <main>
   <h1>playskin</h1>
-  <p class="lead">Playful skins for any web page. Turn one on with a single attribute, and your page becomes glass, crayon paper, or the home of a cat.</p>
+  <p class="lead">Playful skins for any web page. Turn one on with a single attribute, and your page becomes glass, crayon paper, the home of a cat, or a narrated tour you can film.</p>
 
   <div class="row" role="group" aria-label="Skin">
     <button data-button="outline" data-skin="">Plain</button>
     <button data-button="outline" data-skin="aura">Aura</button>
     <button data-button="outline" data-skin="crayon">Crayon</button>
     <button data-button="outline" data-skin="whiskers">Whiskers</button>
+    <button data-button="outline" data-skin="record">Record</button>
     <button data-button="ghost" id="dark">Dark mode</button>
   </div>
 
@@ -71,6 +74,10 @@
       <h2>Whiskers</h2>
       <p>A cat that hops between your cards, rolls round buttons like wheels and naps. Tap it for a trick.</p>
       <div class="steps"><button>1</button><button>2</button><button>3</button><button>4</button></div>
+    </section>
+    <section data-card>
+      <h2>Record</h2>
+      <p>Keeps your look and adds a Record button. It films the page while it rings each part and captions a line about it, with your voice if you give it one.</p>
     </section>
   </div>
 
@@ -96,7 +103,17 @@ setTheme("whiskers");</pre>
 
 <script type="module">
   import { createPlayskin } from "./src/index.js";
-  const skin = createPlayskin();
+  const tour = {
+    title: "playskin tour",
+    steps: [
+      { heading: "playskin", say: "playskin turns any page into a new skin with one attribute." },
+      { heading: "Aura", say: "Aura is soft glass by day and graphite by night." },
+      { heading: "Crayon", say: "Crayon is ruled paper by day and a chalkboard by night." },
+      { heading: "Whiskers", say: "Whiskers is a cat that lives on your page." },
+      { heading: "Record", say: "And Record films a tour like this one, with captions and a voice." },
+    ],
+  };
+  const skin = createPlayskin({ record: { script: () => tour, offset: 24 } });
   const buttons = [...document.querySelectorAll("[data-skin]")];
   const mark = (theme) => buttons.forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.skin || null) === theme)));
   skin.subscribe(mark);
