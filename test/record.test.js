@@ -66,6 +66,7 @@ test("a pressed toggle is pressed back, found by its new state", () => {
   assert.equal(restoreOf({ press: '[data-do="costs"][aria-pressed="false"]' }), '[data-do="costs"][aria-pressed="true"]');
   assert.equal(restoreOf({ press: "#tab-b", restore: "#tab-a" }), "#tab-a");
   assert.equal(restoreOf({ press: "#toggle" }), "#toggle", "a plain control is pressed again");
+  assert.equal(restoreOf({ press: "#tab-b", restore: false }), null, "restore: false leaves the press as it is");
 });
 
 test("the file is named for the script and the local time, safe on every system", () => {

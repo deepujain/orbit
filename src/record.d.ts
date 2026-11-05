@@ -7,8 +7,8 @@ export interface RecordStep {
   say: string;
   /** A control to click before the line, only while it matches. */
   press?: string;
-  /** The control that undoes press at the end; defaults to press with aria-pressed="true". */
-  restore?: string;
+  /** The control that undoes press at the end; defaults to press with aria-pressed="true"; false undoes nothing. */
+  restore?: string | false;
 }
 
 export interface RecordScript {
@@ -56,7 +56,7 @@ export declare const RECORD_TYPES: string[];
 export declare function startRecord(options?: RecordOptions): Record;
 export declare function readMs(text: string): number;
 export declare function pickType(isTypeSupported: (type: string) => boolean, types?: string[]): string;
-export declare function restoreOf(step: RecordStep): string;
+export declare function restoreOf(step: RecordStep): string | null;
 export declare function withIntro(script: RecordScript | null, intro?: RecordStep[]): RecordScript | null;
 export declare function scriptWords(script: RecordScript | null): number;
 export declare function recordingName(title: string, type: string, at?: Date): string;

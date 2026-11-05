@@ -7,8 +7,9 @@
 
    A script is { title, steps: [{ heading | target, say, press }] }. heading is the text of a heading on the page;
    target is a CSS selector. press is a control to click before the line, only while it matches; at the end restore
-   (or press with aria-pressed="true") is clicked so the page is left as it was. intro steps lead every script. Pages re-render, so the ring is an overlay that
-   finds its part again on every frame. */
+   (or press with aria-pressed="true") is clicked so the page is left as it was; restore: false leaves a press as it
+   is. intro steps lead every script. Pages re-render, so the ring is an overlay that finds its part again on every
+   frame. */
 
 export const RECORD_TYPES = [
   "video/mp4;codecs=avc1,mp4a",
@@ -37,8 +38,8 @@ export function pickType(isTypeSupported, types = RECORD_TYPES) {
   }
   return "";
 }
-/** The control that undoes a step's press: its restore selector, or its press with aria-pressed turned true. */
-export const restoreOf = (step) => step.restore || step.press.replace(/\[aria-pressed=(["']?)false\1\]/, '[aria-pressed="true"]');
+/** The control that undoes a step's press: its restore selector, none for restore: false, or its press with aria-pressed turned true. */
+export const restoreOf = (step) => step.restore === false ? null : step.restore || step.press.replace(/\[aria-pressed=(["']?)false\1\]/, '[aria-pressed="true"]');
 /** A script with the intro steps in front, or null. */
 export const withIntro = (script, intro = []) => (script ? { ...script, steps: [...intro, ...script.steps] } : null);
 /** Words in a script, to keep its length in check: about 2.4 words a second with pauses and scrolling. */
@@ -338,7 +339,10 @@ export function startRecord({
     run.step = null;
     ring.hidden = true;
     // A re-render may have replaced a pressed control, so the one on the page now is found again.
-    for (const step of run.pressed.reverse()) document.querySelector(restoreOf(step))?.click();
+    for (const step of run.pressed.reverse()) {
+      const back = restoreOf(step);
+      if (back) document.querySelector(back)?.click();
+    }
     if (!run.stopped) {
       await glide(0);
       await sleep(TAIL_MS);
