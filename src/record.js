@@ -215,16 +215,18 @@ export function startRecord({
   }
   function play(buffer) {
     return new Promise((ok) => {
-      const src = run.ctx.createBufferSource();
+      // Stopping mid-line ends the clip after the recording is cleared, so the clip keeps its own run.
+      const now = run;
+      const src = now.ctx.createBufferSource();
       src.buffer = buffer;
-      src.connect(run.out);
-      src.connect(run.ctx.destination);
+      src.connect(now.out);
+      src.connect(now.ctx.destination);
       src.onended = () => {
-        run.src = null;
+        if (now.src === src) now.src = null;
         ok();
       };
-      run.src = src;
-      run.wake = ok;
+      now.src = src;
+      now.wake = ok;
       src.start();
     });
   }

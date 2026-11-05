@@ -80,7 +80,8 @@ test("the button, and the app's own marked button, hide while recording so neith
   assert.match(css, /\[data-playskin-recording\] \[data-record-hide\] \{ visibility: hidden; \}/);
   assert.doesNotMatch(css, /\[data-playskin="record"\]/, "Record changes no colours");
   const js = readFileSync(new URL("../src/record.js", import.meta.url), "utf8");
-  assert.match(js, /src\.connect\(run\.out\);\s*src\.connect\(run\.ctx\.destination\);/, "the voice is in the file and heard aloud");
+  assert.match(js, /src\.connect\(now\.out\);\s*src\.connect\(now\.ctx\.destination\);/, "the voice is in the file and heard aloud");
+  assert.match(js, /src\.onended = \(\) => \{\s*if \(now\.src === src\) now\.src = null;/, "stopping mid-line does not touch a cleared recording");
   assert.match(js, /const current = \(\) => safe\(\(\) => withIntro\(script\(\), intro\)\);/, "a page that is not ready yet shows no button instead of breaking");
 });
 
