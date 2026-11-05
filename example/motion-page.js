@@ -1,4 +1,4 @@
-/* Orbit's Motion page: every playskin motion effect, each played by a chart that appears nowhere else in Orbit or by
+/* Orbit's Motion page: every orbit motion effect, each played by a chart that appears nowhere else in Orbit or by
    plain boxes and lists. Each card builds in when scrolled to, again when scrolled back, and on its Replay button. */
 import * as c from "../src/charts.js";
 
@@ -27,7 +27,7 @@ const always = () => `<div class="always">
 
 export const motionPage = () => `
   <div class="page-head"><div><h1 data-motion><span data-m="blur">Motion</span></h1>
-    <p class="lede">Every effect playskin can play on boxes and bars. Each card builds in when you scroll to it and again when you come back.</p></div>
+    <p class="lede">Every effect orbit can play on boxes and bars. Each card builds in when you scroll to it and again when you come back.</p></div>
     <button class="btn" data-button="default" data-replay-all>Replay all</button></div>
   <div class="shows">
     ${show("Rise and count up", 'data-m="rise" + data-count', c.statLine({ items: [["Barrels today", "18,420"], ["Uptime", "97%"], ["Days safe", "214"]] }))}

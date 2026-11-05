@@ -1,5 +1,5 @@
-/* playskin: Whiskers. A cat that lives in the whole window and plays on the page's cards. <html data-playskin="whiskers">
-   gives the page its lavender room; startWhiskers() from playskin/whiskers brings out the cat, its toys, the fish and
+/* orbit: Whiskers. A cat that lives in the whole window and plays on the page's cards. <html data-orbit="whiskers">
+   gives the page its lavender room; startWhiskers() from orbit/whiskers brings out the cat, its toys, the fish and
    the trick panel, all styled here. Their colours come from the --kc-* variables below. */
 :root{--kc-font:Inter,system-ui,sans-serif;--kc-ink:hsl(var(--foreground));--kc-ink-2:hsl(var(--foreground));--kc-muted:hsl(var(--muted-foreground));
  --kc-line:hsl(var(--border));--kc-surface:hsl(var(--card));--kc-surface-2:hsl(var(--muted));--kc-surface-3:hsl(var(--accent));--kc-panel:hsl(var(--popover));
@@ -7,13 +7,13 @@
 :is(.dark,[data-theme="dark"]){--kc-amethyst-soft:#2e1f5e;--kc-amethyst-ink:#c4b5fd}
 
 /* The page: a soft lavender room with a faint grid, as in Kokoro. */
-[data-playskin="whiskers"]{--background:252 100% 97%}
-:is(.dark,[data-theme="dark"])[data-playskin="whiskers"]{--background:250 44% 10%}
-[data-playskin="whiskers"] body{background:
+[data-orbit="whiskers"]{--background:252 100% 97%}
+:is(.dark,[data-theme="dark"])[data-orbit="whiskers"]{--background:250 44% 10%}
+[data-orbit="whiskers"] body{background:
  linear-gradient(rgb(124 58 237/.06) 1px,transparent 1px) 0 0/24px 24px,
  linear-gradient(90deg,rgb(124 58 237/.06) 1px,transparent 1px) 0 0/24px 24px,
  radial-gradient(1200px 500px at 10% -10%,#ddd3ff,transparent 60%),hsl(var(--background));background-attachment:fixed}
-:is(.dark,[data-theme="dark"])[data-playskin="whiskers"] body{background:
+:is(.dark,[data-theme="dark"])[data-orbit="whiskers"] body{background:
  linear-gradient(rgb(167 139 250/.07) 1px,transparent 1px) 0 0/24px 24px,
  linear-gradient(90deg,rgb(167 139 250/.07) 1px,transparent 1px) 0 0/24px 24px,
  radial-gradient(1200px 500px at 10% -10%,#2a1f55,transparent 60%),hsl(var(--background));background-attachment:fixed}

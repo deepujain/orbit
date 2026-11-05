@@ -1,9 +1,10 @@
 /* Whiskers: brings the cat out onto the page. It shows while the page's skin is "whiskers" and leaves when the skin
    changes. Pages tell it what to stand on and what to leave alone with a few attributes:
-   data-playskin-floor  the element whose top edge is its floor, such as a bottom tab bar
-   data-playskin-ignore anything it should never walk on
+   data-orbit-floor  the element whose top edge is its floor, such as a bottom tab bar
+   data-orbit-ignore anything it should never walk on
    data-card            a card it can hop onto (any boxed element works too) */
 import { startTimelineCat } from "./cat.js";
+import { moveSaved } from "../saved.js";
 
 export { MEOWS } from "./cat-voice.js";
 export { JOKES, REVIEW_JOKES, STATION_LINES, catLine } from "./cat.js";
@@ -18,11 +19,12 @@ export { JOKES, REVIEW_JOKES, STATION_LINES, catLine } from "./cat.js";
  */
 export function startWhiskers({
   root = document.documentElement,
-  attribute = "data-playskin",
+  attribute = "data-orbit",
   show,
   reducedMotion,
   ...rest
 } = {}) {
+  moveSaved();
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   return startTimelineCat({
     reducedMotion: reducedMotion || (() => motion.matches),

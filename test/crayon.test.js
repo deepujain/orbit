@@ -53,7 +53,7 @@ test("the plane moves only when asked: never under reduced motion, in a hidden t
   assert.ok(timers[0][1] >= 14000 && timers[0][1] <= 26000, "the next flight is 14 to 26 seconds away");
 });
 
-test("Crayon is whole from the library: createPlayskin brings out every part, and each theme reads either dark switch", () => {
+test("Crayon is whole from the library: createOrbit brings out every part, and each theme reads either dark switch", () => {
   const index = readFileSync(new URL("../src/index.js", import.meta.url), "utf8");
   assert.match(index, /if \(theme === "crayon" && !crayon\) crayon = startCrayon\(o\.crayon\);/);
   assert.match(index, /crayon\.stop\(\);/, "turning Crayon off takes its parts away");

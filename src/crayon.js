@@ -17,7 +17,7 @@ export function startCrayonPlane({
   doc = document,
   win = window,
   anchor = () => doc.querySelector("[data-brand]") || doc.querySelector("[data-wordmark]"),
-  active = () => doc.documentElement.getAttribute("data-playskin") === "crayon",
+  active = () => doc.documentElement.getAttribute("data-orbit") === "crayon",
   reducedMotion = () => win.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false,
   every = [14000, 26000],
   first = [4000, 7000],
@@ -96,7 +96,7 @@ export function startCrayon({ doc = document, win = window, reducedMotion, ancho
       el.append(b);
     }
     const said = doc.createElement("span");
-    said.className = "playskin-said";
+    said.className = "orbit-said";
     said.textContent = text;
     el.append(said);
   };

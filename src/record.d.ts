@@ -21,7 +21,7 @@ export interface RecordOptions {
   script?: () => RecordScript | null;
   intro?: RecordStep[];
   voice?: ((text: string) => Promise<ArrayBuffer | null>) | null;
-  /** Marked data-playskin-recording while filming. */
+  /** Marked data-orbit-recording while filming. */
   root?: Element;
   /** false draws no button; the app's own button calls start(). */
   button?: boolean;

@@ -1,14 +1,14 @@
-/* playskin for React: one hook that keeps the page's skin, saved choice and effects in step, and re-renders when the
+/* orbit for React: one hook that keeps the page's skin, saved choice and effects in step, and re-renders when the
    skin changes. Works in client components; on the server it renders with no skin. */
 import { useEffect, useRef, useState } from "react";
-import { createPlayskin } from "../src/index.js";
+import { createOrbit } from "../src/index.js";
 
-/** Returns [theme, setTheme]. Options are those of createPlayskin; they are read once, when the hook first runs. */
-export function usePlayskin(options) {
+/** Returns [theme, setTheme]. Options are those of createOrbit; they are read once, when the hook first runs. */
+export function useOrbit(options) {
   const ref = useRef(null);
   const [theme, setTheme] = useState(null);
   useEffect(() => {
-    const skin = createPlayskin(options);
+    const skin = createOrbit(options);
     ref.current = skin;
     setTheme(skin.get());
     const stop = skin.subscribe(setTheme);
@@ -23,7 +23,7 @@ export function usePlayskin(options) {
 }
 
 /** Drop-in component for the root of an app: applies the saved skin and renders nothing. */
-export function PlayskinRoot(props) {
-  usePlayskin(props);
+export function OrbitRoot(props) {
+  useOrbit(props);
   return null;
 }

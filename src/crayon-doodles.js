@@ -1,7 +1,7 @@
 import { SNAIL_SVG } from "./crayon-art.js";
 
 /* Crayon doodles behind the page: bunting, drifting clouds, corner drawings and a snail that crawls the page and back. crayon.css shows them
-   only while <html data-playskin="crayon"> is set; everything here sits behind the content and never takes a click. */
+   only while <html data-orbit="crayon"> is set; everything here sits behind the content and never takes a click. */
 const MARKUP = `<div class="crayon-doodles" aria-hidden="true">
   <svg class="cd-defs" width="0" height="0" focusable="false">
     <filter id="cd-rough" x="-10%" y="-10%" width="120%" height="120%">

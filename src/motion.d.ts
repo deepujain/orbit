@@ -1,7 +1,7 @@
 export interface MotionOptions {
   doc?: Document;
   win?: Window;
-  /** The element whose data-playskin-recording attribute replays blocks on screen; defaults to <html>. */
+  /** The element whose data-orbit-recording attribute replays blocks on screen; defaults to <html>. */
   root?: Element;
   /** How much of a block must be on screen before it plays, 0 to 1; defaults to 0.15. */
   threshold?: number;

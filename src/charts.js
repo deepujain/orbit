@@ -1,4 +1,4 @@
-/* playskin charts: the charts a modern dashboard draws, as plain SVG and HTML with no chart library. Each function takes
+/* orbit charts: the charts a modern dashboard draws, as plain SVG and HTML with no chart library. Each function takes
    rows of data and returns the chart's markup as a string. Every chart is its own data-motion block marked for
    startMotion (bars grow, lines draw, rings fill, dots pop, numbers count up) and a data-cat-chart for Whiskers to sit
    on. Colours come from --pc-1 to --pc-8 in charts.css, which follow the shadcn --chart-1 to --chart-5 variables. */

@@ -50,7 +50,7 @@ export function along(points,u){
  return points.at(-1)[1];
 }
 
-export function catVoice({win=window,doc=document,store=win.localStorage,key='playskin.cat.voice',meows=MEOWS}={}){const KEY=key;
+export function catVoice({win=window,doc=document,store=win.localStorage,key='orbit.cat.voice',meows=MEOWS}={}){const KEY=key;
  let ctx=null,purr=null,on=(()=>{try{return store?.getItem(KEY)!=='off';}catch{return true;}})();
  const AC=win.AudioContext||win.webkitAudioContext;
  const wake=()=>{if(!AC)return;if(!ctx)try{ctx=new AC();}catch{return;}if(ctx.state==='suspended')ctx.resume().catch(()=>{});load();};

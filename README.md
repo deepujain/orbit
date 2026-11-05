@@ -1,6 +1,8 @@
-# playskin
+# Orbit
 
-Playful skins for any web page. Turn one on with a single attribute, and your page becomes soft glass, crayon paper or the home of a cat. Record, an action rather than a skin, films a narrated tour of the page in whichever skin is on.
+Playful skins, motion and charts for any web page, and a recorder that films a narrated tour of it. Turn a skin on with a single attribute, and your page becomes soft glass, crayon paper or the home of a cat. Record is an action rather than a skin, so it films the page in whichever skin is on.
+
+Orbit was called playskin. Choices saved under the old name move to the new one the first time a page loads.
 
 | Skin | What it does |
 |---|---|
@@ -12,7 +14,7 @@ Aura, Crayon and Whiskers follow light and dark mode (a `dark` class on `<html>`
 
 ## Screenshots
 
-The same demo page in each skin, light on the left and dark on the right.
+The same demo page in each skin, light on the left and dark on the right. The round Record button in the corner films a narrated tour of it.
 
 ### Aura
 
@@ -31,31 +33,38 @@ The same demo page in each skin, light on the left and dark on the right.
 ### Whiskers
 
 <p>
-  <img src="docs/whiskers-light.png" alt="Whiskers skin in light mode: the cat sitting on the page title next to its ball of yarn" width="49%">
-  <img src="docs/whiskers-dark.png" alt="Whiskers skin in dark mode: the cat walking across the cards while a round button spins like a wheel" width="49%">
+  <img src="docs/whiskers-light.png" alt="Whiskers skin in light mode: the cat on the floor of the page, its ball of yarn on a button and a toy mouse on a card" width="49%">
+  <img src="docs/whiskers-dark.png" alt="Whiskers skin in dark mode: the cat on a dark grid page, with its yarn and a toy mouse on the cards" width="49%">
+</p>
+
+### The example app
+
+<p>
+  <img src="docs/example-dashboard.png" alt="The example app's dashboard in Aura: four number cards with sparklines and a week of oil produced as columns, the best day raised" width="49%">
+  <img src="docs/example-production.png" alt="The example app's Production page in Crayon dark: a chalkboard with a headline number and a month calendar of barrels each day" width="49%">
 </p>
 
 ## Try it
 
-Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small control room for an offshore oil rig, with cards, charts, tabs, a form, its own dropdowns, a side menu that opens when you point at it, and every button style. It shows each chart type `playskin/charts` draws once, on made-up rig numbers: a few on the dashboard, a few to each of its Production, Wells, Drilling, Safety, Supply and Costs pages, and the rest on its Motion page, which plays every effect `motion.css` has. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Its top bar has a Record button that films a narrated tour of the page you are on, in whichever skin is on. `index.html` is a one-page demo of the same skins.
+Run `npm start` and open the address it prints (http://localhost:5173/example/). The example app in `example/`, also called Orbit, is a small control room for an offshore oil rig, with cards, charts, tabs, a form, its own dropdowns, a side menu that opens when you point at it, and every button style. It shows each chart type `orbit/charts` draws once, on made-up rig numbers: a few on the dashboard, a few to each of its Production, Wells, Drilling, Safety, Supply and Costs pages, and the rest on its Motion page, which plays every effect `motion.css` has. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Its top bar has a Record button that films a narrated tour of the page you are on, in whichever skin is on. `index.html` is a one-page demo of the same skins.
 
 ## Use it on any page
 
 No build step is needed. Add the stylesheet and set the attribute:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/playskin/themes/aura.css">
-<html data-playskin="aura">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/deepujain/orbit/themes/aura.css">
+<html data-orbit="aura">
 ```
 
-Crayon's doodles and the Whiskers cat need a little JavaScript, which `createPlayskin` runs for you:
+Crayon's doodles and the Whiskers cat need a little JavaScript, which `createOrbit` runs for you:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/playskin/themes/crayon.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/playskin/themes/whiskers.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/deepujain/orbit/themes/crayon.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/deepujain/orbit/themes/whiskers.css">
 <script type="module">
-  import { createPlayskin } from "https://cdn.jsdelivr.net/npm/playskin/src/index.js";
-  const skin = createPlayskin();   // applies the visitor's saved skin
+  import { createOrbit } from "https://cdn.jsdelivr.net/gh/deepujain/orbit/src/index.js";
+  const skin = createOrbit();   // applies the visitor's saved skin
   skin.set("whiskers");            // or "aura", "crayon", or null for your own look
 </script>
 ```
@@ -63,14 +72,14 @@ Crayon's doodles and the Whiskers cat need a little JavaScript, which `createPla
 ## Use it with npm
 
 ```bash
-npm install playskin
+npm install github:deepujain/orbit
 ```
 
 ```js
-import "playskin/aura.css";
-import "playskin/crayon.css";
-import "playskin/whiskers.css";
-import { setTheme } from "playskin";
+import "orbit/aura.css";
+import "orbit/crayon.css";
+import "orbit/whiskers.css";
+import { setTheme } from "orbit";
 
 setTheme("crayon");
 ```
@@ -78,10 +87,10 @@ setTheme("crayon");
 ### React and Next.js
 
 ```jsx
-import { usePlayskin } from "playskin/react";
+import { useOrbit } from "orbit/react";
 
 export function SkinPicker() {
-  const [skin, setSkin] = usePlayskin();
+  const [skin, setSkin] = useOrbit();
   return (
     <select value={skin ?? ""} onChange={(e) => setSkin(e.target.value || null)}>
       <option value="">Plain</option>
@@ -98,8 +107,8 @@ export function SkinPicker() {
 Record is an action, not a skin, so the video shows your page in whichever skin is on. Give it a script for the page you are on. Each step names a heading on the page (or a CSS selector as `target`) and the line to say. `voice` is optional: return audio for a line, from any text-to-speech you run, and it goes into the video. Without it the lines show as captions.
 
 ```js
-import "playskin/record.css";
-import { startRecord } from "playskin/record";
+import "orbit/record.css";
+import { startRecord } from "orbit/record";
 
 const scripts = {
   home: { title: "Home tour", steps: [
@@ -119,7 +128,7 @@ That adds a floating Record button on every page with a script. To use your own 
 
 A step's `press` clicks a control before its line, and the tour presses it back at the end. Chrome and Edge record the tab; the browser asks once to share it. Esc stops early.
 
-`<PlayskinRoot />` applies the saved skin without any picker. To avoid a flash of the plain look on load, put the output of `bootScript()` in an inline `<script>` in `<head>`.
+`<OrbitRoot />` applies the saved skin without any picker. To avoid a flash of the plain look on load, put the output of `bootScript()` in an inline `<script>` in `<head>`.
 
 ## How your page is read
 
@@ -137,8 +146,8 @@ A few markers let a skin restyle specific parts:
 | `data-wordmark` | Your name in the top bar: tight in Aura; each letter its own crayon colour in Crayon |
 | `data-nav` | A row of nav links; mark the current one with `aria-current="page"`. Each icon gets its own colour and the current one a pill in Aura; hand-written and circled in Crayon |
 | `data-theme-toggle` | Your light and dark button; Crayon swaps its face for a sun and a moon |
-| `data-playskin-floor` | An element whose top edge is the cat's floor, such as a bottom tab bar |
-| `data-playskin-ignore` | Anything the cat should never walk on |
+| `data-orbit-floor` | An element whose top edge is the cat's floor, such as a bottom tab bar |
+| `data-orbit-ignore` | Anything the cat should never walk on |
 | `data-cat-chart` | Charts the cat plays with |
 | `data-record-hide` | Anything Record should keep out of its video, such as your own Record button |
 
@@ -148,15 +157,15 @@ Headings, `main`, form fields, menus (`role="menu"`, `role="listbox"`) and tabs 
 
 ## API
 
-### `createPlayskin(options)`
+### `createOrbit(options)`
 
 Keeps the attribute on `<html>` in step with the chosen skin and runs each skin's effects. Returns `{ get, set, subscribe, destroy }`.
 
 | Option | Default | Meaning |
 |---|---|---|
 | `themes` | `["aura", "crayon", "whiskers"]` | Skins that may be turned on |
-| `storageKey` | `"playskin"` | `localStorage` key for the visitor's choice; `null` to not save it |
-| `attribute` | `"data-playskin"` | Attribute set on the root element |
+| `storageKey` | `"orbit"` | `localStorage` key for the visitor's choice; `null` to not save it |
+| `attribute` | `"data-orbit"` | Attribute set on the root element |
 | `root` | `document.documentElement` | Element that carries the attribute |
 | `effects` | `true` | Set `false` to run Crayon's drawings and the cat yourself |
 | `crayon` | `{}` | Options passed to `startCrayon` |
@@ -164,9 +173,9 @@ Keeps the attribute on `<html>` in step with the chosen skin and runs each skin'
 
 `setTheme(name)` and `getTheme()` do the same with the default options. `bootScript(options)` returns the no-flash script text.
 
-### `startWhiskers(options)` from `playskin/whiskers`
+### `startWhiskers(options)` from `orbit/whiskers`
 
-Brings out the cat. It shows while `show()` returns true (by default, while the skin is `"whiskers"`) and leaves when it returns false. Options: `floor` and `ignore` (CSS selectors), `storage` (prefix for its saved name and hunger, default `"playskin.cat"`), `global` (window property for its controls, default `"playskinCat"`), `meow` (URL of its meow recording), `music` (an object whose `on` is true while page music plays), `reducedMotion` (a function).
+Brings out the cat. It shows while `show()` returns true (by default, while the skin is `"whiskers"`) and leaves when it returns false. Options: `floor` and `ignore` (CSS selectors), `storage` (prefix for its saved name and hunger, default `"orbit.cat"`), `global` (window property for its controls, default `"orbitCat"`), `meow` (URL of its meow recording), `music` (an object whose `on` is true while page music plays), `reducedMotion` (a function).
 
 An app can make the cat its own:
 
@@ -183,21 +192,21 @@ An app can make the cat its own:
 | `game` | `null` | A game module (rules, foes, levels) for the cat to play. |
 | `line`, `read`, `home` | | Where its speech bubble points, the text it reads out, and its home spot. |
 
-`playskin/whiskers/physics` holds the cat's physics on its own, for games and tests.
+`orbit/whiskers/physics` holds the cat's physics on its own, for games and tests.
 
-### `startRecord(options)` from `playskin/record`
+### `startRecord(options)` from `orbit/record`
 
-Starts the Record action, in any skin. Its button shows while the page has a script and `show()` returns true (always, by default). Options: `script` (a function returning `{ title, steps }` for the current page, or null), `intro` (steps that lead every script), `voice` (async text to an `ArrayBuffer` of audio), `button` (`false` to draw none and call `start()` from your own), `headings` (where heading steps look, default `main h1, main h2, main h3`), `sectionOf` (the part to ring for a heading), `offset` (pixels left above a part when scrolling to it), `label`, `onChange({ available, busy, recording })`, and `onMessage(text, tone)`. Returns `{ refresh, start, stop, running, available, destroy }`; call `refresh()` after the page changes. Colours come from `--playskin-record-accent`, `-surface`, `-ink` and `-line`, or the variables above.
+Starts the Record action, in any skin. Its button shows while the page has a script and `show()` returns true (always, by default). Options: `script` (a function returning `{ title, steps }` for the current page, or null), `intro` (steps that lead every script), `voice` (async text to an `ArrayBuffer` of audio), `button` (`false` to draw none and call `start()` from your own), `headings` (where heading steps look, default `main h1, main h2, main h3`), `sectionOf` (the part to ring for a heading), `offset` (pixels left above a part when scrolling to it), `label`, `onChange({ available, busy, recording })`, and `onMessage(text, tone)`. Returns `{ refresh, start, stop, running, available, destroy }`; call `refresh()` after the page changes. Colours come from `--orbit-record-accent`, `-surface`, `-ink` and `-line`, or the variables above.
 
-### `mountCrayonDoodles(target)` from `playskin/crayon-doodles`
+### `mountCrayonDoodles(target)` from `orbit/crayon-doodles`
 
 Adds Crayon's doodles to `target` (default `document.body`) and returns a function that removes them. `crayon.css` shows them only while the Crayon skin is on.
 
-### `startCrayon(options)` from `playskin/crayon`
+### `startCrayon(options)` from `orbit/crayon`
 
-Brings out all of Crayon on the marked parts: the corner doodles and snail, bunting under `data-topbar`, a letter for each crayon colour in `data-wordmark`, the sun and moon in `data-theme-toggle`, and the paper plane. `createPlayskin` runs it while the skin is `"crayon"`, so most apps never call it. If your app redraws those parts, it adds them again on the next frame. Options: `anchor` (where the plane takes off), `reducedMotion`, `doodles` and `plane` (set `false` to leave one out). Returns `{ fly, flights, stop }`; `stop()` takes every part away and gives the wordmark back its plain text.
+Brings out all of Crayon on the marked parts: the corner doodles and snail, bunting under `data-topbar`, a letter for each crayon colour in `data-wordmark`, the sun and moon in `data-theme-toggle`, and the paper plane. `createOrbit` runs it while the skin is `"crayon"`, so most apps never call it. If your app redraws those parts, it adds them again on the next frame. Options: `anchor` (where the plane takes off), `reducedMotion`, `doodles` and `plane` (set `false` to leave one out). Returns `{ fly, flights, stop }`; `stop()` takes every part away and gives the wordmark back its plain text.
 
-### Crayon's drawings from `playskin/crayon`
+### Crayon's drawings from `orbit/crayon`
 
 The same drawings, for an app that wants to place them itself. `crayon.css` styles them in light and dark.
 
@@ -216,14 +225,14 @@ The same drawings, for an app that wants to place them itself. `crayon.css` styl
 
 ## Charts and motion
 
-Dashboards built with playskin can build in the way modern dashboards do: cards rise, bars grow, lines draw, rings fill, dots pop and numbers count up as each block comes into view, and again when it comes back.
+Dashboards built with orbit can build in the way modern dashboards do: cards rise, bars grow, lines draw, rings fill, dots pop and numbers count up as each block comes into view, and again when it comes back.
 
 ### Motion: `motion.css` and `startMotion(options)`
 
 Mark a block with `data-motion` and each moving part inside it with `data-m`. Parts side by side start one after another. Mark a number with `data-count` and it counts up from zero.
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/playskin/themes/motion.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/deepujain/orbit/themes/motion.css">
 <section data-motion>
   <b data-count>1,204</b>
   <div class="bar" data-m="grow-y sheen" style="height:80%"></div>
@@ -244,14 +253,14 @@ Mark a block with `data-motion` and each moving part inside it with `data-m`. Pa
 
 `--m-delay` waits before a part starts, `--m-step` sets the gap between neighbours (60ms), and `--m-cap` sets how many steps at most (12). Put `data-m-group` on a parent so that hovering one child sets the others back.
 
-`createPlayskin` runs `startMotion` for you; pass `motion: false` to leave blocks still. It holds each block at its first frame until enough of it is on screen (`threshold`, default 0.15) and plays it again whenever it comes back (`replay`, default true), and every block on screen plays again when a Record recording starts. Blocks your app redraws are found on the next frame. Under reduced motion everything shows complete and still. It returns `{ replay(block?), stop }`, and `skin.motion` is the one `createPlayskin` started.
+`createOrbit` runs `startMotion` for you; pass `motion: false` to leave blocks still. It holds each block at its first frame until enough of it is on screen (`threshold`, default 0.15) and plays it again whenever it comes back (`replay`, default true), and every block on screen plays again when a Record recording starts. Blocks your app redraws are found on the next frame. Under reduced motion everything shows complete and still. It returns `{ replay(block?), stop }`, and `skin.motion` is the one `createOrbit` started.
 
-### Charts: `charts.css` and `playskin/charts`
+### Charts: `charts.css` and `orbit/charts`
 
 Each builder takes plain data and returns the chart's markup as a string, plain SVG and HTML with no chart library. Every chart is a motion block and a `data-cat-chart`, and its colours follow the shadcn `--chart-1` to `--chart-5` variables, so each skin repaints it.
 
 ```js
-import { columns, donut, compact } from "playskin/charts";
+import { columns, donut, compact } from "orbit/charts";
 el.innerHTML = columns({ rows: [{ label: "Mon", value: 820 }, { label: "Tue", value: 940 }], format: (v) => `$${compact(v)}` });
 ```
 
@@ -264,7 +273,7 @@ el.innerHTML = columns({ rows: [{ label: "Mon", value: 820 }, { label: "Tue", va
 | Shares | `treemap`, `breakdownStrip`, `tickBreakdown`, `hexShare`, `segmentedProgress`, `shareTable` |
 | Grids, rows and flows | `heatGrid`, `calendarHeat`, `monthCalendar`, `butterfly`, `dotRows`, `funnel`, `stockBridge`, `shiftTimeline`, `rankTiles`, `dropColumns`, `flow` |
 
-Charts drawn in SVG take `width` and `height` in drawing units; give a wide card a larger `width` so its text stays the same size. Orbit shows each chart type once: the dashboard in `example/app.js`, the chart pages in `example/charts-page.js` and the Motion page in `example/motion-page.js`.
+Charts drawn in SVG take `width` and `height` in drawing units; give a wide card a larger `width` so its text stays the same size. The example app shows each chart type once: the dashboard in `example/app.js`, the chart pages in `example/charts-page.js` and the Motion page in `example/motion-page.js`.
 
 ## Credits
 

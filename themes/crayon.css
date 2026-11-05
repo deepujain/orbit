@@ -1,6 +1,6 @@
-/* playskin: Crayon. Cream ruled paper by day, a green chalkboard by night. Turn it on with <html data-playskin="crayon">;
-   dark is <html class="dark"> or <html data-theme="dark">. startCrayon() from playskin/crayon brings out the drawings. */
-[data-playskin="crayon"] {
+/* orbit: Crayon. Cream ruled paper by day, a green chalkboard by night. Turn it on with <html data-orbit="crayon">;
+   dark is <html class="dark"> or <html data-theme="dark">. startCrayon() from orbit/crayon brings out the drawings. */
+[data-orbit="crayon"] {
   --hand: "Chalkboard SE", "Marker Felt", "Comic Sans MS", "Segoe Print", "Bradley Hand", cursive;
   --cr-red: #e63946; --cr-orange: #f77f00; --cr-yellow: #f2b705; --cr-green: #2a9d4b; --cr-blue: #2f6fdf; --cr-purple: #8e44ad;
   --cr-gold: #d99a00;
@@ -38,7 +38,7 @@
   --chart-4: 30 95% 50%;
   --chart-5: 280 50% 48%;
 }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) {
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) {
   --cr-red: #f6a5b4; --cr-orange: #f9be85; --cr-yellow: #f7e07a; --cr-green: #a8e6a3; --cr-blue: #9ad0f5; --cr-purple: #cbb0f5;
   --cr-gold: #f7e07a;
   --cr-ink: #f4f1e6;
@@ -74,12 +74,12 @@
   --chart-5: 268 75% 82%;
 }
 /* Paper with faint ruled lines and a margin line; the board with chalk dust and wiped smudges */
-[data-playskin="crayon"] body {
+[data-orbit="crayon"] body {
   background-color: hsl(var(--background));
   background-image: var(--cr-grain), linear-gradient(90deg, transparent 54px, #e6394630 54px 56px, transparent 56px), repeating-linear-gradient(180deg, transparent 0 31px, #6f9fd62e 31px 32px);
   background-attachment: fixed;
 }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) body {
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) body {
   background-image: var(--cr-grain),
     radial-gradient(42% 26% at 16% 24%, #ffffff14, transparent 70%),
     radial-gradient(36% 20% at 74% 62%, #ffffff10, transparent 72%),
@@ -87,30 +87,30 @@
     linear-gradient(168deg, transparent 30%, #ffffff0a 36%, transparent 41%, transparent 58%, #ffffff08 63%, transparent 68%),
     radial-gradient(120% 90% at 50% 40%, transparent 60%, #0b1c1566);
 }
-[data-playskin="crayon"] main { background-color: transparent; }
-[data-playskin="crayon"] body:not(:has([data-topbar])) main { padding-top: 2.4rem; }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) body::after { content: ""; position: fixed; inset: 0; z-index: 45; pointer-events: none; border: 8px solid #8b5a2b; border-image: repeating-linear-gradient(90deg, #9a6533 0 7px, #8a5829 7px 11px, #a8723d 11px 19px, #7d4f24 19px 22px) 8; box-shadow: inset 0 0 0 1px #5e3a1a, inset 0 0 22px #00000059; }
+[data-orbit="crayon"] main { background-color: transparent; }
+[data-orbit="crayon"] body:not(:has([data-topbar])) main { padding-top: 2.4rem; }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) body::after { content: ""; position: fixed; inset: 0; z-index: 45; pointer-events: none; border: 8px solid #8b5a2b; border-image: repeating-linear-gradient(90deg, #9a6533 0 7px, #8a5829 7px 11px, #a8723d 11px 19px, #7d4f24 19px 22px) 8; box-shadow: inset 0 0 0 1px #5e3a1a, inset 0 0 22px #00000059; }
 /* Handwriting for headings, buttons and tabs; everything else stays readable */
-[data-playskin="crayon"] :where(h1, h2, h3, h4, [data-card-title], [role="tab"], .font-headline, [data-button]) { font-family: var(--hand); letter-spacing: .01em; }
-[data-playskin="crayon"] :where(h1, h2, h3, h4, [data-card-title]) { font-weight: 700; }
-[data-playskin="crayon"] :where(h2) { text-decoration-color: var(--cr-blue); }
+[data-orbit="crayon"] :where(h1, h2, h3, h4, [data-card-title], [role="tab"], .font-headline, [data-button]) { font-family: var(--hand); letter-spacing: .01em; }
+[data-orbit="crayon"] :where(h1, h2, h3, h4, [data-card-title]) { font-weight: 700; }
+[data-orbit="crayon"] :where(h2) { text-decoration-color: var(--cr-blue); }
 /* Hand-drawn shapes with a hard crayon shadow */
-[data-playskin="crayon"] [data-card] { border: 2.5px solid var(--cr-line); border-radius: var(--cr-wobble); box-shadow: 4px 5px 0 var(--cr-shadow); }
-[data-playskin="crayon"] [data-card]:nth-of-type(3n+2) { border-radius: 8px 18px 7px 16px / 16px 7px 18px 8px; }
-[data-playskin="crayon"] [data-card]:nth-of-type(3n) { border-radius: 14px 10px 20px 6px / 9px 18px 6px 15px; }
-[data-playskin="crayon"] :is(input, textarea, select, [role="combobox"]):not([type="checkbox"]):not([type="radio"]) { border-width: 2px; border-radius: var(--cr-wobble-sm); }
-[data-playskin="crayon"] [data-button] { font-weight: 700; }
-[data-playskin="crayon"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])) { border: 2px solid var(--cr-line); border-radius: var(--cr-wobble-sm); box-shadow: 3px 3px 0 var(--cr-shadow); transition: transform .12s ease, box-shadow .12s ease, background-color .15s ease; }
-[data-playskin="crayon"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])):hover:not(:disabled) { transform: translate(-1px, -1px) rotate(-.6deg); box-shadow: 4px 5px 0 var(--cr-shadow); }
-[data-playskin="crayon"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])):active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--cr-shadow); }
-[data-playskin="crayon"] [data-button]:disabled { box-shadow: none; }
-[data-playskin="crayon"] [data-button="default"] { background: repeating-linear-gradient(-45deg, #ffffff2e 0 2px, transparent 2px 6px), hsl(var(--primary)); border-color: #172f73; color: hsl(var(--primary-foreground)); }
-[data-playskin="crayon"] [data-button="destructive"] { background: repeating-linear-gradient(-45deg, #ffffff26 0 2px, transparent 2px 6px), hsl(var(--destructive)); }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-button="default"] { background: repeating-linear-gradient(-45deg, #1c3a2f24 0 2px, transparent 2px 6px), hsl(var(--primary)); border-color: var(--cr-ink); }
-[data-playskin="crayon"] [data-button="ghost"]:hover { border-radius: var(--cr-wobble-sm); }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) :is(.text-rose-500, .text-rose-600, .text-rose-700, .text-red-500, .text-red-600, .text-red-700, .text-destructive) { color: #ffb3ad; }
-[data-playskin="crayon"] :is([role="menu"], [role="listbox"]) { border: 2px solid var(--cr-line); border-radius: var(--cr-wobble); box-shadow: 4px 5px 0 var(--cr-shadow); padding: 6px; }
-[data-playskin="crayon"] :is([role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"]) { border-radius: var(--cr-wobble-sm); }
+[data-orbit="crayon"] [data-card] { border: 2.5px solid var(--cr-line); border-radius: var(--cr-wobble); box-shadow: 4px 5px 0 var(--cr-shadow); }
+[data-orbit="crayon"] [data-card]:nth-of-type(3n+2) { border-radius: 8px 18px 7px 16px / 16px 7px 18px 8px; }
+[data-orbit="crayon"] [data-card]:nth-of-type(3n) { border-radius: 14px 10px 20px 6px / 9px 18px 6px 15px; }
+[data-orbit="crayon"] :is(input, textarea, select, [role="combobox"]):not([type="checkbox"]):not([type="radio"]) { border-width: 2px; border-radius: var(--cr-wobble-sm); }
+[data-orbit="crayon"] [data-button] { font-weight: 700; }
+[data-orbit="crayon"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])) { border: 2px solid var(--cr-line); border-radius: var(--cr-wobble-sm); box-shadow: 3px 3px 0 var(--cr-shadow); transition: transform .12s ease, box-shadow .12s ease, background-color .15s ease; }
+[data-orbit="crayon"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])):hover:not(:disabled) { transform: translate(-1px, -1px) rotate(-.6deg); box-shadow: 4px 5px 0 var(--cr-shadow); }
+[data-orbit="crayon"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])):active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--cr-shadow); }
+[data-orbit="crayon"] [data-button]:disabled { box-shadow: none; }
+[data-orbit="crayon"] [data-button="default"] { background: repeating-linear-gradient(-45deg, #ffffff2e 0 2px, transparent 2px 6px), hsl(var(--primary)); border-color: #172f73; color: hsl(var(--primary-foreground)); }
+[data-orbit="crayon"] [data-button="destructive"] { background: repeating-linear-gradient(-45deg, #ffffff26 0 2px, transparent 2px 6px), hsl(var(--destructive)); }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) [data-button="default"] { background: repeating-linear-gradient(-45deg, #1c3a2f24 0 2px, transparent 2px 6px), hsl(var(--primary)); border-color: var(--cr-ink); }
+[data-orbit="crayon"] [data-button="ghost"]:hover { border-radius: var(--cr-wobble-sm); }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) :is(.text-rose-500, .text-rose-600, .text-rose-700, .text-red-500, .text-red-600, .text-red-700, .text-destructive) { color: #ffb3ad; }
+[data-orbit="crayon"] :is([role="menu"], [role="listbox"]) { border: 2px solid var(--cr-line); border-radius: var(--cr-wobble); box-shadow: 4px 5px 0 var(--cr-shadow); padding: 6px; }
+[data-orbit="crayon"] :is([role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"]) { border-radius: var(--cr-wobble-sm); }
 @keyframes crayon-wiggle {
   from { transform: translateY(var(--y)) rotate(calc(var(--r) - 8deg)); }
   to { transform: translateY(calc(var(--y) - 3px)) rotate(calc(var(--r) + 8deg)); }
@@ -119,7 +119,7 @@
 @keyframes crayon-twinkle { from { opacity: .45; transform: scale(.75); } to { opacity: 1; transform: scale(1.1); } }
 /* Doodles behind the content: bunting, clouds, corner drawings and a snail */
 .crayon-doodles { display: none; }
-[data-playskin="crayon"] .crayon-doodles { display: block; }
+[data-orbit="crayon"] .crayon-doodles { display: block; }
 .crayon-doodles > * { position: fixed; z-index: -1; pointer-events: none; }
 .crayon-doodles .cd-defs { position: absolute; }
 .crayon-doodles svg { overflow: visible; }
@@ -173,49 +173,49 @@
 /* The parts an app marks. data-topbar: a rainbow crayon stripe, or the chalk tray after dark, with bunting hung under it.
    data-wordmark: every letter its own crayon, a little crooked, jiggling when pointed at. data-nav: the current page is
    circled in pencil. data-theme-toggle: a smiling sun, or a moon with stars. Tooltips get a hand-drawn edge. */
-:where([data-playskin="crayon"] [data-topbar]) { position: relative; }
-[data-playskin="crayon"] [data-topbar] { border-bottom: 3px solid transparent; border-image: linear-gradient(90deg, #e63946, #f4a261 18%, #ffd60a 35%, #52b788 52%, #4895ef 70%, #9d4edd 88%, #e63946) 1; }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-topbar] { border-image: none; border-bottom: 6px solid #8a5a32; box-shadow: 0 2px 0 #5b3a1f; }
-[data-playskin="crayon"]:has([data-topbar]) .cd-bunting { display: none; }
+:where([data-orbit="crayon"] [data-topbar]) { position: relative; }
+[data-orbit="crayon"] [data-topbar] { border-bottom: 3px solid transparent; border-image: linear-gradient(90deg, #e63946, #f4a261 18%, #ffd60a 35%, #52b788 52%, #4895ef 70%, #9d4edd 88%, #e63946) 1; }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) [data-topbar] { border-image: none; border-bottom: 6px solid #8a5a32; box-shadow: 0 2px 0 #5b3a1f; }
+[data-orbit="crayon"]:has([data-topbar]) .cd-bunting { display: none; }
 .cr-bunting { display: none; }
-[data-playskin="crayon"] .cr-bunting { display: flex; position: absolute; left: 0; right: 0; top: 100%; height: 24px; overflow: hidden; pointer-events: none; }
+[data-orbit="crayon"] .cr-bunting { display: flex; position: absolute; left: 0; right: 0; top: 100%; height: 24px; overflow: hidden; pointer-events: none; }
 .cr-bunting svg { flex: none; width: 420px; height: 24px; overflow: visible; }
 .cr-string { fill: none; stroke: var(--cr-line); stroke-width: 1.6; }
 .cr-flag { stroke: #2b211866; stroke-width: 1.2; stroke-linejoin: round; transform-box: fill-box; transform-origin: 50% 0; }
 :is(.dark, [data-theme="dark"]) .cr-flag { stroke: #f4f1e655; opacity: .88; }
-[data-playskin="crayon"] [data-wordmark] { display: inline-flex; align-items: baseline; font-family: var(--hand); font-weight: 700; letter-spacing: .01em; }
-[data-playskin="crayon"] [data-wordmark] > * { display: inline-block; color: var(--c); transform: translateY(var(--y, 0)) rotate(var(--r, 0deg)); transition: transform .3s ease; }
-[data-playskin="crayon"] [data-wordmark] > :nth-child(6n+1) { --c: #d62839; --r: -6deg; }
-[data-playskin="crayon"] [data-wordmark] > :nth-child(6n+2) { --c: #d9480f; --r: 4deg; --y: 1px; --j: 1; }
-[data-playskin="crayon"] [data-wordmark] > :nth-child(6n+3) { --c: #b08900; --r: -3deg; --j: 2; }
-[data-playskin="crayon"] [data-wordmark] > :nth-child(6n+4) { --c: #2b8a3e; --r: 5deg; --y: -1px; --j: 3; }
-[data-playskin="crayon"] [data-wordmark] > :nth-child(6n+5) { --c: #1f63d6; --r: -4deg; --j: 4; }
-[data-playskin="crayon"] [data-wordmark] > :nth-child(6n) { --c: #7b2fbf; --r: 6deg; --y: 1px; --j: 5; }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+1) { --c: #ff8a8a; }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+2) { --c: #ffb070; }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+3) { --c: #ffe066; }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+4) { --c: #8ce99a; }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+5) { --c: #8ec5ff; }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n) { --c: #d9b3ff; }
-[data-playskin="crayon"]:is(.dark, [data-theme="dark"]) :is([data-wordmark], h1, h2, h3) { text-shadow: 0 0 1px #fff8, 0 0 6px #ffffff1f; }
-.playskin-said { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-[data-playskin="crayon"] [data-nav] :is(a, button) { font-family: var(--hand); }
-:where([data-playskin="crayon"] [data-nav] :is(a, button)) { color: inherit; text-decoration: none; }
-:where([data-playskin="crayon"] [data-theme-toggle]) { background: transparent; border-color: transparent; }
-[data-playskin="crayon"] [data-nav] :is(a, button)[aria-current]:not([aria-current="false"]) { border-radius: var(--cr-wobble-sm); box-shadow: inset 0 0 0 2px var(--cr-line), 2px 3px 0 var(--cr-shadow); }
-[data-playskin="crayon"] [data-nav] :is(a, button)[aria-current]:not([aria-current="false"]) svg { color: var(--cr-red); }
+[data-orbit="crayon"] [data-wordmark] { display: inline-flex; align-items: baseline; font-family: var(--hand); font-weight: 700; letter-spacing: .01em; }
+[data-orbit="crayon"] [data-wordmark] > * { display: inline-block; color: var(--c); transform: translateY(var(--y, 0)) rotate(var(--r, 0deg)); transition: transform .3s ease; }
+[data-orbit="crayon"] [data-wordmark] > :nth-child(6n+1) { --c: #d62839; --r: -6deg; }
+[data-orbit="crayon"] [data-wordmark] > :nth-child(6n+2) { --c: #d9480f; --r: 4deg; --y: 1px; --j: 1; }
+[data-orbit="crayon"] [data-wordmark] > :nth-child(6n+3) { --c: #b08900; --r: -3deg; --j: 2; }
+[data-orbit="crayon"] [data-wordmark] > :nth-child(6n+4) { --c: #2b8a3e; --r: 5deg; --y: -1px; --j: 3; }
+[data-orbit="crayon"] [data-wordmark] > :nth-child(6n+5) { --c: #1f63d6; --r: -4deg; --j: 4; }
+[data-orbit="crayon"] [data-wordmark] > :nth-child(6n) { --c: #7b2fbf; --r: 6deg; --y: 1px; --j: 5; }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+1) { --c: #ff8a8a; }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+2) { --c: #ffb070; }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+3) { --c: #ffe066; }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+4) { --c: #8ce99a; }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n+5) { --c: #8ec5ff; }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) [data-wordmark] > :nth-child(6n) { --c: #d9b3ff; }
+[data-orbit="crayon"]:is(.dark, [data-theme="dark"]) :is([data-wordmark], h1, h2, h3) { text-shadow: 0 0 1px #fff8, 0 0 6px #ffffff1f; }
+.orbit-said { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+[data-orbit="crayon"] [data-nav] :is(a, button) { font-family: var(--hand); }
+:where([data-orbit="crayon"] [data-nav] :is(a, button)) { color: inherit; text-decoration: none; }
+:where([data-orbit="crayon"] [data-theme-toggle]) { background: transparent; border-color: transparent; }
+[data-orbit="crayon"] [data-nav] :is(a, button)[aria-current]:not([aria-current="false"]) { border-radius: var(--cr-wobble-sm); box-shadow: inset 0 0 0 2px var(--cr-line), 2px 3px 0 var(--cr-shadow); }
+[data-orbit="crayon"] [data-nav] :is(a, button)[aria-current]:not([aria-current="false"]) svg { color: var(--cr-red); }
 .cr-toggle { display: none; }
-[data-playskin="crayon"] [data-theme-toggle] > :not(.cr-toggle) { display: none; }
-[data-playskin="crayon"] [data-theme-toggle] > .cr-toggle { display: block; }
-[data-playskin="crayon"] [role="tooltip"] { border: 2px solid var(--cr-line); border-radius: var(--cr-wobble-sm); box-shadow: 3px 4px 0 var(--cr-shadow); rotate: -.4deg; }
+[data-orbit="crayon"] [data-theme-toggle] > :not(.cr-toggle) { display: none; }
+[data-orbit="crayon"] [data-theme-toggle] > .cr-toggle { display: block; }
+[data-orbit="crayon"] [role="tooltip"] { border: 2px solid var(--cr-line); border-radius: var(--cr-wobble-sm); box-shadow: 3px 4px 0 var(--cr-shadow); rotate: -.4deg; }
 @media (prefers-reduced-motion: no-preference) {
-  [data-playskin="crayon"] :is([data-brand]:hover [data-wordmark], [data-wordmark]:hover) > * { animation: crayon-jiggle .5s ease-in-out calc(var(--j, 0) * 60ms); }
-  [data-playskin="crayon"] [data-theme-toggle]:hover > .cr-toggle { animation: crayon-jiggle .5s ease-in-out; }
+  [data-orbit="crayon"] :is([data-brand]:hover [data-wordmark], [data-wordmark]:hover) > * { animation: crayon-jiggle .5s ease-in-out calc(var(--j, 0) * 60ms); }
+  [data-orbit="crayon"] [data-theme-toggle]:hover > .cr-toggle { animation: crayon-jiggle .5s ease-in-out; }
   .cr-flag { animation: crayon-flutter 2.8s ease-in-out calc(var(--i) * -.7s) infinite alternate; }
 }
 @keyframes crayon-jiggle { 30% { translate: 0 -4px; rotate: -8deg; } 60% { translate: 0 1px; rotate: 6deg; } }
 @keyframes crayon-flutter { from { rotate: -5deg; } to { rotate: 5deg; } }
-/* The drawings in playskin/crayon. The app places each one and decides when it shows; these rules only draw them. */
+/* The drawings in orbit/crayon. The app places each one and decides when it shows; these rules only draw them. */
 .cr-flyer { display: block; position: fixed; left: 0; top: 0; z-index: 40; width: 40px; height: 25px; margin: -12.5px 0 0 -20px; pointer-events: none; opacity: 0; }
 .cr-flyer svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(1px 2px 0 #2b211833); }
 .pl-wing { fill: #fff; stroke: #2b2118; stroke-width: 1.4; stroke-linejoin: round; }
@@ -266,7 +266,7 @@
   .cd-bunting i { width: 14px; height: 16px; }
 }
 @media (forced-colors: active) {
-  [data-playskin="crayon"] .crayon-doodles, .cr-flyer, .cr-snail, .cr-bunting, .cr-toggle { display: none; }
-  [data-playskin="crayon"] [data-theme-toggle] > :not(.cr-toggle) { display: revert; }
-  [data-playskin="crayon"]:is(.dark, [data-theme="dark"]) body::after { display: none; }
+  [data-orbit="crayon"] .crayon-doodles, .cr-flyer, .cr-snail, .cr-bunting, .cr-toggle { display: none; }
+  [data-orbit="crayon"] [data-theme-toggle] > :not(.cr-toggle) { display: revert; }
+  [data-orbit="crayon"]:is(.dark, [data-theme="dark"]) body::after { display: none; }
 }

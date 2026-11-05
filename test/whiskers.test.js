@@ -85,7 +85,7 @@ test('the cat has a voice: each sound it makes is defined, and on the page it so
   for(const [name,c] of Object.entries(CALLS))for(const k of ['f0','f1','f2','f3','open'])assert.ok(Array.isArray(c[k]),`${name} has ${k}`);
   assert.ok(along(CALLS.meow.open,0)<1000&&along(CALLS.meow.open,.3)>3000&&along(CALLS.meow.open,1)<1000,'a meow opens from the m and closes on the w');
   const kept={},store={getItem:k=>kept[k]??null,setItem:(k,v)=>{kept[k]=v;}},doc={addEventListener(){}};
-  const v=catVoice({win:{},doc,store});assert.equal(v.on,true);v.setOn(false);assert.equal(kept['playskin.cat.voice'],'off');
+  const v=catVoice({win:{},doc,store});assert.equal(v.on,true);v.setOn(false);assert.equal(kept['orbit.cat.voice'],'off');
   assert.equal(catVoice({win:{},doc,store}).on,false);v.call('meow');v.purrOn();v.speak('hi');
   const js=readFileSync(new URL('../src/whiskers/cat.js',import.meta.url),'utf8');
   assert.match(js,/const voice=\{cue:\(n,o\)=>Boolean\(music\?\.cue\?\.\(n,o\)\)/);assert.match(js,/purrOn\(\)\{\},purrOff\(\)\{\}/,'no heavy purr');

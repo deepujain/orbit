@@ -1,4 +1,4 @@
-/* playskin charts: the look of the charts src/charts.js draws. Colours follow the shadcn variables when the page has
+/* orbit charts: the look of the charts src/charts.js draws. Colours follow the shadcn variables when the page has
    them (--chart-1 to --chart-5, --muted, --foreground and so on), so every skin repaints them; otherwise they fall back
    to a calm palette. Load motion.css too for the build-in. */
 

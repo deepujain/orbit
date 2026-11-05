@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>playskin: playful skins for any web page</title>
+<title>Orbit: playful skins for any web page</title>
 <meta name="description" content="Aura glass, Crayon paper and chalkboard, Whiskers, a cat that lives on your page. One attribute to turn on. Record films a narrated tour in any of them.">
-<script>(function(){try{var s=localStorage.getItem("playskin");if(["aura","crayon","whiskers"].indexOf(s)>-1)document.documentElement.setAttribute("data-playskin",s);if(localStorage.getItem("playskin-dark")==="1")document.documentElement.classList.add("dark");}catch(e){}})();</script>
+<script>(function(){try{var s=localStorage.getItem("orbit");if(["aura","crayon","whiskers"].indexOf(s)>-1)document.documentElement.setAttribute("data-orbit",s);if(localStorage.getItem("orbit-dark")==="1")document.documentElement.classList.add("dark");}catch(e){}})();</script>
 <link rel="stylesheet" href="./themes/aura.css">
 <link rel="stylesheet" href="./themes/crayon.css">
 <link rel="stylesheet" href="./themes/whiskers.css">
@@ -41,13 +41,13 @@
   .steps button:first-child { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
   .bar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 28px; padding: 14px; background: hsl(var(--card)); border-top: 1px solid hsl(var(--border)); }
   .bar a { color: hsl(var(--muted-foreground)); text-decoration: none; font-weight: 600; font-size: 13px; }
-  .playskin-record { bottom: 72px; }
+  .orbit-record { bottom: 72px; }
   .stat { font-size: 30px; font-weight: 700; color: hsl(var(--foreground)); }
 </style>
 </head>
 <body>
 <main>
-  <h1>playskin</h1>
+  <h1>Orbit</h1>
   <p class="lead">Playful skins for any web page. Turn one on with a single attribute, and your page becomes glass, crayon paper or the home of a cat. Record films a narrated tour of it in any skin.</p>
 
   <div class="row" role="group" aria-label="Skin">
@@ -83,12 +83,12 @@
   <div class="grid">
     <section data-card>
       <h2>Use it on any page</h2>
-      <pre>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/playskin/themes/aura.css"&gt;
-&lt;html data-playskin="aura"&gt;</pre>
+      <pre>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/deepujain/orbit/themes/aura.css"&gt;
+&lt;html data-orbit="aura"&gt;</pre>
     </section>
     <section data-card>
       <h2>Or from JavaScript</h2>
-      <pre>import { setTheme } from "playskin";
+      <pre>import { setTheme } from "orbit";
 setTheme("whiskers");</pre>
     </section>
     <section data-card>
@@ -98,22 +98,22 @@ setTheme("whiskers");</pre>
     </section>
   </div>
 </main>
-<nav class="bar" data-playskin-floor><a href="#">Home</a><a href="#">Cards</a><a href="https://github.com/deepujain/orbit">GitHub</a></nav>
+<nav class="bar" data-orbit-floor><a href="#">Home</a><a href="#">Cards</a><a href="https://github.com/deepujain/orbit">GitHub</a></nav>
 
 <script type="module">
-  import { createPlayskin } from "./src/index.js";
+  import { createOrbit } from "./src/index.js";
   import { startRecord } from "./src/record.js";
   const tour = {
-    title: "playskin tour",
+    title: "orbit tour",
     steps: [
-      { heading: "playskin", say: "playskin turns any page into a new skin with one attribute." },
+      { heading: "orbit", say: "orbit turns any page into a new skin with one attribute." },
       { heading: "Aura", say: "Aura is soft glass by day and graphite by night." },
       { heading: "Crayon", say: "Crayon is ruled paper by day and a chalkboard by night." },
       { heading: "Whiskers", say: "Whiskers is a cat that lives on your page." },
       { heading: "Record", say: "And Record films a tour like this one in any skin, with captions and a voice." },
     ],
   };
-  const skin = createPlayskin();
+  const skin = createOrbit();
   startRecord({ script: () => tour, offset: 24 });
   const buttons = [...document.querySelectorAll("[data-skin]")];
   const mark = (theme) => buttons.forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.skin || null) === theme)));
@@ -122,7 +122,7 @@ setTheme("whiskers");</pre>
   buttons.forEach((b) => b.addEventListener("click", () => skin.set(b.dataset.skin || null)));
   document.getElementById("dark").addEventListener("click", () => {
     const on = document.documentElement.classList.toggle("dark");
-    try { localStorage.setItem("playskin-dark", on ? "1" : "0"); } catch {}
+    try { localStorage.setItem("orbit-dark", on ? "1" : "0"); } catch {}
   });
 </script>
 </body>

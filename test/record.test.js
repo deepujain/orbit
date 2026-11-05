@@ -77,9 +77,9 @@ test("the file is named for the script and the local time, safe on every system"
 
 test("the button, and the app's own marked button, hide while recording so neither is in the video, and the look is the page's own", () => {
   const css = readFileSync(new URL("../themes/record.css", import.meta.url), "utf8");
-  assert.match(css, /\[data-playskin-recording\] \.playskin-record \{ display: none; \}/);
-  assert.match(css, /\[data-playskin-recording\] \[data-record-hide\] \{ visibility: hidden; \}/);
-  assert.doesNotMatch(css, /\[data-playskin="record"\]/, "Record changes no colours");
+  assert.match(css, /\[data-orbit-recording\] \.orbit-record \{ display: none; \}/);
+  assert.match(css, /\[data-orbit-recording\] \[data-record-hide\] \{ visibility: hidden; \}/);
+  assert.doesNotMatch(css, /\[data-orbit="record"\]/, "Record changes no colours");
   const js = readFileSync(new URL("../src/record.js", import.meta.url), "utf8");
   assert.match(js, /src\.connect\(now\.out\);\s*src\.connect\(now\.ctx\.destination\);/, "the voice is in the file and heard aloud");
   assert.match(js, /src\.onended = \(\) => \{\s*if \(now\.src === src\) now\.src = null;/, "stopping mid-line does not touch a cleared recording");

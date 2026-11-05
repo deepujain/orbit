@@ -143,13 +143,13 @@ export function startMotion({
   watch.observe(doc.body, { childList: true, subtree: true });
   // A recording films the page from the top, so whatever is on screen builds in again for it.
   const film = new win.MutationObserver(() => {
-    if (!root.hasAttribute("data-playskin-recording")) return;
+    if (!root.hasAttribute("data-orbit-recording")) return;
     for (const b of doc.querySelectorAll(BLOCK)) if (onScreen(b)) {
       rewind(b);
       play(b);
     }
   });
-  film.observe(root, { attributes: true, attributeFilter: ["data-playskin-recording"] });
+  film.observe(root, { attributes: true, attributeFilter: ["data-orbit-recording"] });
   tag();
 
   return {

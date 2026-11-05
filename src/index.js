@@ -1,17 +1,18 @@
-/* playskin: playful skins for a web page. A skin is turned on by one attribute on <html>, data-playskin="aura",
-   "crayon" or "whiskers", and its stylesheet does the rest. createPlayskin() keeps that attribute in step with the
+/* orbit: playful skins for a web page. A skin is turned on by one attribute on <html>, data-orbit="aura",
+   "crayon" or "whiskers", and its stylesheet does the rest. createOrbit() keeps that attribute in step with the
    visitor's saved choice and, unless told not to, brings out what a skin draws beyond CSS: Crayon's doodles and the
-   Whiskers cat. Record (playskin/record) is an action, not a skin, so it films the page in any of them. */
+   Whiskers cat. Record (orbit/record) is an action, not a skin, so it films the page in any of them. */
 import { mountCrayonDoodles } from "./crayon-doodles.js";
 import { startCrayon } from "./crayon.js";
 import { startMotion } from "./motion.js";
+import { moveSaved } from "./saved.js";
 
 export const THEMES = ["aura", "crayon", "whiskers"];
 export const THEME_NAMES = { aura: "Aura", crayon: "Crayon", whiskers: "Whiskers" };
-export const CHANGE_EVENT = "playskin-change";
-export { mountCrayonDoodles, startCrayon, startMotion };
+export const CHANGE_EVENT = "orbit-change";
+export { mountCrayonDoodles, startCrayon, startMotion, moveSaved };
 
-const DEFAULTS = { themes: THEMES, storageKey: "playskin", attribute: "data-playskin", effects: true, crayon: {}, whiskers: {}, motion: {} };
+const DEFAULTS = { themes: THEMES, storageKey: "orbit", attribute: "data-orbit", effects: true, crayon: {}, whiskers: {}, motion: {} };
 
 function readStored(key) {
   try {
@@ -29,14 +30,15 @@ function writeStored(key, value) {
 }
 
 /**
- * Keeps <html data-playskin> in step with the chosen skin.
+ * Keeps <html data-orbit> in step with the chosen skin.
  * Options: themes (allowed names), storageKey (where the choice is saved, or null to not save), attribute,
  * root (the element that carries the attribute), effects (false to skip Crayon's drawings and the cat), crayon
  * (options for startCrayon), whiskers (options for startWhiskers), motion (options for startMotion, or false to leave
  * data-motion blocks still).
  */
-export function createPlayskin(options = {}) {
+export function createOrbit(options = {}) {
   const o = { ...DEFAULTS, ...options };
+  moveSaved();
   const root = o.root || document.documentElement;
   const listeners = new Set();
   let current = null;
@@ -106,7 +108,7 @@ export function createPlayskin(options = {}) {
 }
 
 let shared = null;
-const instance = () => (shared ||= createPlayskin());
+const instance = () => (shared ||= createOrbit());
 
 /** Turns a skin on for the page with the default options. */
 export const setTheme = (theme) => instance().set(theme);
@@ -118,5 +120,6 @@ export const getTheme = () => instance().get();
  * page's own look first. Put its text in an inline <script>.
  */
 export function bootScript({ storageKey = DEFAULTS.storageKey, attribute = DEFAULTS.attribute, themes = THEMES } = {}) {
-  return `(function(){try{var s=localStorage.getItem(${JSON.stringify(storageKey)});if(${JSON.stringify(themes)}.indexOf(s)>-1)document.documentElement.setAttribute(${JSON.stringify(attribute)},s);}catch(e){}})();`;
+  const key = JSON.stringify(storageKey), old = storageKey === DEFAULTS.storageKey ? '||localStorage.getItem("playskin")' : "";
+  return `(function(){try{var s=localStorage.getItem(${key})${old};if(${JSON.stringify(themes)}.indexOf(s)>-1)document.documentElement.setAttribute(${JSON.stringify(attribute)},s);}catch(e){}})();`;
 }

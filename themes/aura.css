@@ -1,6 +1,6 @@
-/* playskin: Aura. Soft white glass by day, graphite by night. Turn it on with <html data-playskin="aura">; dark is
+/* orbit: Aura. Soft white glass by day, graphite by night. Turn it on with <html data-orbit="aura">; dark is
    <html class="dark"> or <html data-theme="dark">. */
-[data-playskin="aura"] {
+[data-orbit="aura"] {
   --aura-mint: #b6efd0; --aura-peach: #ffd0b5; --aura-lilac: #d4c6ff; --aura-rose: #ffc6da; --aura-sky: #bfe0ff;
   --aura-green: #059669; --aura-orange: #ea580c; --aura-violet: #7c3aed; --aura-pink: #db2777; --aura-blue: #0284c7;
   --aura-glow: .8;
@@ -31,7 +31,7 @@
   --chart-4: 340 72% 68%;
   --chart-5: 205 78% 58%;
 }
-[data-playskin="aura"]:is(.dark, [data-theme="dark"]) {
+[data-orbit="aura"]:is(.dark, [data-theme="dark"]) {
   --aura-mint: #1c7a55; --aura-peach: #8a4422; --aura-lilac: #5240a6; --aura-rose: #872a52; --aura-sky: #1f5b8f;
   --aura-green: #34d399; --aura-orange: #fb923c; --aura-violet: #a78bfa; --aura-pink: #f472b6; --aura-blue: #38bdf8;
   --aura-glow: .5;
@@ -62,7 +62,7 @@
   --chart-5: 205 85% 66%;
 }
 /* A clean sans, quiet labels and tight, confident headings */
-[data-playskin="aura"] body {
+[data-orbit="aura"] body {
   font-family: "SF Pro Text", "SF Pro Display", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
   background-color: hsl(var(--background));
   background-image:
@@ -71,12 +71,12 @@
     radial-gradient(900px 600px at 70% 112%, color-mix(in srgb, var(--aura-lilac) calc(var(--aura-glow) * 100%), transparent), transparent 62%);
   background-attachment: fixed;
 }
-[data-playskin="aura"] main { background-color: transparent; }
-[data-playskin="aura"] :where(h1, h2, .font-headline) { font-weight: 600; letter-spacing: -.025em; }
-[data-playskin="aura"] :where(h3, h4, [data-card-title]) { font-weight: 550; letter-spacing: -.012em; }
-[data-playskin="aura"] :where(th) { font-weight: 500; color: hsl(var(--muted-foreground)); }
+[data-orbit="aura"] main { background-color: transparent; }
+[data-orbit="aura"] :where(h1, h2, .font-headline) { font-weight: 600; letter-spacing: -.025em; }
+[data-orbit="aura"] :where(h3, h4, [data-card-title]) { font-weight: 550; letter-spacing: -.012em; }
+[data-orbit="aura"] :where(th) { font-weight: 500; color: hsl(var(--muted-foreground)); }
 /* Page titles: a violet-to-pink wash over the words, the icon in violet */
-[data-playskin="aura"] main h1 {
+[data-orbit="aura"] main h1 {
   width: fit-content;
   max-width: 100%;
   background-image: linear-gradient(95deg, var(--aura-violet), var(--aura-pink) 55%, var(--aura-orange));
@@ -84,10 +84,10 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-[data-playskin="aura"] main h1 svg { color: var(--aura-violet); }
-[data-playskin="aura"] main h1 :is(button, a, [data-button], [class*="bg-"]) { -webkit-text-fill-color: currentColor; }
+[data-orbit="aura"] main h1 svg { color: var(--aura-violet); }
+[data-orbit="aura"] main h1 :is(button, a, [data-button], [class*="bg-"]) { -webkit-text-fill-color: currentColor; }
 /* Glass cards, each catching a different soft glow in its corner */
-[data-playskin="aura"] [data-card] {
+[data-orbit="aura"] [data-card] {
   --aura-tint: var(--aura-mint);
   border: 1px solid hsl(var(--border) / .75);
   border-radius: 22px;
@@ -97,57 +97,57 @@
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
   backdrop-filter: blur(18px) saturate(1.2);
 }
-[data-playskin="aura"] [data-card]:nth-of-type(5n+2) { --aura-tint: var(--aura-peach); }
-[data-playskin="aura"] [data-card]:nth-of-type(5n+3) { --aura-tint: var(--aura-lilac); }
-[data-playskin="aura"] [data-card]:nth-of-type(5n+4) { --aura-tint: var(--aura-rose); }
-[data-playskin="aura"] [data-card]:nth-of-type(5n) { --aura-tint: var(--aura-sky); }
-[data-playskin="aura"] [data-card] [data-card] { background-image: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+[data-orbit="aura"] [data-card]:nth-of-type(5n+2) { --aura-tint: var(--aura-peach); }
+[data-orbit="aura"] [data-card]:nth-of-type(5n+3) { --aura-tint: var(--aura-lilac); }
+[data-orbit="aura"] [data-card]:nth-of-type(5n+4) { --aura-tint: var(--aura-rose); }
+[data-orbit="aura"] [data-card]:nth-of-type(5n) { --aura-tint: var(--aura-sky); }
+[data-orbit="aura"] [data-card] [data-card] { background-image: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 /* Hand-built panels outside the Card component get the same glass */
-[data-playskin="aura"] main :is(div, section):is(.rounded-lg, .rounded-xl, .rounded-2xl).border:is(.bg-card, .bg-background):not([data-card]):not([data-card] *) {
+[data-orbit="aura"] main :is(div, section):is(.rounded-lg, .rounded-xl, .rounded-2xl).border:is(.bg-card, .bg-background):not([data-card]):not([data-card] *) {
   border-radius: 18px;
   border-color: hsl(var(--border) / .75);
   background-color: hsl(var(--card) / .82);
   box-shadow: var(--aura-shadow);
 }
 /* Pill buttons, rounded fields, pill tabs and soft menus */
-[data-playskin="aura"] [data-button]:where(:not([data-button="link"])) { border-radius: 999px; font-weight: 550; transition: background-color .15s ease, box-shadow .15s ease, transform .12s ease; }
-[data-playskin="aura"] [data-button="default"] { box-shadow: 0 1px 2px rgb(0 0 0 / .12), 0 6px 16px -8px hsl(var(--primary) / .55); }
-[data-playskin="aura"] [data-button="outline"] { background-color: hsl(var(--card) / .9); border-color: hsl(var(--border)); }
-[data-playskin="aura"] [data-button="default"]:hover:not(:disabled) {
+[data-orbit="aura"] [data-button]:where(:not([data-button="link"])) { border-radius: 999px; font-weight: 550; transition: background-color .15s ease, box-shadow .15s ease, transform .12s ease; }
+[data-orbit="aura"] [data-button="default"] { box-shadow: 0 1px 2px rgb(0 0 0 / .12), 0 6px 16px -8px hsl(var(--primary) / .55); }
+[data-orbit="aura"] [data-button="outline"] { background-color: hsl(var(--card) / .9); border-color: hsl(var(--border)); }
+[data-orbit="aura"] [data-button="default"]:hover:not(:disabled) {
   background-image: linear-gradient(100deg, var(--aura-violet), var(--aura-pink));
   box-shadow: 0 1px 2px rgb(0 0 0 / .12), 0 10px 22px -8px color-mix(in srgb, var(--aura-pink) 60%, transparent);
   transform: translateY(-1px);
 }
-[data-playskin="aura"] :is([data-button="outline"], [data-button="secondary"], [data-button="ghost"]):hover:not(:disabled) {
+[data-orbit="aura"] :is([data-button="outline"], [data-button="secondary"], [data-button="ghost"]):hover:not(:disabled) {
   background-color: color-mix(in srgb, var(--aura-violet) 14%, hsl(var(--card)));
   border-color: color-mix(in srgb, var(--aura-violet) 45%, transparent);
   color: var(--aura-violet);
 }
-[data-playskin="aura"] [data-button="destructive"]:hover:not(:disabled) {
+[data-orbit="aura"] [data-button="destructive"]:hover:not(:disabled) {
   background-image: linear-gradient(100deg, hsl(var(--destructive)), var(--aura-orange));
   transform: translateY(-1px);
 }
-[data-playskin="aura"] [data-button]:where(:not([data-button="link"])):active:not(:disabled) { transform: scale(.98); }
-[data-playskin="aura"] :is(input, textarea, select, [role="combobox"]):not([type="checkbox"]):not([type="radio"]) { border-radius: 12px; background-color: hsl(var(--card) / .9); }
-[data-playskin="aura"] :is([role="menu"], [role="listbox"]) { border-radius: 16px; padding: 6px; box-shadow: var(--aura-shadow); }
-[data-playskin="aura"] :is([role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"]) { border-radius: 10px; }
+[data-orbit="aura"] [data-button]:where(:not([data-button="link"])):active:not(:disabled) { transform: scale(.98); }
+[data-orbit="aura"] :is(input, textarea, select, [role="combobox"]):not([type="checkbox"]):not([type="radio"]) { border-radius: 12px; background-color: hsl(var(--card) / .9); }
+[data-orbit="aura"] :is([role="menu"], [role="listbox"]) { border-radius: 16px; padding: 6px; box-shadow: var(--aura-shadow); }
+[data-orbit="aura"] :is([role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"]) { border-radius: 10px; }
 @media (min-width: 640px) {
-  [data-playskin="aura"] :is([role="dialog"], [role="alertdialog"]).sm\:rounded-lg { border-radius: 24px; }
+  [data-orbit="aura"] :is([role="dialog"], [role="alertdialog"]).sm\:rounded-lg { border-radius: 24px; }
 }
 /* The parts an app marks. data-topbar: no bar, just the brand on the glow, frosted once the page scrolls under it.
    data-wordmark: tight and confident. data-nav: every icon in its own colour, the current page on a soft glass pill. */
-[data-playskin="aura"] [data-topbar] { border-bottom-color: transparent; background-color: hsl(var(--background) / .72); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2); }
-[data-playskin="aura"] [data-wordmark] { font-weight: 650; letter-spacing: -.03em; color: hsl(var(--foreground)); }
-[data-playskin="aura"] [data-nav] > :is(a, button) { --aura-icon: var(--aura-violet); border-radius: 14px; }
-:where([data-playskin="aura"] [data-nav] > :is(a, button)) { color: hsl(var(--muted-foreground)); text-decoration: none; }
-[data-playskin="aura"] [data-nav] > :is(a, button):nth-child(5n+2) { --aura-icon: var(--aura-green); }
-[data-playskin="aura"] [data-nav] > :is(a, button):nth-child(5n+3) { --aura-icon: var(--aura-orange); }
-[data-playskin="aura"] [data-nav] > :is(a, button):nth-child(5n+4) { --aura-icon: var(--aura-blue); }
-[data-playskin="aura"] [data-nav] > :is(a, button):nth-child(5n) { --aura-icon: var(--aura-pink); }
-[data-playskin="aura"] [data-nav] > :is(a, button) svg { color: var(--aura-icon); }
-[data-playskin="aura"] [data-nav] > :is(a, button):hover { background-color: color-mix(in srgb, var(--aura-icon) 12%, transparent); }
-[data-playskin="aura"] [data-nav] > :is(a, button)[aria-current]:not([aria-current="false"]) { color: hsl(var(--foreground)); background-color: hsl(var(--card)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--aura-icon) 35%, transparent), 0 6px 16px -8px color-mix(in srgb, var(--aura-icon) 55%, transparent); }
-[data-playskin="aura"] [role="tooltip"] { border-radius: 12px; box-shadow: var(--aura-shadow); }
+[data-orbit="aura"] [data-topbar] { border-bottom-color: transparent; background-color: hsl(var(--background) / .72); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2); }
+[data-orbit="aura"] [data-wordmark] { font-weight: 650; letter-spacing: -.03em; color: hsl(var(--foreground)); }
+[data-orbit="aura"] [data-nav] > :is(a, button) { --aura-icon: var(--aura-violet); border-radius: 14px; }
+:where([data-orbit="aura"] [data-nav] > :is(a, button)) { color: hsl(var(--muted-foreground)); text-decoration: none; }
+[data-orbit="aura"] [data-nav] > :is(a, button):nth-child(5n+2) { --aura-icon: var(--aura-green); }
+[data-orbit="aura"] [data-nav] > :is(a, button):nth-child(5n+3) { --aura-icon: var(--aura-orange); }
+[data-orbit="aura"] [data-nav] > :is(a, button):nth-child(5n+4) { --aura-icon: var(--aura-blue); }
+[data-orbit="aura"] [data-nav] > :is(a, button):nth-child(5n) { --aura-icon: var(--aura-pink); }
+[data-orbit="aura"] [data-nav] > :is(a, button) svg { color: var(--aura-icon); }
+[data-orbit="aura"] [data-nav] > :is(a, button):hover { background-color: color-mix(in srgb, var(--aura-icon) 12%, transparent); }
+[data-orbit="aura"] [data-nav] > :is(a, button)[aria-current]:not([aria-current="false"]) { color: hsl(var(--foreground)); background-color: hsl(var(--card)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--aura-icon) 35%, transparent), 0 6px 16px -8px color-mix(in srgb, var(--aura-icon) 55%, transparent); }
+[data-orbit="aura"] [role="tooltip"] { border-radius: 12px; box-shadow: var(--aura-shadow); }
 @media (forced-colors: active) {
-  [data-playskin="aura"] [data-card] { background-image: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  [data-orbit="aura"] [data-card] { background-image: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 }

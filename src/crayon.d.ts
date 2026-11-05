@@ -20,7 +20,7 @@ export interface CrayonPlaneOptions {
   win?: Window;
   /** The element the plane takes off from; defaults to [data-brand], then [data-wordmark]. */
   anchor?: () => Element | null;
-  /** Whether the plane may fly; defaults to <html data-playskin="crayon">. */
+  /** Whether the plane may fly; defaults to <html data-orbit="crayon">. */
   active?: () => boolean;
   reducedMotion?: () => boolean;
   /** Milliseconds between flights, as [shortest, longest]. */

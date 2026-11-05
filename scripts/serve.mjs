@@ -35,4 +35,4 @@ createServer(async (req, res) => {
     res.writeHead(404, { "Content-Type": "text/plain" });
     res.end("Not found");
   }
-}).listen(PORT, "127.0.0.1", () => console.log(`playskin example: http://localhost:${PORT}/example/`));
+}).listen(PORT, "127.0.0.1", () => console.log(`orbit example: http://localhost:${PORT}/example/`));

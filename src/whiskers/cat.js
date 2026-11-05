@@ -148,7 +148,7 @@ export function catLine({bar,status,station,work='author',r=Math.random,jokes=JO
    it to those scenes); pet (false drops its name, hunger and feeding); label (what it is called for screen readers);
    jokes (its own jokes); aloud (read its lines aloud while the music is on); slide (shoves push cards along their row
    too, not just down); follow (scroll the page to keep it in sight). */
-export function startTimelineCat({doc=document,win=window,reducedMotion=()=>false,waiting=()=>false,line=()=>null,read=()=>'',home=()=>null,music=null,global='playskinCat',storage='playskin.cat',floor='[data-playskin-floor]',ignore='[data-playskin-ignore]',meow=MEOWS[0],
+export function startTimelineCat({doc=document,win=window,reducedMotion=()=>false,waiting=()=>false,line=()=>null,read=()=>'',home=()=>null,music=null,global='orbitCat',storage='orbit.cat',floor='[data-orbit-floor]',ignore='[data-orbit-ignore]',meow=MEOWS[0],
  game=null,boss=()=>null,scenes=[],room=true,pet=true,label='',jokes=JOKES,aloud=false,slide=false,follow=false}={}){
  if(win[global]?.voice)return win[global];
  const GAME=game;

@@ -1,8 +1,8 @@
-/* Orbit: a small app for trying every playskin skin, and Record, which films its tour in any of them. It marks its parts
+/* Orbit: a small app for trying every orbit skin, and Record, which films its tour in any of them. It marks its parts
    the way the README says (data-topbar, data-brand, data-wordmark, data-nav, data-theme-toggle, data-card, data-button,
    data-cat-chart, data-record-hide) and redraws the whole page on every navigation, as real apps do, so each skin has to
    keep up on its own. */
-import { createPlayskin, THEME_NAMES } from "../src/index.js";
+import { createOrbit, THEME_NAMES } from "../src/index.js";
 import * as c from "../src/charts.js";
 import { startRecord } from "../src/record.js";
 import { CHART_PAGES, chartPage } from "./charts-page.js";
@@ -89,14 +89,14 @@ const BODY = {
 
 // One narrated tour per page for Record, which films the page in whatever skin is on.
 const TOURS = {
-  dashboard: { title: "Platform Alpha dashboard", steps: [{ heading: "Good morning, Platform Alpha", say: "This is Orbit, the control room for an offshore oil rig, dressed by playskin." }, { heading: "Oil produced", say: "Barrels, wells, uptime and permits all take the skin's look." }] },
+  dashboard: { title: "Platform Alpha dashboard", steps: [{ heading: "Good morning, Platform Alpha", say: "This is Orbit, the control room for an offshore oil rig, dressed by orbit." }, { heading: "Oil produced", say: "Barrels, wells, uptime and permits all take the skin's look." }] },
   ...Object.fromEntries(CHART_PAGES.map((p) => [p.id, { title: `Platform Alpha ${p.label.toLowerCase()}`, steps: [{ heading: p.label, say: p.lede }, { heading: p.sections[0][0], say: "Each chart builds in as it comes into view." }] }])),
   motion: { title: "Platform Alpha motion", steps: [{ heading: "Motion", say: "Every card builds in as it comes into view." }, { heading: "Line draws, area reveals, dots pop", say: "Lines draw themselves, areas sweep in and points pop." }] },
   settings: { title: "Platform Alpha settings", steps: [{ heading: "Settings", say: "Form fields and every button style." }] },
 };
 
 const nav = () => PAGES.map(([id, ic, label]) => `<a href="#${id}" ${page() === id ? 'aria-current="page"' : ""} title="${label}">${icon(ic)}<span>${label}</span></a>`).join("");
-const skin = createPlayskin();
+const skin = createOrbit();
 let filming = { available: false, busy: false, recording: false };
 // Hidden while filming, so the button never shows in its own video.
 const recordButton = () => `<button class="btn record-action" data-button="outline" data-record data-record-hide ${filming.available ? "" : "hidden"} ${filming.busy ? 'aria-busy="true"' : ""} aria-label="Record a narrated tour of this page">${icon("record")}<span class="record-label">${filming.busy ? "Getting ready" : "Record"}</span></button>`;
@@ -120,7 +120,7 @@ function render() {
       <nav class="rail" data-nav aria-label="Main">${nav()}</nav>
       <main>${BODY[page()]()}</main>
     </div>
-    <nav class="tabbar" data-nav data-playskin-floor aria-label="Main">${nav()}</nav>`;
+    <nav class="tabbar" data-nav data-orbit-floor aria-label="Main">${nav()}</nav>`;
   record.refresh();
 }
 

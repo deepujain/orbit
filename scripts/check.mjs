@@ -27,4 +27,4 @@ for (const path of files("themes")) {
 const tests = readdirSync("test").filter((name) => name.endsWith(".test.js")).map((name) => join("test", name));
 if (tests.length && spawnSync(process.execPath, ["--test", ...tests], { stdio: "inherit" }).status !== 0) failed = true;
 if (failed) process.exit(1);
-console.log("playskin: all checks pass");
+console.log("orbit: all checks pass");

@@ -6,12 +6,12 @@ export type Theme = "aura" | "crayon" | "whiskers";
 
 export declare const THEMES: Theme[];
 export declare const THEME_NAMES: Record<Theme, string>;
-export declare const CHANGE_EVENT: "playskin-change";
+export declare const CHANGE_EVENT: "orbit-change";
 export { mountCrayonDoodles } from "./crayon-doodles.js";
 export { startCrayon } from "./crayon.js";
 export { startMotion } from "./motion.js";
 
-export interface PlayskinOptions {
+export interface OrbitOptions {
   themes?: string[];
   storageKey?: string | null;
   attribute?: string;
@@ -22,7 +22,7 @@ export interface PlayskinOptions {
   motion?: MotionOptions | false;
 }
 
-export interface Playskin {
+export interface Orbit {
   get(): string | null;
   set(theme: string | null): string | null;
   subscribe(fn: (theme: string | null) => void): () => void;
@@ -30,7 +30,9 @@ export interface Playskin {
   destroy(): void;
 }
 
-export declare function createPlayskin(options?: PlayskinOptions): Playskin;
+export declare function createOrbit(options?: OrbitOptions): Orbit;
 export declare function setTheme(theme: string | null): string | null;
 export declare function getTheme(): string | null;
+/** Moves choices saved under the old name, playskin and playskin.*, to orbit and orbit.*. */
+export declare function moveSaved(store?: Storage): void;
 export declare function bootScript(options?: { storageKey?: string; attribute?: string; themes?: string[] }): string;

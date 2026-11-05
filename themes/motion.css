@@ -1,4 +1,4 @@
-/* playskin motion: the build-in effects startMotion() plays. Mark a block with data-motion and each moving part
+/* orbit motion: the build-in effects startMotion() plays. Mark a block with data-motion and each moving part
    with data-m="<effect>"; parts side by side start --m-step apart (at most --m-cap steps, twelve unless set),
    after --m-delay.
    Works with any skin or none. Under reduced motion nothing moves and everything shows as it ends. */

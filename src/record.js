@@ -118,7 +118,7 @@ const pinned = (el) => {
  * Options: script (a function returning the current page's script, or null), intro (steps that lead every script),
  * voice (async text => ArrayBuffer of audio, or null for captions alone), button (false to draw no button and let the
  * app call start), show (a function saying whether the button is out; defaults to always while the page has a
- * script), root (marked data-playskin-recording while filming), headings (where heading steps look), sectionOf (the
+ * script), root (marked data-orbit-recording while filming), headings (where heading steps look), sectionOf (the
  * part to ring for a matched heading), offset (pixels left above a part when the page scrolls to it), label (the
  * button text), onChange ({ available, busy, recording }) whenever that changes, onMessage (text, tone) for problems
  * and the saved length.
@@ -148,10 +148,10 @@ export function startRecord({
   const visible = () => safe(show);
   const current = () => safe(() => withIntro(script(), intro));
   const make = (cls, tag = "div") => Object.assign(document.createElement(tag), { className: cls, hidden: true });
-  const button = make("playskin-record", "button");
+  const button = make("orbit-record", "button");
   button.type = "button";
-  const ring = make("playskin-record-ring");
-  const caption = make("playskin-record-caption");
+  const ring = make("orbit-record-ring");
+  const caption = make("orbit-record-caption");
   caption.setAttribute("aria-live", "polite");
   document.body.append(...(drawButton ? [button] : []), ring, caption);
   let run = null;
@@ -173,9 +173,9 @@ export function startRecord({
     }
     button.hidden = !s && !run;
     button.classList.toggle("is-busy", Boolean(run));
-    button.innerHTML = `<i class="playskin-record-dot"></i>${run ? (run.recording ? "Recording" : "Getting the voice ready") : label}`;
+    button.innerHTML = `<i class="orbit-record-dot"></i>${run ? (run.recording ? "Recording" : "Getting the voice ready") : label}`;
     button.setAttribute("aria-label", run ? "Recording. Press Esc to stop" : `${label} this page with its narration`);
-    root.toggleAttribute("data-playskin-recording", Boolean(run?.recording));
+    root.toggleAttribute("data-orbit-recording", Boolean(run?.recording));
   }
   function follow() {
     if (!run) return;
