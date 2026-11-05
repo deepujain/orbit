@@ -38,7 +38,7 @@ The same demo page in each skin, light on the left and dark on the right.
 
 ## Try it
 
-Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small control room for an offshore oil rig, with cards, charts, tabs, a form, its own dropdowns, a side menu that opens when you point at it, and every button style. Its Production, Wells, Drilling, Safety, Permits, Supply and Costs pages show every chart `playskin/charts` draws between them, a few to a page, on made-up rig numbers, and its Motion page shows every effect `motion.css` plays. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Record has a narrated tour for every page. `index.html` is a one-page demo of the same skins.
+Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small control room for an offshore oil rig, with cards, charts, tabs, a form, its own dropdowns, a side menu that opens when you point at it, and every button style. It shows each chart type `playskin/charts` draws once, on made-up rig numbers: a few on the dashboard, a few to each of its Production, Wells, Drilling, Safety, Supply and Costs pages, and the rest on its Motion page, which plays every effect `motion.css` has. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Record has a narrated tour for every page. `index.html` is a one-page demo of the same skins.
 
 ## Use it on any page
 
@@ -263,7 +263,7 @@ el.innerHTML = columns({ rows: [{ label: "Mon", value: 820 }, { label: "Tue", va
 | Shares | `treemap`, `breakdownStrip`, `tickBreakdown`, `hexShare`, `segmentedProgress`, `shareTable` |
 | Grids, rows and flows | `heatGrid`, `calendarHeat`, `monthCalendar`, `butterfly`, `dotRows`, `funnel`, `stockBridge`, `shiftTimeline`, `rankTiles`, `dropColumns`, `flow` |
 
-Charts drawn in SVG take `width` and `height` in drawing units; give a wide card a larger `width` so its text stays the same size. `example/charts-page.js` calls every builder, grouped into Orbit's pages.
+Charts drawn in SVG take `width` and `height` in drawing units; give a wide card a larger `width` so its text stays the same size. Orbit shows each chart type once: the dashboard in `example/app.js`, the chart pages in `example/charts-page.js` and the Motion page in `example/motion-page.js`.
 
 ## Credits
 

@@ -7,7 +7,7 @@ import { CHART_PAGES, chartPage, chartCount } from "../example/charts-page.js";
 import { motionPage } from "../example/motion-page.js";
 
 const motionCss = readFileSync(new URL("../themes/motion.css", import.meta.url), "utf8");
-const pageSource = readFileSync(new URL("../example/charts-page.js", import.meta.url), "utf8");
+const orbitSource = ["app.js", "charts-page.js", "motion-page.js"].map((f) => readFileSync(new URL(`../example/${f}`, import.meta.url), "utf8")).join("\n");
 
 test("a count keeps what is around its number, its decimals and its digit grouping", () => {
   const c = parseCount("$1,204.50k");
@@ -29,12 +29,27 @@ test("big numbers read short", () => {
 
 const chartsPage = () => CHART_PAGES.map((p) => chartPage(p.id)).join("");
 
-test("the chart pages show every chart playskin draws between them, a few to a page, each a motion block with sound numbers", () => {
+// A builder that only restyles another (areaChart is a lineChart) or is drawn inside another (podium ends in
+// lollipops) is already on screen, so showing it on its own would repeat a chart type.
+const drawnElsewhere = () => {
+  const src = readFileSync(new URL("../src/charts.js", import.meta.url), "utf8");
+  const names = Object.keys(CHARTS), out = new Set();
+  for (const [, name, body] of src.matchAll(/export function (\w+)\([^)]*\)\s*\{([\s\S]*?)\n\}/g)) {
+    for (const other of names) if (other !== name && new RegExp(`(?<![\\w.])${other}\\(`).test(body)) out.add(new RegExp(`^\\s*return ${other}\\(`).test(body) ? name : other);
+  }
+  return out;
+};
+
+test("Orbit shows each chart type once across its dashboard, chart pages and Motion page", () => {
+  const skip = drawnElsewhere();
+  assert.deepEqual([...skip].sort(), ["areaChart", "lollipops"]);
+  for (const name of Object.keys(CHARTS)) assert.equal((orbitSource.match(new RegExp(`\\bc\\.${name}\\(`, "g")) || []).length, skip.has(name) ? 0 : 1, `${name} appears ${skip.has(name) ? "only inside another chart" : "once"} in Orbit`);
+});
+
+test("the chart pages show a few charts to a page, each a motion block with sound numbers", () => {
   const html = chartsPage();
   for (const p of CHART_PAGES) assert.ok(p.sections.reduce((n, [, items]) => n + items.length, 0) <= 10, `${p.label} is not crowded`);
-  for (const name of Object.keys(CHARTS)) assert.match(pageSource, new RegExp(`c\\.${name}\\(`), `${name} is on the Charts page`);
-  assert.ok(chartCount >= 40);
-  assert.ok((html.match(/class="pc pc-k-/g) || []).length >= Object.keys(CHARTS).length);
+  assert.ok((html.match(/class="pc pc-k-/g) || []).length >= chartCount);
   assert.doesNotMatch(html, /NaN|undefined|Infinity|\[object/);
   assert.equal((html.match(/class="pc pc-k-/g) || []).length, (html.match(/<div class="pc pc-k-[^"]*" data-motion/g) || []).length + (html.match(/pc-k-lollipop"(?! data-motion)/g) || []).length);
 });

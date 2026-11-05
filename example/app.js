@@ -2,7 +2,7 @@
    data-brand, data-wordmark, data-nav, data-theme-toggle, data-card, data-button, data-cat-chart) and redraws the whole
    page on every navigation, as real apps do, so each skin has to keep up on its own. */
 import { createPlayskin, THEME_NAMES } from "../src/index.js";
-import { rankedBars, blockGauge, splitGauge, rankTiles, compact } from "../src/charts.js";
+import * as c from "../src/charts.js";
 import { CHART_PAGES, chartPage } from "./charts-page.js";
 import { motionPage } from "./motion-page.js";
 
@@ -18,7 +18,6 @@ const ICONS = {
   derrick: '<path d="M12 2L6 22M12 2l6 20M10 8h4M8.5 13h7M7.3 17.5h9.4"/>',
   drill: '<path d="M5 3h14l-2 5H7zM9 8v5l3 3 3-3V8M12 16v6"/>',
   shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-  clipboard: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 13l2 2 4-4"/>',
   ship: '<path d="M2 20c1.5 1.3 3.5 1.3 5 0s3.5-1.3 5 0 3.5 1.3 5 0 3.5-1.3 5 0M4 17l-1-6h18l-1 6M12 11V3M8 7h8"/>',
   dollar: '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
   spark: '<path d="M12 3l2.2 6.3L20.5 12l-6.3 2.2L12 20.5l-2.2-6.3L3.5 12l6.3-2.7z"/>',
@@ -41,11 +40,9 @@ const SKINS = [["", "Plain", "The app's own look"], ["aura", THEME_NAMES.aura, "
 const TEAMS = [["Drill crew", "Drill crew", "Runs the drill floor"], ["Deck crew", "Deck crew", "Cranes, cargo and the boats"], ["Maintenance", "Maintenance", "Keeps pumps, engines and power running"], ["Control room", "Control room", "Watches the wells and the process"]];
 
 const page = () => (PAGES.some(([id]) => id === location.hash.slice(1)) ? location.hash.slice(1) : "dashboard");
-const cards = (items) => `<div class="grid" data-motion>${items.map(([title, value, delta]) => `<section class="card" data-card data-m="rise"><h3 data-card-title>${title}</h3><div class="stat" data-count>${value}</div><div class="delta">${delta}</div></section>`).join("")}</div>`;
-const chart = (rows) => {
-  const max = Math.max(...rows.map(([, v]) => v));
-  return `<div class="chart" data-cat-chart data-m-group role="img" aria-label="Barrels of oil produced">${rows.map(([label, v]) => `<div class="bar" title="${compact(v)} bbl"><i data-m="grow-y sheen" style="height:${Math.round((v / max) * 100)}%"></i>${label}</div>`).join("")}</div>`;
-};
+const bbl = (v) => `${c.compact(v)} bbl`;
+const KPIS = [["Oil today", "18,420 bbl", 3, 1], ["On board", "112", 4, 2], ["Uptime", "97.2%", 1.4, 3], ["Gas flared", "1.8 MMscf", -14, 4, true]];
+const kpis = () => `<div class="grid">${KPIS.map(([label, value, delta, seed, invert]) => `<section class="card" data-card>${c.kpi({ label, value, delta, invert, values: Array.from({ length: 10 }, (_, i) => 50 + 12 * Math.sin(i / 1.6 + seed) + (invert ? -i : i) * 2) })}</section>`).join("")}</div>`;
 // A dropdown drawn by the app rather than the browser, so every skin dresses it. Opening it changes only the menu, so
 // the page and its charts are not drawn again.
 const menu = (id, label, options, value, cls = "") => {
@@ -60,17 +57,17 @@ const BODY = {
   dashboard: () => `
     <div class="page-head"><div><h1>Good morning, Platform Alpha</h1><p class="lede">Six wells flowing, one on test. Seas are calm and the next crew change is Thursday.</p></div>
       <div class="row"><button class="btn" data-button="outline">Share report</button><button class="btn" data-button="default">${icon("plus")}New permit</button></div></div>
-    ${cards([["Oil today", "18,420 bbl", "Up 3% on yesterday"], ["On board", "112", "Crew change Thursday"], ["Uptime", "97.2%", "Up from 95.8%"], ["Days without injury", "214", "Best run this year"]])}
+    ${kpis()}
     <h2>Oil produced</h2>
-    <section class="card wide" data-card data-motion>
+    <section class="card wide" data-card>
       <div class="tabs" role="tablist">${["week", "month", "year"].map((t) => `<button role="tab" data-tab="${t}" aria-selected="${state.tab === t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join("")}</div>
-      ${chart(OUTPUT[state.tab])}
+      ${c.columns({ rows: OUTPUT[state.tab].map(([label, value]) => ({ label, value })), format: bbl, width: 900, height: 240 })}
     </section>
     <div class="shows dash">
-      <section class="card" data-card><h3 data-card-title>Output by well</h3>${rankedBars({ rows: [["A-1", 4200], ["A-2", 3650], ["A-3", 3100], ["A-4", 2900], ["A-5", 2400], ["A-6", 1800]].map(([label, value]) => ({ label, value })), format: (v) => `${compact(v)} bbl` })}</section>
-      <section class="card" data-card><h3 data-card-title>Rig time today</h3>${splitGauge({ rows: [["Working", 21.5], ["Repairs", 1.5], ["Weather", 1]].map(([label, value]) => ({ label, value })), format: (v) => `${v}h`, center: "Hours" })}</section>
-      <section class="card" data-card><h3 data-card-title>Uptime</h3>${blockGauge({ value: 0.97, label: "97%", caption: "Uptime this month" })}</section>
-      <section class="card" data-card><h3 data-card-title>Most permits issued</h3>${rankTiles({ rows: [["Drill floor", 64], ["Pipe deck", 51], ["Pump room", 38], ["Process deck", 22]].map(([label, value]) => ({ label, value })), unit: "permits" })}</section>
+      <section class="card" data-card><h3 data-card-title>Output by well</h3>${c.rankedBars({ rows: [["A-1", 4200], ["A-2", 3650], ["A-3", 3100], ["A-4", 2900], ["A-5", 2400], ["A-6", 1800]].map(([label, value]) => ({ label, value })), format: bbl })}</section>
+      <section class="card" data-card><h3 data-card-title>Rig time today</h3>${c.splitGauge({ rows: [["Working", 21.5], ["Repairs", 1.5], ["Weather", 1]].map(([label, value]) => ({ label, value })), format: (v) => `${v}h`, center: "Hours" })}</section>
+      <section class="card" data-card><h3 data-card-title>Uptime</h3>${c.blockGauge({ value: 0.97, label: "97%", caption: "Uptime this month" })}</section>
+      <section class="card" data-card><h3 data-card-title>Most permits issued</h3>${c.rankTiles({ rows: [["Drill floor", 64], ["Pipe deck", 51], ["Pump room", 38], ["Process deck", 22]].map(([label, value]) => ({ label, value })), unit: "permits" })}</section>
     </div>`,
   settings: () => `
     <div class="page-head"><div><h1>Settings</h1><p class="lede">Your profile and the reports you get.</p></div></div>
