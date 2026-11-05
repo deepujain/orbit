@@ -38,7 +38,7 @@ The same demo page in each skin, light on the left and dark on the right.
 
 ## Try it
 
-Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small dashboard with cards, charts, tabs, a form, its own dropdowns and every button style. Its Charts page shows every chart `playskin/charts` draws on made-up numbers, and its Motion page shows every effect `motion.css` plays. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Record has a narrated tour for every page. `index.html` is a one-page demo of the same skins.
+Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small control room for an offshore oil rig, with cards, charts, tabs, a form, its own dropdowns, a side menu that opens when you point at it, and every button style. Its Charts page shows every chart `playskin/charts` draws on made-up rig numbers, and its Motion page shows every effect `motion.css` plays. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Record has a narrated tour for every page. `index.html` is a one-page demo of the same skins.
 
 ## Use it on any page
 
@@ -237,6 +237,7 @@ Mark a block with `data-motion` and each moving part inside it with `data-m`. Pa
 | `pop`, `zoom`, `flip` | Pops out from its centre, spins in, or flips down like a split-flap tile |
 | `draw` | Draws an SVG line or ring; give it `pathLength="1"`, and `--m-fill` (0 to 1) to draw only part of it |
 | `reveal` | Sweeps an area in from left to right |
+| `drop` | Falls from `--m-x0`, `--m-y0` through `--m-x1`, `--m-y1` (offsets from where it rests) and settles with a small bounce |
 | `sheen` | One light sweep across the part after it has grown |
 | `pulse`, `float`, `shimmer` | Always on: a live dot, a gentle bob, a loading skeleton |
 
@@ -259,8 +260,8 @@ el.innerHTML = columns({ rows: [{ label: "Mon", value: 820 }, { label: "Tue", va
 | Columns and bars | `columns`, `stackedColumns`, `rankedBars`, `comboBarLine`, `highlightBars`, `targetBars`, `progressTargets`, `lollipops`, `podium`, `avatarColumns`, `dotMatrix`, `waterfall`, `bandColumns` |
 | Lines and areas | `lineChart`, `areaChart`, `marginStrips`, `flowRibbon`, `stageArea` |
 | Rings, pies and gauges | `donut`, `pie`, `hatchedDonut`, `radialRanks`, `splitGauge`, `blockGauge`, `gauge`, `radialSegments`, `coverageRings` |
-| Shares | `treemap`, `breakdownStrip`, `tickBreakdown`, `hexShare`, `segmentedProgress` |
-| Grids, rows and flows | `heatGrid`, `calendarHeat`, `butterfly`, `dotRows`, `funnel`, `stockBridge`, `shiftTimeline`, `rankTiles`, `flow` |
+| Shares | `treemap`, `breakdownStrip`, `tickBreakdown`, `hexShare`, `segmentedProgress`, `shareTable` |
+| Grids, rows and flows | `heatGrid`, `calendarHeat`, `monthCalendar`, `butterfly`, `dotRows`, `funnel`, `stockBridge`, `shiftTimeline`, `rankTiles`, `dropColumns`, `flow` |
 
 Charts drawn in SVG take `width` and `height` in drawing units; give a wide card a larger `width` so its text stays the same size. `example/charts-page.js` calls every builder.
 

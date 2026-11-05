@@ -1,12 +1,20 @@
-/* Orbit's Charts page: every chart playskin/charts draws, on made-up numbers for a small coffee chain. */
+/* Orbit's Charts page: every chart playskin/charts draws, on made-up numbers for Platform Alpha, an offshore oil rig. */
 import * as c from "../src/charts.js";
 
 const money = (v) => `$${c.compact(v)}`;
+const bbl = (v) => `${c.compact(v)} bbl`;
+const hrs = (v) => `${v}h`;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const SHOPS = ["Harbor", "Old Town", "Riverside", "Airport", "Campus", "Market"];
-const DRINKS = [["Latte", 4200], ["Cold brew", 3100], ["Espresso", 2300], ["Mocha", 1500], ["Tea", 900], ["Juice", 600], ["Water", 400]].map(([label, value]) => ({ label, value }));
+const WELLS = ["A-1", "A-2", "A-3", "A-4", "A-5", "A-6"];
+const OUTPUT = [4200, 3650, 3100, 2900, 2400, 1800];
+const CREWS = ["Drill crew", "Deck crew", "Mechanics", "Electricians", "Control room", "Catering"];
+const PEOPLE = ["Maya Ray", "Arjun Mehta", "Lena Fox", "Sam Ito", "Priya Das", "Omar Ali", "Kai Berg"];
+const AREAS = ["Drill floor", "Pipe deck", "Pump room", "Process deck", "Helideck", "Living quarters"];
+const SPEND = [["Rig day rate", 182000, 1], ["Fuel", 41000, 18], ["Supply boats", 36000, 9], ["Helicopters", 28000, 12], ["Chemicals", 17000, 22], ["Catering", 12000, 31], ["Rentals", 9000, 7]].map(([label, value, count]) => ({ label, value, count }));
+const DAY = [["Drilling", 11.5], ["Tripping pipe", 5], ["Running casing", 3.5], ["Circulating", 2.5], ["Waiting on weather", 1.5]].map(([label, value]) => ({ label, value }));
 const wave = (n, base, amp, seed = 1) => Array.from({ length: n }, (_, i) => Math.round(base + amp * Math.sin(i / 1.7 + seed) + (i * amp) / n + ((i * 37 + seed * 11) % 7) * (amp / 10)));
+const october = (fn) => Array.from({ length: 31 }, (_, i) => fn(i + 1, (i + 3) % 7));
 
 const card = (title, spark, body, wide = false) => `
   <section class="card chart-card${wide ? " wide" : ""}" data-card>
@@ -17,60 +25,65 @@ const card = (title, spark, body, wide = false) => `
 
 const SECTIONS = [
   ["Numbers", [
-    ["Headline", "headline", c.headline({ value: "$48,210", delta: 12, caption: "Sales this week, against last week" })],
-    ["Stat line", "statLine", c.statLine({ items: [["Orders", "1,284"], ["Average", "$7.40"], ["Refunds", "6"], ["Tips", "$912"]] })],
-    ["KPI with sparkline", "kpi", `<div class="kpis">${c.kpi({ label: "Revenue", value: "$9,420", delta: 8, values: wave(10, 60, 14) })}${c.kpi({ label: "Waste", value: "3.1%", delta: -14, invert: true, values: wave(10, 40, 10, 3).reverse() })}</div>`, true],
+    ["Headline", "headline", c.headline({ value: "18,420 bbl", delta: 3, caption: "Oil produced today, against yesterday" })],
+    ["Stat line", "statLine", c.statLine({ items: [["On board", "112"], ["Gas", "24.6 MMscf"], ["Water cut", "31%"], ["Uptime", "97.2%"]] })],
+    ["KPI with sparkline", "kpi", `<div class="kpis">${c.kpi({ label: "Oil rate", value: "18,420 bbl/d", delta: 3, values: wave(10, 60, 14) })}${c.kpi({ label: "Gas flared", value: "1.8 MMscf", delta: -14, invert: true, values: wave(10, 40, 10, 3).reverse() })}</div>`, true],
   ]],
   ["Columns and bars", [
-    ["Columns with average", "columns (BarChart)", c.columns({ rows: DAYS.map((label, i) => ({ label, value: [820, 940, 880, 1120, 1380, 1720, 1510][i] })), format: money })],
-    ["Stacked columns", "stackedColumns (stackId)", c.stackedColumns({ rows: DAYS.map((label, i) => ({ label, values: [300 + i * 40, 220 + ((i * 53) % 140), 120 + i * 18] })), keys: ["Dine in", "Takeaway", "Delivery"] })],
-    ["Ranked bars", "RankedBars", c.rankedBars({ rows: SHOPS.map((label, i) => ({ label, value: [18400, 15200, 12900, 9800, 7100, 4300][i] })), format: money })],
-    ["Bars and a line", "ComboBarLine (ComposedChart)", c.comboBarLine({ rows: DRINKS.slice(0, 6).map((d, i) => ({ ...d, rate: [62, 71, 74, 58, 80, 45][i] })), format: money })],
-    ["Highlighted bar", "HighlightBars", c.highlightBars({ rows: MONTHS.slice(0, 9).map((label, i) => ({ label, value: wave(9, 50, 20, 2)[i] })), tabs: ["Sales", "Orders", "Visits"] })],
-    ["Against target", "TargetBars", c.targetBars({ rows: SHOPS.slice(0, 5).map((label, i) => ({ label, value: [82, 64, 95, 41, 70][i], target: [100, 90, 100, 80, 85][i] })) })],
-    ["Progress against target", "ProgressTargets", c.progressTargets({ rows: SHOPS.slice(0, 5).map((label, i) => ({ label, value: [9200, 7600, 11400, 5100, 6800][i] })), target: 9000, format: money })],
-    ["Lollipops", "LollipopColumns", c.lollipops({ rows: SHOPS.map((label, i) => ({ label, value: [312, 280, 244, 198, 150, 96][i] })) })],
-    ["Podium", "PodiumLeaders", c.podium({ rows: ["Maya", "Arjun", "Lena", "Sam", "Priya", "Omar", "Kai"].map((label, i) => ({ label, value: [148, 131, 122, 98, 87, 71, 54][i] })) })],
-    ["Stacked with avatars", "StackedAvatarColumns", c.avatarColumns({ rows: ["Maya Ray", "Arjun Mehta", "Lena Fox", "Sam Ito", "Priya Das", "Omar Ali"].map((label, i) => ({ label, values: [40 + i * 7, 30 + ((i * 13) % 25), 20 + ((i * 7) % 18)] })), keys: ["Coffee", "Food", "Beans"] })],
-    ["Dot matrix", "DotMatrixColumns", c.dotMatrix({ rows: MONTHS.slice(0, 8).map((label, i) => ({ label, values: [3 + (i % 3), 2 + ((i * 5) % 4), 1 + ((i * 3) % 5)] })), keys: ["New", "Returning", "Members"] })],
-    ["Waterfall", "WaterfallColumns", c.waterfall({ width: 900, height: 260, steps: [{ label: "Sales", value: 48000, total: true }, { label: "Beans", value: -14200 }, { label: "Staff", value: -16800 }, { label: "Rent", value: -6200 }, { label: "Catering", value: 5400 }, { label: "Profit", value: 16200, total: true }], format: money }), true],
-    ["Band columns", "StackedBandColumns", c.bandColumns({ periods: ["Q1", "Q2", "Q3", "Q4"].map((label, i) => ({ label, values: [120 + i * 30, 90 + ((i * 41) % 60), 60 + i * 12] })), keys: ["Coffee", "Food", "Beans"] })],
+    ["Oil produced each day", "columns (BarChart)", c.columns({ rows: DAYS.map((label, i) => ({ label, value: [17200, 17900, 18100, 16400, 18800, 19300, 18420][i] })), format: bbl })],
+    ["Rig hours by activity", "stackedColumns (stackId)", c.stackedColumns({ rows: DAYS.map((label, i) => ({ label, values: [12 + (i % 3), 6 - (i % 2), 3 + ((i * 2) % 3)] })), keys: ["Drilling", "Tripping", "Casing"], format: hrs })],
+    ["Output by well", "RankedBars", c.rankedBars({ rows: WELLS.map((label, i) => ({ label, value: OUTPUT[i] })), format: bbl })],
+    ["Output and water cut", "ComboBarLine (ComposedChart)", c.comboBarLine({ rows: WELLS.map((label, i) => ({ label, value: OUTPUT[i], rate: [18, 24, 31, 36, 42, 55][i] })), format: bbl })],
+    ["Monthly output", "HighlightBars", c.highlightBars({ rows: MONTHS.slice(0, 9).map((label, i) => ({ label, value: wave(9, 520, 60, 2)[i] * 1000 })), tabs: ["Oil", "Gas", "Water"], format: bbl })],
+    ["Wells against plan", "TargetBars", c.targetBars({ rows: WELLS.slice(0, 5).map((label, i) => ({ label, value: [3900, 3400, 3200, 2500, 2300][i], target: [4000, 3800, 3300, 3000, 2600][i] })), format: bbl })],
+    ["Safety cards against target", "ProgressTargets", c.progressTargets({ rows: CREWS.slice(0, 5).map((label, i) => ({ label, value: [46, 38, 52, 29, 35][i] })), target: 40 })],
+    ["Work orders closed", "LollipopColumns", c.lollipops({ rows: CREWS.map((label, i) => ({ label, value: [64, 51, 47, 38, 29, 18][i] })) })],
+    ["Most safety cards", "PodiumLeaders", c.podium({ rows: PEOPLE.map((label, i) => ({ label, value: [48, 41, 37, 30, 26, 21, 15][i] })) })],
+    ["Hours by person", "StackedAvatarColumns", c.avatarColumns({ rows: PEOPLE.slice(0, 6).map((label, i) => ({ label, values: [40 + i * 7, 30 + ((i * 13) % 25), 8 + ((i * 7) % 10)] })), keys: ["Drilling", "Maintenance", "Drills and training"], format: hrs })],
+    ["Trips to the rig", "DotMatrixColumns", c.dotMatrix({ rows: MONTHS.slice(0, 8).map((label, i) => ({ label, values: [3 + (i % 3), 2 + ((i * 5) % 4), 1 + ((i * 3) % 5)] })), keys: ["Supply boats", "Helicopters", "Crew change"] })],
+    ["From the wells to the tanker", "WaterfallColumns", c.waterfall({ width: 900, height: 260, steps: [{ label: "Well output", value: 21400, total: true }, { label: "Used on rig", value: -620 }, { label: "Flared", value: -480 }, { label: "Shrinkage", value: -220 }, { label: "From storage", value: 500 }, { label: "Sold", value: 20580, total: true }], format: bbl }), true],
+    ["Output by quarter", "StackedBandColumns", c.bandColumns({ periods: ["Q1", "Q2", "Q3", "Q4"].map((label, i) => ({ label, values: [1200 + i * 300, 900 + ((i * 410) % 600), 600 + i * 120] })), keys: ["Oil", "Gas", "Condensate"], format: (v) => `${c.compact(v)}k boe` })],
   ]],
   ["Lines and areas", [
-    ["Line with target and peak", "LineChart + ReferenceLine + ReferenceDot", c.lineChart({ width: 900, height: 260, labels: MONTHS, series: [{ name: "Visits", values: wave(12, 60, 22) }, { name: "Orders", values: wave(12, 38, 14, 4) }], target: 90 }), true],
-    ["This period against last", "AreaChart", c.areaChart({ labels: DAYS, now: [42, 50, 47, 66, 72, 91, 80], before: [38, 44, 49, 52, 61, 70, 74], format: money })],
-    ["Margin strips", "MarginStrips", c.marginStrips({ series: [{ name: "Coffee", values: wave(14, 62, 5) }, { name: "Food", values: wave(14, 38, 6, 2) }, { name: "Beans", values: wave(14, 24, 4, 5) }] })],
-    ["Flow ribbon", "FlowRibbon", c.flowRibbon({ width: 900, height: 240, labels: MONTHS, series: [{ name: "Latte", values: wave(12, 40, 12) }, { name: "Cold brew", values: wave(12, 25, 15, 2) }, { name: "Tea", values: wave(12, 15, 6, 4) }], markers: [3, 8] }), true],
-    ["Stage area", "LayeredStageArea", c.stageArea({ width: 900, height: 180, stages: [["Visited", 12000], ["Browsed", 7400], ["Added", 3900], ["Paid", 2600], ["Came back", 1100]].map(([label, value]) => ({ label, value })) }), true],
+    ["Monthly output with target", "LineChart + ReferenceLine + ReferenceDot", c.lineChart({ width: 900, height: 260, labels: MONTHS, series: [{ name: "Oil", values: wave(12, 560, 120).map((v) => v * 1000) }, { name: "Water", values: wave(12, 260, 70, 4).map((v) => v * 1000) }], target: 700000, format: bbl }), true],
+    ["Drilling speed, this week against last", "AreaChart", c.areaChart({ labels: DAYS, now: [42, 50, 47, 66, 72, 91, 80], before: [38, 44, 49, 52, 61, 70, 74], format: (v) => `${v} ft/h` })],
+    ["Water cut by well", "MarginStrips", c.marginStrips({ series: [{ name: "A-1", values: wave(14, 18, 3) }, { name: "A-3", values: wave(14, 31, 4, 2) }, { name: "A-6", values: wave(14, 52, 5, 5) }] })],
+    ["What the rig produces", "FlowRibbon", c.flowRibbon({ width: 900, height: 240, labels: MONTHS, series: [{ name: "Oil", values: wave(12, 40, 12) }, { name: "Gas", values: wave(12, 25, 15, 2) }, { name: "Water", values: wave(12, 15, 6, 4) }], markers: [3, 8] }), true],
+    ["Permits to work", "LayeredStageArea", c.stageArea({ width: 900, height: 180, stages: [["Raised", 1200], ["Reviewed", 980], ["Approved", 860], ["Issued", 820], ["Closed", 790]].map(([label, value]) => ({ label, value })) }), true],
   ]],
   ["Rings, pies and gauges", [
-    ["Donut with legend", "DonutWithLegend (Pie)", c.donut({ rows: DRINKS.slice(0, 5), format: money })],
-    ["Pie", "PieChart", c.pie({ rows: DRINKS.slice(0, 5), format: money })],
-    ["Hatched donut", "HatchedDonut", c.hatchedDonut({ rows: DRINKS, format: money })],
-    ["Radial bars", "RadialRanks (RadialBarChart)", c.radialRanks({ rows: SHOPS.slice(0, 5).map((label, i) => ({ label, value: [920, 780, 640, 510, 300][i] })) })],
-    ["Split gauge", "SplitGauge", c.splitGauge({ rows: [["Card", 31200], ["Cash", 9800], ["App", 7200]].map(([label, value]) => ({ label, value })), format: money })],
-    ["Block gauge", "BlockGauge", c.blockGauge({ value: 0.78, label: "78%", caption: "Orders on time" })],
-    ["Gauge", "gauge", c.gauge({ value: 0.64, label: "64", caption: "Health score" })],
-    ["Polar segments", "RadialSegments", c.radialSegments({ rows: Array.from({ length: 24 }, (_, h) => ({ label: `${h}:00`, value: Math.max(4, Math.round(60 * Math.exp(-((h - 9) ** 2) / 8) + 40 * Math.exp(-((h - 15) ** 2) / 10))) })), center: "Orders by hour" })],
-    ["Coverage rings", "CoverageRings", c.coverageRings({ rows: ["Maya Ray", "Arjun Mehta", "Lena Fox", "Sam Ito", "Priya Das"].map((label, i) => ({ label, value: [96, 84, 67, 52, 31][i] })), unit: "of visits" }), true],
+    ["Where today went", "DonutWithLegend (Pie)", c.donut({ rows: DAY, format: hrs, center: "Hours" })],
+    ["Diesel by user", "PieChart", c.pie({ rows: [["Generators", 38], ["Mud pumps", 21], ["Supply boat", 14], ["Cranes", 9], ["Living quarters", 7]].map(([label, value]) => ({ label, value })), format: (v) => `${v} m³` })],
+    ["Spend today", "HatchedDonut", c.hatchedDonut({ rows: SPEND, format: money })],
+    ["Output by well", "RadialRanks (RadialBarChart)", c.radialRanks({ rows: WELLS.slice(0, 5).map((label, i) => ({ label, value: OUTPUT[i] })), format: bbl })],
+    ["Rig time", "SplitGauge", c.splitGauge({ rows: [["Working", 21.5], ["Repairs", 1.5], ["Weather", 1]].map(([label, value]) => ({ label, value })), format: hrs, center: "Hours" })],
+    ["Rig uptime", "BlockGauge", c.blockGauge({ value: 0.97, label: "97%", caption: "Uptime this month" })],
+    ["Mud pit level", "gauge", c.gauge({ value: 0.64, label: "64%", caption: "Active mud pits" })],
+    ["Crane lifts by hour", "RadialSegments", c.radialSegments({ rows: Array.from({ length: 24 }, (_, h) => ({ label: `${h}:00`, value: Math.max(2, Math.round(30 * Math.exp(-((h - 9) ** 2) / 8) + 22 * Math.exp(-((h - 15) ** 2) / 10))) })), center: "Crane lifts" })],
+    ["Inspections done", "CoverageRings", c.coverageRings({ rows: PEOPLE.slice(0, 5).map((label, i) => ({ label, value: [96, 84, 67, 52, 31][i] })), unit: "of checks" }), true],
   ]],
   ["Shares", [
-    ["Treemap", "ShareTreemap (Treemap)", c.treemap({ rows: DRINKS, format: money }), true],
-    ["Breakdown strip", "BreakdownStrip", c.breakdownStrip({ rows: DRINKS.slice(0, 5), format: money })],
-    ["Tick breakdown", "TickBreakdown", c.tickBreakdown({ rows: DRINKS.slice(0, 4), format: money }), true],
-    ["Segmented progress", "SegmentedProgress", `${c.segmentedProgress({ value: 0.72, label: "Monthly goal" })}${c.segmentedProgress({ value: 0.35, label: "Bean stock" })}`],
-    ["Hex share", "HexBinShare", c.hexShare({ rows: DRINKS.slice(0, 5), format: money }), true],
+    ["Spend today", "ShareTreemap (Treemap)", c.treemap({ rows: SPEND, format: money }), true],
+    ["Spend split", "BreakdownStrip", c.breakdownStrip({ rows: SPEND.slice(0, 5), format: money })],
+    ["Spend, each tick $1k", "TickBreakdown", c.tickBreakdown({ rows: SPEND.slice(1, 5), format: money }), true],
+    ["Progress", "SegmentedProgress", `${c.segmentedProgress({ value: 0.72, label: "Well A-7 depth to target" })}${c.segmentedProgress({ value: 0.35, label: "Diesel tank" })}`],
+    ["Output by well", "HexBinShare", c.hexShare({ rows: WELLS.slice(0, 5).map((label, i) => ({ label, value: OUTPUT[i] })), format: bbl }), true],
+    ["Wells", "shareTable", c.shareTable({ title: "Wells", rows: WELLS.map((label, i) => ({ label, type: i === 4 ? "Gas" : "Oil", qty: OUTPUT[i], amount: OUTPUT[i] * 78 })), qtyLabel: "Barrels", amountLabel: "Value", money }), true],
   ]],
   ["Grids, rows and flows", [
-    ["Heat grid", "HeatGrid", c.heatGrid({ rows: SHOPS.slice(0, 5).map((label, i) => ({ label, values: DAYS.map((_, d) => 40 + ((i * 31 + d * 17) % 70) + (d > 4 ? 40 : 0)) })), columns: DAYS }), true],
-    ["Calendar heat", "chart-calendar", c.calendarHeat({ values: Array.from({ length: 126 }, (_, i) => ((i * 47) % 13) + (i % 7 > 4 ? 8 : 0)) })],
-    ["Butterfly rows", "ButterflyRows", c.butterfly({ rows: SHOPS.slice(0, 5).map((label, i) => ({ label, left: [320, 260, 410, 180, 220][i], right: [290, 300, 350, 210, 160][i] })), left: "Full cups out", right: "Empties back" })],
-    ["Dot rows", "DotRows", c.dotRows({ rows: SHOPS.slice(0, 4).map((label, i) => ({ label, total: [28, 34, 22, 30][i], flagged: [2, 6, 1, 9][i] })), flaggedLabel: "late" })],
-    ["Funnel", "OrderFunnelCard", c.funnel({ stages: [["Created", 420], ["Approved", 365], ["Packed", 331], ["Delivered", 298]].map(([label, value]) => ({ label, value })) })],
-    ["Stock bridge", "StockBridge", c.stockBridge({ open: 820, moves: [{ label: "Received", value: 400 }, { label: "Sold", value: -610 }, { label: "Spilled", value: -24 }], unit: " kg" })],
-    ["Shift timeline", "PumpsCard", c.shiftTimeline({ rows: [["Bar 1", [[6, 11], [13, 18]]], ["Bar 2", [[7, 15]]], ["Bar 3", [[10, 14], [16, 22]]], ["Drive-in", [[6, 9.5], [11, 20]]]].map(([label, spans]) => ({ label, spans })) })],
-    ["Rank tiles", "RankTiles", c.rankTiles({ rows: SHOPS.slice(0, 4).map((label, i) => ({ label, value: [64, 51, 38, 22][i] })), unit: "check-ins" }), true],
-    ["Flow", "FlowAnimationCard", c.flow({ width: 900, height: 240, source: "Roastery", sinks: SHOPS.slice(0, 4).map((label, i) => ({ label, value: [420, 310, 220, 140][i] })) }), true],
+    ["Faults by system", "HeatGrid", c.heatGrid({ rows: ["Mud pumps", "Top drive", "Cranes", "Compressors", "Generators", "Water makers"].map((label, i) => ({ label, values: DAYS.map((_, d) => ((i * 31 + d * 17) % 11) * ((i + d) % 4 ? 1 : 0) + (i === 0 && d > 3 ? 6 : 0)) })), columns: DAYS }), true],
+    ["Barrels each day", "chart-calendar (month)", c.monthCalendar({ year: 2026, month: 9, format: (v) => `${(v / 1000).toFixed(1)}k`, values: october((d, w) => 16800 + ((d * 37) % 23) * 110 + (w > 4 ? 600 : 0) - (d === 14 ? 9000 : 0)) })],
+    ["Gas checks, on time and late", "Check-in overview", c.monthCalendar({ year: 2026, month: 9, split: true, labels: ["On time", "Late"], values: october((d) => (d > 29 ? null : [14 + ((d * 7) % 9), (d * 5) % 4])) })],
+    ["Safety walks each day", "chart-calendar", c.calendarHeat({ values: Array.from({ length: 126 }, (_, i) => ((i * 47) % 13) + (i % 7 > 4 ? 8 : 0)) })],
+    ["Boat cargo", "ButterflyRows", c.butterfly({ rows: ["Pipe", "Drilling mud", "Fresh water", "Diesel", "Waste"].map((label, i) => ({ label, left: [320, 260, 410, 180, 40][i], right: [90, 120, 0, 0, 210][i] })), left: "Tonnes out", right: "Tonnes back" })],
+    ["Late permits by area", "DotRows", c.dotRows({ rows: AREAS.slice(0, 4).map((label, i) => ({ label, total: [28, 34, 22, 30][i], flagged: [2, 6, 1, 9][i] })), flaggedLabel: "late" })],
+    ["Permit flow", "OrderFunnelCard", c.funnel({ stages: [["Raised", 420], ["Approved", 365], ["Issued", 331], ["Closed", 298]].map(([label, value]) => ({ label, value })) })],
+    ["Spend settling by category", "ExpenseFlowAnimationCard", c.dropColumns({ rows: SPEND.slice(1, 7), format: money })],
+    ["Diesel stock", "StockBridge", c.stockBridge({ open: 820, moves: [{ label: "From supply boat", value: 400 }, { label: "Generators", value: -610 }, { label: "Cranes", value: -24 }], unit: " m³" })],
+    ["Who is on shift", "PumpsCard", c.shiftTimeline({ from: 0, to: 24, rows: [["Drill crew A", [[6, 18]]], ["Drill crew B", [[0, 6], [18, 24]]], ["Crane ops", [[7, 12], [13, 17]]], ["Helideck", [[8, 9.5], [14, 15.5]]]].map(([label, spans]) => ({ label, spans })) })],
+    ["Most permits issued", "RankTiles (most)", c.rankTiles({ rows: AREAS.map((label, i) => ({ label, value: [64, 51, 38, 22, 14, 9][i] })), unit: "permits" }), true],
+    ["Equipment with fewest checks", "RankTiles (fewest)", c.rankTiles({ view: "fewest", rows: ["Lifeboat 2", "Fire pump B", "Gas detector 14", "Crane 3", "BOP panel", "Emergency light 7", "Mud pump 2", "Winch 4", "Fire pump A", "Lifeboat 1"].map((label, i) => ({ label, value: [0, 0, 1, 2, 3, 0, 5, 6, 7, 4][i] })), unit: "checks", empty: "not checked" }), true],
+    ["Well fluid through the separator", "FlowAnimationCard", c.flow({ width: 900, height: 240, source: "Separator", sinks: [["Oil to tanker", 18400], ["Water treated", 8200], ["Fuel gas", 620], ["Flare", 480]].map(([label, value]) => ({ label, value })) }), true],
   ]],
 ];
 
@@ -82,7 +95,7 @@ const paired = (items) => {
 };
 
 export const chartsPage = () => `
-  <div class="page-head"><div><h1>Charts</h1><p class="lede">Every chart playskin draws, on made-up numbers for a small coffee chain. Each one builds in as it comes into view.</p></div>
+  <div class="page-head"><div><h1>Charts</h1><p class="lede">Every chart playskin draws, on made-up numbers for Platform Alpha, an offshore oil rig. Each one builds in as it comes into view.</p></div>
     <button class="btn" data-button="default" data-replay-all>Replay all</button></div>
   ${SECTIONS.map(([name, items]) => `<h2>${name}</h2><div class="shows">${paired(items).map(([title, spark, body, wide]) => card(title, spark, body, wide)).join("")}</div>`).join("")}`;
 

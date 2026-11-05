@@ -150,8 +150,12 @@
 .pc-fly > b:last-child { text-align: right; }
 
 .pc-heat { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 12px; }
-.pc-heat th { color: var(--pc-sub); font-weight: 600; text-align: left; padding: 2px 4px; }
-.pc-heat td { padding: 7px 6px; border-radius: 6px; text-align: center; }
+.pc-heat th { color: var(--pc-sub); font-weight: 600; text-align: left; padding: 2px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+.pc-heat thead th { text-align: center; font-size: 11px; }
+.pc-heat thead th small { display: block; font-size: 10px; font-weight: 500; opacity: .8; }
+.pc-heat td { padding: 7px 6px; border-radius: 8px; text-align: center; font-weight: 600; }
+.pc-heat td.hot { color: #fff; }
+.pc-heat td:last-child { background: none; text-align: right; }
 
 .pc-avcols, .pc-hbars, .pc-matrix { display: flex; align-items: flex-end; gap: 10px; }
 .pc-hbars { padding-top: 28px; }
@@ -193,14 +197,44 @@
 .pc-shift .pc-track { height: 16px; border-radius: 6px; }
 .pc-shift .pc-track i { position: absolute; top: 0; border-radius: 6px; }
 
-.pc-ranktiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
-.pc-ranktiles > div { display: grid; gap: 2px; padding: 10px; border: 1px solid var(--pc-border); border-radius: 12px; }
-.pc-ranktiles em { font-style: normal; font-weight: 800; color: var(--pc-sub); }
-.pc-ranktiles b { font-size: 20px; }
-.pc-ranktiles .pc-track { height: 6px; }
+.pc-ranktiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 8px; }
+.pc-ranktiles > div { display: grid; grid-template-columns: 1fr auto; align-content: space-between; gap: 6px 6px; min-height: 68px; padding: 8px 10px; border: 1px solid; border-radius: 12px; }
+.pc-ranktiles > div.hot, .pc-ranktiles > div.hot small, .pc-ranktiles > div.hot span { color: #fff; }
+.pc-ranktiles small { font-size: 11px; font-weight: 500; color: var(--pc-fg); line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.pc-ranktiles em { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 99px; background: color-mix(in srgb, var(--pc-card) 55%, transparent); font-size: 10px; font-weight: 700; }
+.pc-ranktiles em:is(.gold, .silver, .bronze) { color: #fff; }
+.pc-ranktiles em { justify-self: end; align-self: start; }
+.pc-ranktiles p { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 5px; min-width: 0; margin: 0; }
+.pc-ranktiles b { font-size: 18px; line-height: 1; }
+.pc-ranktiles span { font-size: 10px; color: var(--pc-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .pc-cal { display: grid; grid-template-rows: repeat(7, auto); grid-auto-flow: column; grid-auto-columns: minmax(0, 22px); justify-content: space-between; gap: 3px; }
 .pc-cal i { aspect-ratio: 1; border-radius: 3px; }
+
+.pc-month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.pc-month small { text-align: center; font-weight: 600; }
+.pc-month i { display: grid; place-items: center; height: 30px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.pc-month i.on { color: #fff; text-shadow: 0 1px 2px rgb(0 0 0 / .25); }
+.pc-month i.later { border: 1px solid var(--pc-border); color: var(--pc-sub); font-weight: 400; }
+
+.pc-tablehead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pc-tablehead b { display: inline-flex; align-items: center; gap: 8px; }
+.pc-tablehead b i { width: 8px; height: 8px; border-radius: 50%; }
+.pc-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.pc-table th { padding: 6px 8px; color: var(--pc-sub); font-weight: 500; text-align: right; border-bottom: 1px solid var(--pc-border); }
+.pc-table td { padding: 7px 8px; text-align: right; border-bottom: 1px solid color-mix(in srgb, var(--pc-border) 60%, transparent); white-space: nowrap; }
+.pc-table :is(th, td):first-child { text-align: left; }
+.pc-table :is(th, td):nth-child(2):has(small), .pc-table th:nth-child(2) { text-align: center; }
+.pc-table tfoot td { font-weight: 700; border-bottom: 0; border-top: 1px solid var(--pc-border); }
+.pc-share { display: inline-flex; align-items: center; gap: 8px; }
+.pc-share .pc-track { width: 54px; height: 6px; }
+
+.pc-funnel-cone { fill: none; stroke: var(--pc-sub); stroke-width: 2; stroke-linejoin: round; opacity: .55; }
+.pc-droplabels { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); text-align: center; }
+.pc-droplabels > div { display: grid; min-width: 0; padding: 0 2px; }
+.pc-droplabels small { display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-droplabels small i { flex: none; width: 7px; height: 7px; border-radius: 50%; }
+.pc-droplabels b { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .pc-k-hex { container-type: inline-size; }
 .pc-hexwrap, .pc-hexside { display: grid; gap: 14px; }

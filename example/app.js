@@ -2,6 +2,7 @@
    data-brand, data-wordmark, data-nav, data-theme-toggle, data-card, data-button, data-cat-chart) and redraws the whole
    page on every navigation, as real apps do, so each skin has to keep up on its own. */
 import { createPlayskin, THEME_NAMES } from "../src/index.js";
+import { rankedBars, blockGauge, splitGauge, rankTiles, compact } from "../src/charts.js";
 import { chartsPage } from "./charts-page.js";
 import { motionPage } from "./motion-page.js";
 
@@ -24,16 +25,20 @@ const PAGES = [
   ["motion", "spark", "Motion"],
   ["settings", "gear", "Settings"],
 ];
-const WEEKS = [42, 58, 51, 73, 66, 88, 79, 95];
-const state = { tab: "week", team: "Engineering" };
+const OUTPUT = {
+  week: [["Mon", 17200], ["Tue", 17900], ["Wed", 18100], ["Thu", 16400], ["Fri", 18800], ["Sat", 19300], ["Sun", 18420]],
+  month: [["Week 1", 121000], ["Week 2", 126500], ["Week 3", 118200], ["Week 4", 129800]],
+  year: [["Q1", 1580000], ["Q2", 1660000], ["Q3", 1610000], ["Q4", 1720000]],
+};
+const state = { tab: "week", team: "Drill crew" };
 const SKINS = [["", "Plain", "The app's own look"], ["aura", THEME_NAMES.aura, "Frosted glass and soft colour"], ["crayon", THEME_NAMES.crayon, "Paper by day, chalkboard by night"], ["whiskers", THEME_NAMES.whiskers, "A cat that lives on the page"], ["record", THEME_NAMES.record, "A narrated tour, filmed as a video"]];
-const TEAMS = [["Design", "Design"], ["Engineering", "Engineering"], ["Sales", "Sales"]];
+const TEAMS = [["Drill crew", "Drill crew", "Runs the drill floor"], ["Deck crew", "Deck crew", "Cranes, cargo and the boats"], ["Maintenance", "Maintenance", "Keeps pumps, engines and power running"], ["Control room", "Control room", "Watches the wells and the process"]];
 
 const page = () => (PAGES.some(([id]) => id === location.hash.slice(1)) ? location.hash.slice(1) : "dashboard");
 const cards = (items) => `<div class="grid" data-motion>${items.map(([title, value, delta]) => `<section class="card" data-card data-m="rise"><h3 data-card-title>${title}</h3><div class="stat" data-count>${value}</div><div class="delta">${delta}</div></section>`).join("")}</div>`;
-const chart = (values) => {
-  const max = Math.max(...values);
-  return `<div class="chart" data-cat-chart data-m-group role="img" aria-label="Tasks done each week">${values.map((v, i) => `<div class="bar"><i data-m="grow-y sheen" style="height:${Math.round((v / max) * 100)}%"></i>W${i + 1}</div>`).join("")}</div>`;
+const chart = (rows) => {
+  const max = Math.max(...rows.map(([, v]) => v));
+  return `<div class="chart" data-cat-chart data-m-group role="img" aria-label="Barrels of oil produced">${rows.map(([label, v]) => `<div class="bar" title="${compact(v)} bbl"><i data-m="grow-y sheen" style="height:${Math.round((v / max) * 100)}%"></i>${label}</div>`).join("")}</div>`;
 };
 // A dropdown drawn by the app rather than the browser, so every skin dresses it. Opening it changes only the menu, so
 // the page and its charts are not drawn again.
@@ -47,22 +52,28 @@ const menu = (id, label, options, value, cls = "") => {
 
 const BODY = {
   dashboard: () => `
-    <div class="page-head"><div><h1>Good afternoon</h1><p class="lede">Five projects, one running late.</p></div>
-      <div class="row"><button class="btn" data-button="outline">Share</button><button class="btn" data-button="default">${icon("plus")}New project</button></div></div>
-    ${cards([["Tasks done", "1,204", "+12% on last week"], ["Open tasks", "86", "14 due this week"], ["On time", "92%", "Up from 88%"], ["Team", "12", "2 joined this month"]])}
-    <h2>Tasks done each week</h2>
+    <div class="page-head"><div><h1>Good morning, Platform Alpha</h1><p class="lede">Six wells flowing, one on test. Seas are calm and the next crew change is Thursday.</p></div>
+      <div class="row"><button class="btn" data-button="outline">Share report</button><button class="btn" data-button="default">${icon("plus")}New permit</button></div></div>
+    ${cards([["Oil today", "18,420 bbl", "Up 3% on yesterday"], ["On board", "112", "Crew change Thursday"], ["Uptime", "97.2%", "Up from 95.8%"], ["Days without injury", "214", "Best run this year"]])}
+    <h2>Oil produced</h2>
     <section class="card wide" data-card data-motion>
       <div class="tabs" role="tablist">${["week", "month", "year"].map((t) => `<button role="tab" data-tab="${t}" aria-selected="${state.tab === t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join("")}</div>
-      ${chart(state.tab === "week" ? WEEKS : state.tab === "month" ? [210, 260, 240, 300, 330, 310] : [2100, 2600, 3100, 3800])}
-    </section>`,
+      ${chart(OUTPUT[state.tab])}
+    </section>
+    <div class="shows dash">
+      <section class="card" data-card><h3 data-card-title>Output by well</h3>${rankedBars({ rows: [["A-1", 4200], ["A-2", 3650], ["A-3", 3100], ["A-4", 2900], ["A-5", 2400], ["A-6", 1800]].map(([label, value]) => ({ label, value })), format: (v) => `${compact(v)} bbl` })}</section>
+      <section class="card" data-card><h3 data-card-title>Rig time today</h3>${splitGauge({ rows: [["Working", 21.5], ["Repairs", 1.5], ["Weather", 1]].map(([label, value]) => ({ label, value })), format: (v) => `${v}h`, center: "Hours" })}</section>
+      <section class="card" data-card><h3 data-card-title>Uptime</h3>${blockGauge({ value: 0.97, label: "97%", caption: "Uptime this month" })}</section>
+      <section class="card" data-card><h3 data-card-title>Most permits issued</h3>${rankTiles({ rows: [["Drill floor", 64], ["Pipe deck", 51], ["Pump room", 38], ["Process deck", 22]].map(([label, value]) => ({ label, value })), unit: "permits" })}</section>
+    </div>`,
   settings: () => `
-    <div class="page-head"><div><h1>Settings</h1><p class="lede">Your profile and notifications.</p></div></div>
+    <div class="page-head"><div><h1>Settings</h1><p class="lede">Your profile and the reports you get.</p></div></div>
     <section class="card" data-card><h3 data-card-title>Profile</h3>
       <form onsubmit="return false">
         <label>Name<input value="Alex Morgan"></label>
-        <div class="field"><span>Team</span>${menu("team", "Team", TEAMS, state.team, "wide-menu")}</div>
-        <label>About<textarea rows="3">Builds the things the team ships.</textarea></label>
-        <label class="check"><input type="checkbox" checked> Email me a weekly summary</label>
+        <div class="field"><span>Crew</span>${menu("team", "Crew", TEAMS, state.team, "wide-menu")}</div>
+        <label>About<textarea rows="3">Night toolpusher on Platform Alpha, two weeks on and two weeks off.</textarea></label>
+        <label class="check"><input type="checkbox" checked> Email me the morning report</label>
         <div class="row"><button class="btn" data-button="default">Save</button><button class="btn" data-button="ghost">Cancel</button><button class="btn" data-button="destructive">Delete account</button><button class="btn" data-button="link">Help</button></div>
       </form>
     </section>`,
@@ -72,13 +83,13 @@ const BODY = {
 
 // One narrated tour per page for the Record skin.
 const TOURS = {
-  dashboard: { title: "Orbit dashboard", steps: [{ heading: "Good afternoon", say: "This is Orbit, a small app dressed by playskin." }, { heading: "Tasks done each week", say: "Charts, cards and buttons all take the skin's look." }] },
-  charts: { title: "Orbit charts", steps: [{ heading: "Charts", say: "Every chart playskin draws, on made-up numbers." }, { heading: "Rings, pies and gauges", say: "Rings fill, pies spin in and gauges sweep up." }] },
-  motion: { title: "Orbit motion", steps: [{ heading: "Motion", say: "Every card builds in as it comes into view." }, { heading: "Line draws, area reveals, dots pop", say: "Lines draw themselves, areas sweep in and points pop." }] },
-  settings: { title: "Orbit settings", steps: [{ heading: "Settings", say: "Form fields and every button style." }] },
+  dashboard: { title: "Platform Alpha dashboard", steps: [{ heading: "Good morning, Platform Alpha", say: "This is Orbit, the control room for an offshore oil rig, dressed by playskin." }, { heading: "Oil produced", say: "Barrels, wells, uptime and permits all take the skin's look." }] },
+  charts: { title: "Platform Alpha charts", steps: [{ heading: "Charts", say: "Every chart playskin draws, on made-up rig numbers." }, { heading: "Rings, pies and gauges", say: "Rings fill, pies spin in and gauges sweep up." }] },
+  motion: { title: "Platform Alpha motion", steps: [{ heading: "Motion", say: "Every card builds in as it comes into view." }, { heading: "Line draws, area reveals, dots pop", say: "Lines draw themselves, areas sweep in and points pop." }] },
+  settings: { title: "Platform Alpha settings", steps: [{ heading: "Settings", say: "Form fields and every button style." }] },
 };
 
-const nav = () => PAGES.map(([id, ic, label]) => `<a href="#${id}" ${page() === id ? 'aria-current="page"' : ""}>${icon(ic)}<span>${label}</span></a>`).join("");
+const nav = () => PAGES.map(([id, ic, label]) => `<a href="#${id}" ${page() === id ? 'aria-current="page"' : ""} title="${label}">${icon(ic)}<span>${label}</span></a>`).join("");
 const skin = createPlayskin({ record: { script: () => TOURS[page()], offset: 72 } });
 
 function render() {
@@ -86,13 +97,15 @@ function render() {
   document.getElementById("app").innerHTML = `
     <header class="topbar" data-topbar>
       <a class="brand" href="#dashboard" data-brand aria-label="Orbit home"><span class="brand-mark" aria-hidden="true"></span><span class="wordmark" data-wordmark>Orbit</span></a>
-      <nav class="nav" data-nav aria-label="Main">${nav()}</nav>
       <div class="actions">
         ${menu("skin", "Skin", SKINS, now || "")}
         <button class="icon-button" id="dark" data-theme-toggle aria-label="Light or dark">${icon("sun", "sun")}${icon("moon", "moon")}</button>
       </div>
     </header>
-    <main>${BODY[page()]()}</main>
+    <div class="shell">
+      <nav class="rail" data-nav aria-label="Main">${nav()}</nav>
+      <main>${BODY[page()]()}</main>
+    </div>
     <nav class="tabbar" data-nav data-playskin-floor aria-label="Main">${nav()}</nav>`;
 }
 

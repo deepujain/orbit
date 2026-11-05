@@ -35,6 +35,15 @@
 }
 @keyframes m-float { 50% { transform: translateY(-4px); } }
 @keyframes m-shimmer { to { background-position: -200% 0; } }
+/* A part falls from (--m-x0, --m-y0) through (--m-x1, --m-y1), say a funnel's mouth and neck, to where it rests. */
+@keyframes m-drop {
+  0% { opacity: 0; transform: translate(var(--m-x0, 0px), var(--m-y0, -40px)); animation-timing-function: cubic-bezier(.4, 0, .9, .5); }
+  8% { opacity: 1; }
+  38% { transform: translate(var(--m-x1, 0px), var(--m-y1, -20px)); animation-timing-function: cubic-bezier(.5, 0, 1, .6); }
+  86% { transform: translate(0, 0); animation-timing-function: ease-out; }
+  93% { transform: translate(0, -2px); animation-timing-function: ease-in; }
+  100% { transform: translate(0, 0); }
+}
 
 [data-motion] svg [data-m] { transform-box: fill-box; }
 [data-motion] [data-m~="draw"] {
@@ -71,6 +80,7 @@
   [data-motion] [data-m~="flip"] { animation-name: m-flip; --m-dur: 700ms; --m-ease: var(--m-back); transform-origin: center top; }
   [data-motion] [data-m~="blur"] { animation-name: m-blur; --m-dur: 900ms; }
   [data-motion] [data-m~="draw"] { animation-name: m-draw; --m-dur: 1300ms; }
+  [data-motion] [data-m~="drop"] { animation-name: m-drop; --m-dur: 1300ms; --m-ease: linear; }
   [data-motion] [data-m~="reveal"] { animation-name: m-reveal; --m-dur: 1200ms; --m-ease: var(--m-wave); }
   [data-motion] [data-m~="pulse"] { animation: m-pulse 1.6s ease-out infinite; border-radius: 999px; }
   [data-motion] [data-m~="float"] { animation: m-float 3s ease-in-out infinite; animation-delay: calc(min(var(--i, 0), 12) * -400ms); }

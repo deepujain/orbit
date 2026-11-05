@@ -37,7 +37,7 @@ export declare const podium: Builder<{ rows: Row[]; format?: Format }>;
 export declare const lollipops: Builder<{ rows: Row[]; format?: Format; height?: number; offset?: number }>;
 export declare const dotRows: Builder<{ rows: Array<{ label: string; total: number; flagged: number }>; flaggedLabel?: string }>;
 export declare const butterfly: Builder<{ rows: Array<{ label: string; left: number; right: number }>; left: string; right: string; format?: Format }>;
-export declare const heatGrid: Builder<{ rows: Array<{ label: string; values: number[] }>; columns: string[]; format?: Format }>;
+export declare const heatGrid: Builder<{ rows: Array<{ label: string; values: number[] }>; columns: string[]; format?: Format; color?: number }>;
 export declare const avatarColumns: Builder<{ rows: Array<{ label: string; values: number[] }>; keys: string[]; format?: Format; height?: number }>;
 export declare const highlightBars: Builder<{ rows: Row[]; format?: Format; tabs?: string[]; height?: number }>;
 export declare const dotMatrix: Builder<{ rows: Array<{ label: string; values: number[] }>; keys: string[]; levels?: number; format?: Format }>;
@@ -49,7 +49,12 @@ export declare const stageArea: Builder<Sized & { stages: Row[] }>;
 export declare const funnel: Builder<{ stages: Row[]; format?: Format }>;
 export declare const progressTargets: Builder<{ rows: Row[]; target?: number; format?: Format }>;
 export declare const shiftTimeline: Builder<{ rows: Array<{ label: string; spans: Array<[number, number]> }>; from?: number; to?: number }>;
-export declare const rankTiles: Builder<{ rows: Row[]; unit?: string }>;
+export declare const rankTiles: Builder<{ rows: Row[]; unit?: string; view?: "most" | "fewest"; empty?: string }>;
 export declare const calendarHeat: Builder<{ values: number[]; weeks?: number }>;
+/** month is 0 for January. A missing day (null) is one still to come. With split, each day is [good, bad]. */
+export declare const monthCalendar: Builder<{ year: number; month: number; values: Array<number | [number, number] | null>; format?: Format; split?: boolean; labels?: [string, string] }>;
+export declare const shareTable: Builder<{ title?: string; rows: Array<{ label: string; type?: string; qty: number; amount: number }>; qtyLabel?: string; amountLabel?: string; format?: Format; money?: Format; color?: number }>;
+/** count sets the dots, value the amount shown under each column. */
+export declare const dropColumns: Builder<{ rows: Array<{ label: string; count: number; value: number }>; format?: Format; dots?: number; width?: number; height?: number }>;
 export declare const flow: Builder<Sized & { source: string; sinks: Row[] }>;
 export declare const CHARTS: Record<string, Builder<any>>;

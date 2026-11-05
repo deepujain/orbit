@@ -376,10 +376,17 @@ export function butterfly({ rows, left, right, format = compact }) {
   return box("butterfly", "Butterfly rows", `<div class="pc-fly-head"><span style="color:${C(0)}">${esc(left)}</span><span style="color:${C(1)}">${esc(right)}</span></div><div class="pc-rows">${rows.map((r) => `<div class="pc-fly"><b>${format(r.left)}</b><div class="pc-track clear flip"><i data-m="grow-x" style="width:${f((r.left / max) * 100)}%;background:${C(0)};transform-origin:right center"></i></div><span>${esc(r.label)}</span><div class="pc-track clear"><i data-m="grow-x" style="width:${f((r.right / max) * 100)}%;background:${C(1)}"></i></div><b>${format(r.right)}</b></div>`).join("")}</div>`);
 }
 
-/** Rows by columns, each cell tinted in its column's colour by how large it is, with a row total at the end. */
-export function heatGrid({ rows, columns: cols, format = compact }) {
-  const colMax = cols.map((_, j) => Math.max(...rows.map((r) => r.values[j])));
-  return box("heat", "Heat grid", `<table class="pc-heat"><thead><tr><th></th>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${rows.map((r) => `<tr><th>${esc(r.label)}</th>${r.values.map((v, j) => `<td data-m="pop" style="--m-step:22ms;--m-cap:80;background:color-mix(in srgb, ${C(j)} ${Math.round(12 + (v / colMax[j]) * 78)}%, transparent)">${format(v)}</td>`).join("")}<td><b>${format(sum(r.values))}</b></td></tr>`).join("")}</tbody></table>`);
+/** Rows by columns in one colour, each cell darker the larger it is, with column totals overhead and a row total at
+    the end; empty cells stay muted. */
+export function heatGrid({ rows, columns: cols, format = compact, color = 7 }) {
+  const max = Math.max(...rows.flatMap((r) => r.values));
+  const colSum = cols.map((_, j) => sum(rows.map((r) => r.values[j])));
+  const cell = (v, n) => {
+    const p = Math.round(18 + (v / max) * 82);
+    const style = `--m-step:0ms;--m-delay:${n * 18}ms;background:${v ? `color-mix(in srgb, ${C(color)} ${p}%, var(--pc-muted))` : "var(--pc-muted)"}`;
+    return `<td data-m="pop" class="${p > 62 ? "hot" : ""}" style="${style}">${v ? format(v) : ""}</td>`;
+  };
+  return box("heat", "Heat grid", `<table class="pc-heat"><thead><tr><th></th>${cols.map((c, j) => `<th>${esc(c)}<small>${format(colSum[j])}</small></th>`).join("")}<th>Total</th></tr></thead><tbody>${rows.map((r, i) => `<tr><th>${esc(r.label)}</th>${r.values.map((v, j) => cell(v, i + j)).join("")}<td><b data-count>${format(sum(r.values))}</b></td></tr>`).join("")}</tbody></table>`);
 }
 
 /** Ranked columns stacked by category, each under an initials avatar, with a legend of category totals. */
@@ -528,13 +535,80 @@ export function shiftTimeline({ rows, from = 6, to = 22 }) {
   const span = to - from, ticks = [];
   for (let h = from; h <= to; h += 4) ticks.push(h);
   const pos = (h) => ((h - from) / span) * 100;
-  return box("shifts", "Shift timeline", `<div class="pc-shifts"><div class="pc-hours">${ticks.map((h) => `<span style="left:${f(pos(h))}%">${h % 12 || 12}${h < 12 ? "a" : "p"}</span>`).join("")}</div>${rows.map((r, i) => `<div class="pc-shift"><span>${esc(r.label)}</span><div class="pc-track clear">${r.spans.map(([a, b]) => `<i data-m="grow-x" style="left:${f(pos(a))}%;width:${f(pos(b) - pos(a))}%;background:${C(i)}"></i>`).join("")}</div><b>${f(sum(r.spans.map(([a, b]) => b - a)))}h</b></div>`).join("")}</div>`);
+  return box("shifts", "Shift timeline", `<div class="pc-shifts"><div class="pc-hours">${ticks.map((h) => `<span style="left:${f(pos(h))}%">${h % 12 || 12}${h % 24 < 12 ? "a" : "p"}</span>`).join("")}</div>${rows.map((r, i) => `<div class="pc-shift"><span>${esc(r.label)}</span><div class="pc-track clear">${r.spans.map(([a, b]) => `<i data-m="grow-x" style="left:${f(pos(a))}%;width:${f(pos(b) - pos(a))}%;background:${C(i)}"></i>`).join("")}</div><b>${f(sum(r.spans.map(([a, b]) => b - a)))}h</b></div>`).join("")}</div>`);
 }
 
-/** Leaders as tiles: rank, name, count and a small bar against the top. */
-export function rankTiles({ rows, unit = "" }) {
-  const max = Math.max(...rows.map((r) => r.value));
-  return box("ranktiles", "Rank tiles", `<div class="pc-ranktiles" data-m-group>${rows.map((r, i) => `<div data-m="rise"><em>${i + 1}</em><small>${esc(r.label)}</small><b data-count>${r.value}</b><span class="pc-sub">${esc(unit)}</span><div class="pc-track"><i data-m="grow-x" style="width:${f((r.value / max) * 100)}%;background:${C(i)};--m-delay:300ms"></i></div></div>`).join("")}</div>`);
+/** Every item as a tile in rank order, its colour as strong as its count. "most" puts the busiest first with medals
+    for the top three; "fewest" puts the least first, zeros in red, below average in amber. */
+export function rankTiles({ rows, unit = "", view = "most", empty = "none yet" }) {
+  const list = [...rows].sort((p, q) => (view === "most" ? q.value - p.value : p.value - q.value));
+  const max = Math.max(1, ...list.map((r) => r.value));
+  const seen = list.filter((r) => r.value > 0);
+  const avg = seen.length ? sum(seen.map((r) => r.value)) / seen.length : 0;
+  const hue = (r) => (view === "most" ? C(3) : !r.value ? "var(--pc-bad)" : r.value < avg ? "var(--pc-warn)" : "var(--pc-good)");
+  const strength = (r) => (view === "most" ? 0.25 + 0.75 * (r.value / max) : !r.value ? 0.85 : 0.35 + 0.5 * (1 - Math.min(1, r.value / Math.max(1, avg))));
+  const medal = ["gold", "silver", "bronze"];
+  return box("ranktiles", "Rank tiles", `<div class="pc-ranktiles" data-m-group>${list.map((r, i) => {
+    const mix = Math.round(strength(r) * 100);
+    return `<div data-m="pop" class="${mix >= 62 ? "hot" : ""}" style="--m-step:30ms;--m-cap:24;background:linear-gradient(150deg, color-mix(in srgb, ${hue(r)} ${mix}%, var(--pc-card)), color-mix(in srgb, ${hue(r)} ${Math.round(mix * 0.75)}%, var(--pc-card)));border-color:color-mix(in srgb, ${hue(r)} 35%, transparent)"><small>${esc(r.label)}</small><em class="${view === "most" && i < 3 ? medal[i] : ""}">${i + 1}</em><p><b data-count>${r.value}</b><span>${r.value ? esc(unit) : esc(empty)}</span></p></div>`;
+  }).join("")}</div>`);
+}
+
+/** A month laid out Monday to Sunday, each day showing its number tinted by size; days still to come stay outlined.
+    With split, each day is [good, bad]: the good share fills from the top, the bad share sits under it. */
+export function monthCalendar({ year, month, values, format = compact, split, labels = ["Done", "Missed"] }) {
+  const lead = (new Date(year, month, 1).getDay() + 6) % 7;
+  const days = new Date(year, month + 1, 0).getDate();
+  const total = (v) => (Array.isArray(v) ? v[0] + v[1] : v);
+  const max = Math.max(1, ...values.filter((v) => v != null).map(total));
+  const cells = Array.from({ length: lead }, () => "<i></i>");
+  for (let d = 1; d <= days; d++) {
+    const v = values[d - 1], slot = lead + d - 1, delay = `--m-step:0ms;--m-delay:${(Math.floor(slot / 7) + (slot % 7)) * 40}ms`;
+    if (v == null) { cells.push(`<i class="later" data-m="fade" style="${delay}">${d}</i>`); continue; }
+    const t = total(v), fill = Math.round(30 + (t / max) * 70);
+    const bg = split ? `linear-gradient(color-mix(in srgb, ${C(0)} ${fill}%, var(--pc-muted)) 0 ${f(t ? (v[0] / t) * 100 : 100)}%, color-mix(in srgb, var(--pc-bad) ${fill}%, var(--pc-muted)) 0)` : t ? `color-mix(in srgb, ${C(1)} ${fill}%, var(--pc-muted))` : "var(--pc-muted)";
+    cells.push(`<i class="${t ? "on" : ""}" data-m="pop" style="${delay};background:${bg}" title="${d}: ${split ? `${format(v[0])} ${esc(labels[0])}, ${format(v[1])} ${esc(labels[1])}` : format(t)}">${t ? format(t) : "0"}</i>`);
+  }
+  const done = values.filter((v) => v != null);
+  const foot = split
+    ? `<div class="pc-legend"><span><i style="background:${C(0)}"></i>${esc(labels[0])} <b>${format(sum(done.map((v) => v[0])))}</b></span><span><i style="background:var(--pc-bad)"></i>${esc(labels[1])} <b>${format(sum(done.map((v) => v[1])))}</b></span></div>`
+    : `<div class="pc-legend"><span>Less</span>${[30, 55, 80, 100].map((p) => `<i class="sq" style="background:color-mix(in srgb, ${C(1)} ${p}%, var(--pc-muted))"></i>`).join("")}<span>More</span><span><b>${format(sum(done))}</b> over ${done.length} days</span></div>`;
+  return box("month", "Month calendar", `<div class="pc-month">${["M", "T", "W", "T", "F", "S", "S"].map((d) => `<small>${d}</small>`).join("")}${cells.join("")}</div>${foot}`);
+}
+
+/** A table of items with their quantity, amount and a small share bar, closed by a total row. */
+export function shareTable({ title, rows, qtyLabel = "Qty", amountLabel = "Amount", format = compact, money = compact, color = 1 }) {
+  const qty = sum(rows.map((r) => r.qty)), amount = sum(rows.map((r) => r.amount));
+  const typed = rows.some((r) => r.type);
+  return box("table", title || "Share table", `<div class="pc-tablehead"><b><i style="background:${C(color)}"></i>${esc(title || "")}</b><small>${format(qty)} ${esc(qtyLabel.toLowerCase())} · ${money(amount)}</small></div><table class="pc-table"><thead><tr><th>Name</th>${typed ? "<th>Type</th>" : ""}<th>${esc(qtyLabel)}</th><th>${esc(amountLabel)}</th><th>%</th></tr></thead><tbody>${rows.map((r) => {
+    const share = amount ? (r.amount / amount) * 100 : 0;
+    return `<tr data-m="rise" style="--m-step:50ms"><td>${esc(r.label)}</td>${typed ? `<td><small>${esc(r.type || "")}</small></td>` : ""}<td data-count>${format(r.qty)}</td><td data-count>${money(r.amount)}</td><td><span class="pc-share"><span class="pc-track"><i data-m="grow-x" style="width:${f(share)}%;background:${C(color)};--m-delay:300ms"></i></span>${pct(share)}</span></td></tr>`;
+  }).join("")}</tbody><tfoot><tr><td>Total</td>${typed ? "<td></td>" : ""}<td>${format(qty)}</td><td style="color:${C(color)}">${money(amount)}</td><td></td></tr></tfoot></table>`);
+}
+
+/** Units dropping through a funnel and settling into a column per category, one dot each, the busiest first. */
+export function dropColumns({ rows, format = compact, dots = 120, width = 440, height = 230 }) {
+  const data = [...rows].sort((p, q) => q.value - p.value);
+  const units = sum(data.map((r) => r.count)), total = sum(data.map((r) => r.value));
+  const scale = Math.min(1, dots / units);
+  const W = width, H = height, n = data.length, slot = W / n, per = 6, pitch = 8, floor = H - 6;
+  const counts = data.map((r) => Math.max(1, Math.round(r.count * scale)));
+  const mouth = 60, top = 8, neck = 52, cx0 = W / 2;
+  const col = (i) => i * slot + slot / 2;
+  const order = [];
+  for (let k = 0; order.length < sum(counts); k++) counts.forEach((c, i) => { if (k < c) order.push([i, k]); });
+  const balls = order.map(([i, k], at) => {
+    const x = col(i) - ((per - 1) * pitch) / 2 + (k % per) * pitch, y = floor - 6 - Math.floor(k / per) * pitch;
+    const sway = ((at * 37) % 11) / 10 - 0.5;
+    return `<circle cx="${f(x)}" cy="${f(y)}" r="3" fill="${C(i)}" data-m="drop" style="--m-step:0ms;--m-delay:${at * 22}ms;--m-x0:${f(cx0 + sway * mouth - x)}px;--m-y0:${f(top - y)}px;--m-x1:${f(cx0 - x)}px;--m-y1:${f(neck - y)}px"/>`;
+  }).join("");
+  const backs = counts.map((c, i) => {
+    const h = Math.ceil(c / per) * pitch + 6;
+    return `<rect x="${f(col(i) - (per * pitch) / 2 - 3)}" y="${f(floor - h)}" width="${per * pitch + 6}" height="${h}" rx="5" fill="${C(i)}" fill-opacity=".14" stroke="${C(i)}" stroke-opacity=".35" data-m="grow-y" style="--m-delay:${order.length * 22 + 500}ms"/>`;
+  }).join("");
+  const cone = `<path d="M${cx0 - mouth},${top} L${cx0 - 7},${neck - 10} L${cx0 - 7},${neck} M${cx0 + mouth},${top} L${cx0 + 7},${neck - 10} L${cx0 + 7},${neck}" class="pc-funnel-cone" pathLength="1" data-m="draw"/>`;
+  const keys = `<div class="pc-droplabels" style="--n:${n}">${data.map((r, i) => `<div data-m="fade" style="--m-delay:400ms"><small><i style="background:${C(i)}"></i>${esc(r.label)}</small><b>${format(r.value)} · ${pct((r.value / total) * 100)}</b></div>`).join("")}</div>`;
+  return box("drop", "Drop columns", svg(W, H, `${cone}${backs}<line x1="0" x2="${W}" y1="${floor}" y2="${floor}" class="pc-grid"/>${balls}`) + keys);
 }
 
 /** A calendar of days, each tinted by how much happened, that pops in as a wave. */
@@ -556,4 +630,4 @@ export function flow({ source, sinks, format = compact, width = 440, height = 24
 }
 
 /** Every chart builder by name, for galleries and tests. */
-export const CHARTS = { headline, statLine, kpi, columns, stackedColumns, rankedBars, lineChart, areaChart, pie, donut, hatchedDonut, radialRanks, splitGauge, blockGauge, gauge, radialSegments, comboBarLine, treemap, breakdownStrip, tickBreakdown, segmentedProgress, waterfall, stockBridge, marginStrips, coverageRings, podium, lollipops, dotRows, butterfly, heatGrid, avatarColumns, highlightBars, dotMatrix, hexShare, flowRibbon, bandColumns, targetBars, stageArea, funnel, progressTargets, shiftTimeline, rankTiles, calendarHeat, flow };
+export const CHARTS = { headline, statLine, kpi, columns, stackedColumns, rankedBars, lineChart, areaChart, pie, donut, hatchedDonut, radialRanks, splitGauge, blockGauge, gauge, radialSegments, comboBarLine, treemap, breakdownStrip, tickBreakdown, segmentedProgress, waterfall, stockBridge, marginStrips, coverageRings, podium, lollipops, dotRows, butterfly, heatGrid, avatarColumns, highlightBars, dotMatrix, hexShare, flowRibbon, bandColumns, targetBars, stageArea, funnel, progressTargets, shiftTimeline, rankTiles, calendarHeat, monthCalendar, shareTable, dropColumns, flow };

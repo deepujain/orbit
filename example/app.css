@@ -1,5 +1,8 @@
 /* Orbit's own plain look, built on the shadcn/ui colour variables that every playskin skin repaints. */
 :root {
+  --top: 60px;
+  --rail: 68px;
+  --sidebar: 236px;
   --background: 0 0% 100%;
   --foreground: 240 10% 4%;
   --card: 0 0% 100%;
@@ -59,15 +62,24 @@ body { margin: 0; font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe
 a { color: inherit; }
 svg { flex: none; }
 
-.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 20px; padding: 10px 24px; background: hsl(var(--background) / .9); border-bottom: 1px solid hsl(var(--border)); }
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 20px; height: var(--top); box-sizing: border-box; padding: 0 24px; background: hsl(var(--background) / .9); border-bottom: 1px solid hsl(var(--border)); }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .brand-mark { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, hsl(var(--chart-1)), hsl(var(--chart-2))); }
 .wordmark { font-size: 20px; font-weight: 700; }
-.nav { display: flex; gap: 4px; }
-.nav a { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 8px; color: hsl(var(--muted-foreground)); text-decoration: none; font-weight: 500; }
-.nav a:hover { background: hsl(var(--muted)); }
-.nav a[aria-current="page"] { color: hsl(var(--foreground)); background: hsl(var(--muted)); }
-.nav svg { width: 17px; height: 17px; }
+/* The side menu: a slim rail of icons that opens with labels while the pointer or keyboard focus is on it, and
+   closes a moment after it leaves; the page slides over to make room. */
+.shell { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+.rail { position: sticky; top: var(--top); z-index: 15; align-self: start; display: flex; flex-direction: column; gap: 4px; width: var(--rail); height: calc(100vh - var(--top)); box-sizing: border-box; padding: 14px 10px; overflow: hidden; border-right: 1px solid hsl(var(--border)); background: hsl(var(--background)); transition: width .22s ease .35s; }
+.rail:is(:hover, :focus-within) { width: var(--sidebar); transition-delay: 0s; }
+.rail a { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-radius: 12px; color: hsl(var(--muted-foreground)); text-decoration: none; font-weight: 500; white-space: nowrap; }
+.rail a:hover { background: hsl(var(--muted)); color: hsl(var(--foreground)); }
+.rail a[aria-current="page"] { color: hsl(var(--foreground)); background: hsl(var(--muted)); font-weight: 600; }
+.rail svg { width: 20px; height: 20px; }
+.rail span { opacity: 0; transition: opacity .15s ease .35s; }
+.rail:is(:hover, :focus-within) span { opacity: 1; transition-delay: .06s; }
+@keyframes rail-spin { to { rotate: 360deg; } }
+@media (prefers-reduced-motion: no-preference) { .rail a:not([aria-current="page"]):hover svg { animation: rail-spin .7s ease-in-out; } }
+@media (prefers-reduced-motion: reduce) { .rail, .rail span { transition: none; } }
 .actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .menu { position: relative; }
 .menu-button { display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; height: 38px; min-width: 128px; padding: 0 10px 0 14px; border: 1px solid hsl(var(--input)); border-radius: 8px; background: hsl(var(--background)); color: inherit; font: inherit; font-weight: 600; cursor: pointer; }
@@ -93,7 +105,7 @@ svg { flex: none; }
 .icon-button .moon, .dark .icon-button .sun { display: none; }
 .dark .icon-button .moon { display: block; }
 
-main { max-width: 1120px; margin: 0 auto; padding: 28px 24px 96px; }
+main { width: 100%; max-width: 1120px; box-sizing: border-box; margin: 0 auto; padding: 28px 24px 96px; }
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 h1 { margin: 0; font-size: 30px; letter-spacing: -.02em; }
 h2 { margin: 28px 0 12px; font-size: 20px; }
@@ -139,15 +151,17 @@ input:focus, textarea:focus { outline: 2px solid hsl(var(--ring)); outline-offse
 .tabbar a[aria-current="page"] { color: hsl(var(--foreground)); }
 .tabbar svg { width: 20px; height: 20px; }
 @media (max-width: 760px) {
-  .topbar .nav { display: none; }
+  .shell { display: block; }
+  .rail { display: none; }
   .tabbar { display: flex; }
-  .topbar { padding: 10px 14px; gap: 10px; }
+  .topbar { padding: 0 14px; gap: 10px; }
 }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Motion page and the small charts it shows off. */
 .chart .bar i { position: relative; }
 h1 [data-m] { display: inline-block; }
+.shows.dash { margin-top: 16px; }
 .shows { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: dense; }
 @media (max-width: 760px) { .shows { grid-template-columns: minmax(0, 1fr); } }
 .show { display: grid; gap: 12px; align-content: start; }
@@ -201,7 +215,8 @@ h1 [data-m] { display: inline-block; }
 .cal { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; }
 .cal i { aspect-ratio: 1; border-radius: 4px; background: hsl(var(--chart-2)); }
 
-.flaps { display: flex; justify-content: center; gap: 5px; }
+.flaps { display: flex; align-items: center; justify-content: center; gap: 5px; }
+.flaps small { color: hsl(var(--muted-foreground)); }
 .flaps b { display: grid; place-items: center; width: 34px; height: 48px; border-radius: 7px; background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); font: 700 26px/1 ui-monospace, monospace; box-shadow: inset 0 -24px 0 rgb(0 0 0 / .12); }
 .flap-gap { width: 12px; }
 
