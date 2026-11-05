@@ -409,20 +409,49 @@ export function dotMatrix({ rows, keys, levels = 10, format = compact }) {
   }).join("")}</div>${legend(keys.map((label, j) => ({ label, value: sum(rows.map((r) => r.values[j])), color: C(j) })), format)}`);
 }
 
-/** A honeycomb of cells, coloured in proportion to each part's share. */
+// Hexagon cells in rings around a centre, in axial coordinates, as [q, r, ring].
+function hexRings(count) {
+  const cells = [[0, 0, 0]];
+  const dirs = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
+  for (let ring = 1; cells.length < count; ring++) {
+    let q = -ring, r = ring;
+    for (const [dq, dr] of dirs) for (let k = 0; k < ring && cells.length < count; k++) {
+      cells.push([q, r, ring]);
+      q += dq;
+      r += dr;
+    }
+  }
+  return cells.slice(0, count);
+}
+/** A round honeycomb, each hexagon an equal share: the smallest part at the core, the largest on the rim, building
+    out ring by ring; then each part's share and a legend. */
 export function hexShare({ rows, cells = 91, format = compact }) {
-  const total = sum(rows.map((r) => r.value));
-  const counts = rows.map((r) => Math.round((r.value / total) * cells));
-  counts[0] += cells - sum(counts);
-  const colors = counts.flatMap((c, i) => Array(c).fill(C(i)));
-  const cols = 13, R = 13, w = Math.sqrt(3) * R;
-  const hex = (cx, cy) => Array.from({ length: 6 }, (_, k) => at(cx, cy, R - 1.2, k * 60).join(",")).join(" ");
-  const tiles = colors.map((c, i) => {
-    const row = Math.floor(i / cols), col = i % cols;
-    return `<polygon points="${hex(16 + col * w + (row % 2 ? w / 2 : 0), 16 + row * R * 1.5)}" fill="${c}" data-m="pop" style="--m-step:0ms;--m-delay:${i * 9}ms"/>`;
+  const data = [...rows].filter((r) => r.value > 0).sort((p, q) => p.value - q.value);
+  const total = sum(data.map((r) => r.value));
+  const counts = data.map((r) => Math.max(1, Math.round((r.value / total) * cells)));
+  counts[counts.length - 1] += cells - sum(counts);
+  const owner = counts.flatMap((c, i) => Array(c).fill(i));
+  const layout = hexRings(owner.length);
+  const rim = layout.at(-1)[2];
+  const strays = hexRings(owner.length + (rim + 1) * 6 + 6).slice(owner.length).filter((_, i) => i % 4 === 1);
+  const R = 10;
+  const centre = ([q, r]) => [R * Math.sqrt(3) * (q + r / 2), R * 1.5 * r];
+  const hex = ([cx, cy]) => Array.from({ length: 6 }, (_, k) => {
+    const t = (Math.PI / 180) * (60 * k - 30);
+    return `${f(cx + (R - 0.8) * Math.cos(t))},${f(cy + (R - 0.8) * Math.sin(t))}`;
+  }).join(" ");
+  const pts = [...layout, ...strays].map(centre);
+  const ext = Math.ceil(Math.max(...pts.map(([x, y]) => Math.max(Math.abs(x), Math.abs(y)))) + R + 2);
+  const lead = data.length - 1;
+  const comb = layout.map((cell, i) => {
+    const shade = f(0.35 + (((i * 37) % 11) / 10) * 0.65);
+    return `<polygon points="${hex(centre(cell))}" fill="${C(lead - owner[i])}" fill-opacity="${shade}" data-m="pop" style="--m-step:0ms;--m-delay:${cell[2] * 70 + (i % 6) * 10}ms"><title>${esc(data[owner[i]].label)}</title></polygon>`;
   }).join("");
-  const rowsN = Math.ceil(cells / cols);
-  return box("hex", "Hex share", `<div class="pc-side">${svg(f(cols * w + w / 2 + 16), f(rowsN * R * 1.5 + 14), tiles)}${legend(rows, format, total)}</div>`);
+  const halo = strays.map((cell) => `<polygon points="${hex(centre(cell))}" fill="${C(0)}" fill-opacity=".12" data-m="fade" style="--m-delay:${(rim + 1) * 70}ms"/>`).join("");
+  const desc = [...data].reverse();
+  const shares = `<div class="pc-hexshares" style="--n:${desc.length}">${desc.map((r, i) => `<div data-m="rise" style="--m-delay:300ms"><small><i style="background:${C(i)}"></i>${esc(r.label)}</small><b data-count class="${i ? "pc-sub" : ""}">${pct((r.value / total) * 100)}</b></div>`).join("")}</div>`;
+  const list = `<ul class="pc-hexlist" data-m-group>${desc.map((r, i) => `<li data-m="rise" style="--m-delay:400ms"><span class="pc-chip" style="background:color-mix(in srgb, ${C(i)} 14%, transparent)"><i style="background:${C(i)}"></i></span><span>${esc(r.label)}</span><b data-count>${format(r.value)}</b></li>`).join("")}</ul>`;
+  return box("hex", "Hex share", `<div class="pc-hexwrap"><div class="pc-comb">${svg(ext * 2, ext * 2, `<g transform="translate(${ext} ${ext})">${halo}${comb}</g>`)}</div><div class="pc-hexside">${shares}${list}</div></div>`);
 }
 
 /** A streamgraph: layers stacked around a centre line so the flow of each part reads over time, with markers. */

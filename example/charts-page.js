@@ -56,10 +56,10 @@ const SECTIONS = [
   ]],
   ["Shares", [
     ["Treemap", "ShareTreemap (Treemap)", c.treemap({ rows: DRINKS, format: money }), true],
-    ["Breakdown strip", "BreakdownStrip", c.breakdownStrip({ rows: DRINKS, format: money }), true],
+    ["Breakdown strip", "BreakdownStrip", c.breakdownStrip({ rows: DRINKS.slice(0, 5), format: money })],
     ["Tick breakdown", "TickBreakdown", c.tickBreakdown({ rows: DRINKS.slice(0, 4), format: money }), true],
-    ["Hex share", "HexBinShare", c.hexShare({ rows: DRINKS.slice(0, 5), format: money })],
     ["Segmented progress", "SegmentedProgress", `${c.segmentedProgress({ value: 0.72, label: "Monthly goal" })}${c.segmentedProgress({ value: 0.35, label: "Bean stock" })}`],
+    ["Hex share", "HexBinShare", c.hexShare({ rows: DRINKS.slice(0, 5), format: money }), true],
   ]],
   ["Grids, rows and flows", [
     ["Heat grid", "HeatGrid", c.heatGrid({ rows: SHOPS.slice(0, 5).map((label, i) => ({ label, values: DAYS.map((_, d) => 40 + ((i * 31 + d * 17) % 70) + (d > 4 ? 40 : 0)) })), columns: DAYS }), true],
@@ -84,6 +84,6 @@ const paired = (items) => {
 export const chartsPage = () => `
   <div class="page-head"><div><h1>Charts</h1><p class="lede">Every chart playskin draws, on made-up numbers for a small coffee chain. Each one builds in as it comes into view.</p></div>
     <button class="btn" data-button="default" data-replay-all>Replay all</button></div>
-  ${SECTIONS.map(([name, items]) => `<h2>${name}</h2><div class="shows two">${paired(items).map(([title, spark, body, wide]) => card(title, spark, body, wide)).join("")}</div>`).join("")}`;
+  ${SECTIONS.map(([name, items]) => `<h2>${name}</h2><div class="shows">${paired(items).map(([title, spark, body, wide]) => card(title, spark, body, wide)).join("")}</div>`).join("")}`;
 
 export const chartCount = SECTIONS.reduce((n, [, items]) => n + items.length, 0);

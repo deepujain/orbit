@@ -38,7 +38,7 @@ The same demo page in each skin, light on the left and dark on the right.
 
 ## Try it
 
-Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small dashboard with cards, charts, a table, tabs, a form and every button style. Its Charts page shows every chart `playskin/charts` draws on made-up numbers, and its Motion page shows every effect `motion.css` plays. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Record has a narrated tour for every page. `index.html` is a one-page demo of the same skins.
+Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small dashboard with cards, charts, tabs, a form, its own dropdowns and every button style. Its Charts page shows every chart `playskin/charts` draws on made-up numbers, and its Motion page shows every effect `motion.css` plays. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Record has a narrated tour for every page. `index.html` is a one-page demo of the same skins.
 
 ## Use it on any page
 
