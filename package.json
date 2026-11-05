@@ -58,7 +58,8 @@
   },
   "scripts": {
     "check": "node scripts/check.mjs",
-    "demo": "npx --yes serve ."
+    "start": "node scripts/serve.mjs",
+    "demo": "node scripts/serve.mjs"
   },
   "keywords": [
     "theme",

@@ -8,7 +8,7 @@ const files = (dir) => readdirSync(dir).flatMap((name) => {
   return statSync(path).isDirectory() ? files(path) : [path];
 });
 let failed = false;
-for (const path of [...files("src"), ...files("react")].filter((p) => p.endsWith(".js"))) {
+for (const path of [...files("src"), ...files("react"), ...files("example"), ...files("scripts")].filter((p) => /\.m?js$/.test(p))) {
   const result = spawnSync(process.execPath, ["--input-type=module", "--check"], { input: readFileSync(path) });
   if (result.status !== 0) {
     failed = true;
