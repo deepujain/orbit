@@ -1,8 +1,10 @@
-/* Orbit: a small app for trying every playskin skin. It marks its parts the way the README says (data-topbar,
-   data-brand, data-wordmark, data-nav, data-theme-toggle, data-card, data-button, data-cat-chart) and redraws the whole
-   page on every navigation, as real apps do, so each skin has to keep up on its own. */
+/* Orbit: a small app for trying every playskin skin, and Record, which films its tour in any of them. It marks its parts
+   the way the README says (data-topbar, data-brand, data-wordmark, data-nav, data-theme-toggle, data-card, data-button,
+   data-cat-chart, data-record-hide) and redraws the whole page on every navigation, as real apps do, so each skin has to
+   keep up on its own. */
 import { createPlayskin, THEME_NAMES } from "../src/index.js";
 import * as c from "../src/charts.js";
+import { startRecord } from "../src/record.js";
 import { CHART_PAGES, chartPage } from "./charts-page.js";
 import { motionPage } from "./motion-page.js";
 
@@ -20,6 +22,7 @@ const ICONS = {
   shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
   ship: '<path d="M2 20c1.5 1.3 3.5 1.3 5 0s3.5-1.3 5 0 3.5 1.3 5 0 3.5-1.3 5 0M4 17l-1-6h18l-1 6M12 11V3M8 7h8"/>',
   dollar: '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  record: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4" fill="#ef4444" stroke="none"/>',
   spark: '<path d="M12 3l2.2 6.3L20.5 12l-6.3 2.2L12 20.5l-2.2-6.3L3.5 12l6.3-2.7z"/>',
 };
 const icon = (name, cls = "") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
@@ -36,7 +39,7 @@ const OUTPUT = {
   year: [["Q1", 1580000], ["Q2", 1660000], ["Q3", 1610000], ["Q4", 1720000]],
 };
 const state = { tab: "week", team: "Drill crew" };
-const SKINS = [["", "Plain", "The app's own look"], ["aura", THEME_NAMES.aura, "Frosted glass and soft colour"], ["crayon", THEME_NAMES.crayon, "Paper by day, chalkboard by night"], ["whiskers", THEME_NAMES.whiskers, "A cat that lives on the page"], ["record", THEME_NAMES.record, "A narrated tour, filmed as a video"]];
+const SKINS = [["", "Plain", "The app's own look"], ["aura", THEME_NAMES.aura, "Frosted glass and soft colour"], ["crayon", THEME_NAMES.crayon, "Paper by day, chalkboard by night"], ["whiskers", THEME_NAMES.whiskers, "A cat that lives on the page"]];
 const TEAMS = [["Drill crew", "Drill crew", "Runs the drill floor"], ["Deck crew", "Deck crew", "Cranes, cargo and the boats"], ["Maintenance", "Maintenance", "Keeps pumps, engines and power running"], ["Control room", "Control room", "Watches the wells and the process"]];
 
 const page = () => (PAGES.some(([id]) => id === location.hash.slice(1)) ? location.hash.slice(1) : "dashboard");
@@ -84,7 +87,7 @@ const BODY = {
   motion: motionPage,
 };
 
-// One narrated tour per page for the Record skin.
+// One narrated tour per page for Record, which films the page in whatever skin is on.
 const TOURS = {
   dashboard: { title: "Platform Alpha dashboard", steps: [{ heading: "Good morning, Platform Alpha", say: "This is Orbit, the control room for an offshore oil rig, dressed by playskin." }, { heading: "Oil produced", say: "Barrels, wells, uptime and permits all take the skin's look." }] },
   ...Object.fromEntries(CHART_PAGES.map((p) => [p.id, { title: `Platform Alpha ${p.label.toLowerCase()}`, steps: [{ heading: p.label, say: p.lede }, { heading: p.sections[0][0], say: "Each chart builds in as it comes into view." }] }])),
@@ -93,7 +96,14 @@ const TOURS = {
 };
 
 const nav = () => PAGES.map(([id, ic, label]) => `<a href="#${id}" ${page() === id ? 'aria-current="page"' : ""} title="${label}">${icon(ic)}<span>${label}</span></a>`).join("");
-const skin = createPlayskin({ record: { script: () => TOURS[page()], offset: 72 } });
+const skin = createPlayskin();
+let filming = { available: false, busy: false, recording: false };
+// Hidden while filming, so the button never shows in its own video.
+const recordButton = () => `<button class="btn record-action" data-button="outline" data-record data-record-hide ${filming.available ? "" : "hidden"} ${filming.busy ? 'aria-busy="true"' : ""} aria-label="Record a narrated tour of this page">${icon("record")}<span class="record-label">${filming.busy ? "Getting ready" : "Record"}</span></button>`;
+const record = startRecord({ script: () => TOURS[page()] || null, offset: 72, button: false, onChange: (now) => {
+  filming = now;
+  document.querySelector("[data-record]")?.replaceWith(Object.assign(document.createElement("template"), { innerHTML: recordButton() }).content);
+} });
 
 function render() {
   const now = skin.get();
@@ -101,6 +111,7 @@ function render() {
     <header class="topbar" data-topbar>
       <a class="brand" href="#dashboard" data-brand aria-label="Orbit home"><span class="brand-mark" aria-hidden="true"></span><span class="wordmark" data-wordmark>Orbit</span></a>
       <div class="actions">
+        ${recordButton()}
         ${menu("skin", "Skin", SKINS, now || "")}
         <button class="icon-button" id="dark" data-theme-toggle aria-label="Light or dark">${icon("sun", "sun")}${icon("moon", "moon")}</button>
       </div>
@@ -110,6 +121,7 @@ function render() {
       <main>${BODY[page()]()}</main>
     </div>
     <nav class="tabbar" data-nav data-playskin-floor aria-label="Main">${nav()}</nav>`;
+  record.refresh();
 }
 
 function openMenu(box, focus = "selected") {
@@ -178,6 +190,7 @@ document.addEventListener("click", (e) => {
     for (const b of [card, ...card.querySelectorAll("[data-motion]")]) if (b.matches("[data-motion]")) skin.motion?.replay(b);
   }
   if (e.target.closest("[data-replay-all]")) skin.motion?.replay();
+  if (e.target.closest("[data-record]")) record.start();
   const tab = e.target.closest("[data-tab]");
   if (tab) {
     state.tab = tab.dataset.tab;
@@ -190,4 +203,4 @@ addEventListener("hashchange", () => {
 });
 skin.subscribe(render);
 render();
-window.orbit = { skin, render };
+window.orbit = { skin, record, render };

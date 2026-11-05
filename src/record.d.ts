@@ -21,14 +21,26 @@ export interface RecordOptions {
   script?: () => RecordScript | null;
   intro?: RecordStep[];
   voice?: ((text: string) => Promise<ArrayBuffer | null>) | null;
+  /** Marked data-playskin-recording while filming. */
   root?: Element;
-  attribute?: string;
+  /** false draws no button; the app's own button calls start(). */
+  button?: boolean;
+  /** Whether the button is out; defaults to always while the page has a script. */
   show?: () => boolean;
   headings?: string;
   sectionOf?: (heading: Element) => Element;
   offset?: number;
   label?: string;
+  onChange?: (state: RecordState) => void;
   onMessage?: (text: string, tone: "error" | "done") => void;
+}
+
+export interface RecordState {
+  /** The page has a script, or a recording is under way. */
+  available: boolean;
+  /** Getting the voice ready or waiting for the tab to be shared. */
+  busy: boolean;
+  recording: boolean;
 }
 
 export interface Record {
@@ -36,6 +48,7 @@ export interface Record {
   start(): Promise<void>;
   stop(): void;
   readonly running: boolean;
+  available(): boolean;
   destroy(): void;
 }
 

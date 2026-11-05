@@ -8,7 +8,7 @@
     // Before the first paint, so a saved skin or dark mode never flashes the plain look.
     try {
       const skin = localStorage.getItem("playskin");
-      if (["aura", "crayon", "whiskers", "record"].includes(skin)) document.documentElement.setAttribute("data-playskin", skin);
+      if (["aura", "crayon", "whiskers"].includes(skin)) document.documentElement.setAttribute("data-playskin", skin);
       if (localStorage.getItem("orbit-dark") === "1") document.documentElement.classList.add("dark");
     } catch {}
   </script>

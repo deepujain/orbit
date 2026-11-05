@@ -144,6 +144,8 @@ input:focus, textarea:focus { outline: 2px solid hsl(var(--ring)); outline-offse
   .rail { display: none; }
   .tabbar { display: flex; }
   .topbar { padding: 0 14px; gap: 10px; }
+  .record-action { padding: 0 10px; }
+  .record-label { display: none; }
 }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 

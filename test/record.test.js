@@ -1,12 +1,45 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { readMs, pickType, restoreOf, withIntro, scriptWords, recordingName, RECORD_TYPES } from "../src/record.js";
-import { THEMES, THEME_NAMES } from "../src/index.js";
+import { readMs, pickType, restoreOf, withIntro, scriptWords, recordingName, RECORD_TYPES, startRecord } from "../src/record.js";
+import { THEMES, THEME_NAMES, bootScript } from "../src/index.js";
 
-test("Record is a skin like the others", () => {
-  assert.ok(THEMES.includes("record"));
-  assert.equal(THEME_NAMES.record, "Record");
+// Just enough of a page for startRecord to put its parts on: what it appends to the body, and the attributes it sets.
+const fakePage = () => {
+  const added = [];
+  const el = () => ({ hidden: true, style: {}, classList: { toggle() {} }, setAttribute() {}, addEventListener() {}, remove() {} });
+  globalThis.document = { createElement: el, body: { append: (...els) => added.push(...els) }, querySelectorAll: () => [] };
+  globalThis.addEventListener = () => {};
+  globalThis.removeEventListener = () => {};
+  const marks = new Set();
+  const root = { getAttribute: () => null, toggleAttribute: (name, on) => (on ? marks.add(name) : marks.delete(name)) };
+  return { added, root, marks };
+};
+
+test("Record is an action, not a skin, so a page can be filmed in any skin", () => {
+  assert.deepEqual(THEMES, ["aura", "crayon", "whiskers"]);
+  assert.equal(THEME_NAMES.record, undefined);
+  assert.doesNotMatch(bootScript(), /record/);
+  const { added, root } = fakePage();
+  const rec = startRecord({ script: () => ({ title: "Page", steps: [{ heading: "Page", say: "Hello." }] }), root });
+  assert.equal(added.length, 3, "its own button, ring and caption");
+  assert.equal(added[0].hidden, false, "the button is out with no skin turned on");
+  assert.equal(rec.available(), true);
+});
+
+test("with button: false the app's own button drives Record and follows it through onChange", () => {
+  const { added, root } = fakePage();
+  let script = { title: "Page", steps: [{ heading: "Page", say: "Hello." }] };
+  const seen = [];
+  const rec = startRecord({ script: () => script, root, button: false, onChange: (s) => seen.push(s) });
+  assert.equal(added.length, 2, "only the ring and caption");
+  assert.deepEqual(seen, [{ available: true, busy: false, recording: false }]);
+  rec.refresh();
+  assert.equal(seen.length, 1, "nothing is said again while nothing changed");
+  script = null;
+  rec.refresh();
+  assert.deepEqual(seen.at(-1), { available: false, busy: false, recording: false }, "a page without a script has nothing to record");
+  assert.equal(rec.available(), false);
 });
 
 test("the intro leads every script and the length is counted in words", () => {
@@ -41,9 +74,10 @@ test("the file is named for the script and the local time, safe on every system"
   assert.equal(recordingName("", "video/webm", at), "Recording 2026-11-04 09.05.webm");
 });
 
-test("the button hides while recording so it is never in the video, and the look is the page's own", () => {
+test("the button, and the app's own marked button, hide while recording so neither is in the video, and the look is the page's own", () => {
   const css = readFileSync(new URL("../themes/record.css", import.meta.url), "utf8");
   assert.match(css, /\[data-playskin-recording\] \.playskin-record \{ display: none; \}/);
+  assert.match(css, /\[data-playskin-recording\] \[data-record-hide\] \{ visibility: hidden; \}/);
   assert.doesNotMatch(css, /\[data-playskin="record"\]/, "Record changes no colours");
   const js = readFileSync(new URL("../src/record.js", import.meta.url), "utf8");
   assert.match(js, /src\.connect\(run\.out\);\s*src\.connect\(run\.ctx\.destination\);/, "the voice is in the file and heard aloud");

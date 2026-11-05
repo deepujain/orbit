@@ -1,5 +1,6 @@
-/* Record: a narrated tour of the page, filmed as a video. The skin keeps the page's own look and adds a Record button
-   to every page that has a script. Pressing it gets each line's voice ready, asks once to share the tab, then walks
+/* Record: a narrated tour of the page, filmed as a video. It is an action, not a skin, so it films the page in
+   whatever skin is on. It adds a Record button to every page that has a script, or drives the app's own button when
+   given button: false. Pressing it gets each line's voice ready, asks once to share the tab, then walks
    the page: it scrolls to each step's part, rings it, shows the line as a caption and plays the voice, which goes
    into the video and out of the speakers. Esc or the browser's Stop sharing ends it early. The file downloads at the
    end; nothing leaves the browser.
@@ -114,22 +115,25 @@ const pinned = (el) => {
 
 /**
  * Options: script (a function returning the current page's script, or null), intro (steps that lead every script),
- * voice (async text => ArrayBuffer of audio, or null for captions alone), show (a function saying whether the button
- * is out; defaults to the skin being "record"), root and attribute (where the skin is read from), headings (where
- * heading steps look), sectionOf (the part to ring for a matched heading), offset (pixels left above a part when the
- * page scrolls to it), label (the button text), onMessage (text, tone) for problems and the saved length.
+ * voice (async text => ArrayBuffer of audio, or null for captions alone), button (false to draw no button and let the
+ * app call start), show (a function saying whether the button is out; defaults to always while the page has a
+ * script), root (marked data-playskin-recording while filming), headings (where heading steps look), sectionOf (the
+ * part to ring for a matched heading), offset (pixels left above a part when the page scrolls to it), label (the
+ * button text), onChange ({ available, busy, recording }) whenever that changes, onMessage (text, tone) for problems
+ * and the saved length.
  */
 export function startRecord({
   script = () => null,
   intro = [],
   voice = null,
   root = document.documentElement,
-  attribute = "data-playskin",
-  show,
+  button: drawButton = true,
+  show = () => true,
   headings = "main h1, main h2, main h3",
   sectionOf = (h) => h.closest("section, [data-card]") || h.closest("header") || h,
   offset = 88,
   label = "Record",
+  onChange = () => {},
   onMessage = (text) => console.info(text),
 } = {}) {
   // The page may not be ready when Record starts, so a script or show that throws means no button yet.
@@ -140,7 +144,7 @@ export function startRecord({
       return null;
     }
   };
-  const visible = () => safe(show || (() => root.getAttribute(attribute) === "record"));
+  const visible = () => safe(show);
   const current = () => safe(() => withIntro(script(), intro));
   const make = (cls, tag = "div") => Object.assign(document.createElement(tag), { className: cls, hidden: true });
   const button = make("playskin-record", "button");
@@ -148,8 +152,9 @@ export function startRecord({
   const ring = make("playskin-record-ring");
   const caption = make("playskin-record-caption");
   caption.setAttribute("aria-live", "polite");
-  document.body.append(button, ring, caption);
+  document.body.append(...(drawButton ? [button] : []), ring, caption);
   let run = null;
+  let said = "";
 
   const findHeading = (text) => {
     for (const h of document.querySelectorAll(headings)) if (h.textContent.trim() === text) return sectionOf(h);
@@ -160,6 +165,11 @@ export function startRecord({
 
   function refresh() {
     const s = run ? null : visible() ? current() : null;
+    const now = { available: Boolean(s || run), busy: Boolean(run && !run.recording), recording: Boolean(run?.recording) };
+    if (JSON.stringify(now) !== said) {
+      said = JSON.stringify(now);
+      onChange(now);
+    }
     button.hidden = !s && !run;
     button.classList.toggle("is-busy", Boolean(run));
     button.innerHTML = `<i class="playskin-record-dot"></i>${run ? (run.recording ? "Recording" : "Getting the voice ready") : label}`;
@@ -346,8 +356,6 @@ export function startRecord({
   }
 
   button.addEventListener("click", start);
-  const onChange = () => refresh();
-  root.addEventListener("playskin-change", onChange);
   refresh();
   return {
     refresh,
@@ -356,10 +364,11 @@ export function startRecord({
     get running() {
       return Boolean(run);
     },
+    /** Whether the page has a script to record now. */
+    available: () => Boolean(current()),
     destroy() {
       stop();
       removeEventListener("keydown", onKey);
-      root.removeEventListener("playskin-change", onChange);
       button.remove();
       ring.remove();
       caption.remove();

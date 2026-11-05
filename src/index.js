@@ -1,17 +1,17 @@
 /* playskin: playful skins for a web page. A skin is turned on by one attribute on <html>, data-playskin="aura",
-   "crayon", "whiskers" or "record", and its stylesheet does the rest. createPlayskin() keeps that attribute in step
-   with the visitor's saved choice and, unless told not to, brings out what a skin draws beyond CSS: Crayon's doodles,
-   the Whiskers cat and Record's narrated tour. */
+   "crayon" or "whiskers", and its stylesheet does the rest. createPlayskin() keeps that attribute in step with the
+   visitor's saved choice and, unless told not to, brings out what a skin draws beyond CSS: Crayon's doodles and the
+   Whiskers cat. Record (playskin/record) is an action, not a skin, so it films the page in any of them. */
 import { mountCrayonDoodles } from "./crayon-doodles.js";
 import { startCrayon } from "./crayon.js";
 import { startMotion } from "./motion.js";
 
-export const THEMES = ["aura", "crayon", "whiskers", "record"];
-export const THEME_NAMES = { aura: "Aura", crayon: "Crayon", whiskers: "Whiskers", record: "Record" };
+export const THEMES = ["aura", "crayon", "whiskers"];
+export const THEME_NAMES = { aura: "Aura", crayon: "Crayon", whiskers: "Whiskers" };
 export const CHANGE_EVENT = "playskin-change";
 export { mountCrayonDoodles, startCrayon, startMotion };
 
-const DEFAULTS = { themes: THEMES, storageKey: "playskin", attribute: "data-playskin", effects: true, crayon: {}, whiskers: {}, record: null, motion: {} };
+const DEFAULTS = { themes: THEMES, storageKey: "playskin", attribute: "data-playskin", effects: true, crayon: {}, whiskers: {}, motion: {} };
 
 function readStored(key) {
   try {
@@ -31,10 +31,9 @@ function writeStored(key, value) {
 /**
  * Keeps <html data-playskin> in step with the chosen skin.
  * Options: themes (allowed names), storageKey (where the choice is saved, or null to not save), attribute,
- * root (the element that carries the attribute), effects (false to skip Crayon's drawings, the cat and the tour), crayon
- * (options for startCrayon), whiskers
- * (options for startWhiskers), record (options for startRecord; Record shows nothing without a script), motion
- * (options for startMotion, or false to leave data-motion blocks still).
+ * root (the element that carries the attribute), effects (false to skip Crayon's drawings and the cat), crayon
+ * (options for startCrayon), whiskers (options for startWhiskers), motion (options for startMotion, or false to leave
+ * data-motion blocks still).
  */
 export function createPlayskin(options = {}) {
   const o = { ...DEFAULTS, ...options };
@@ -43,7 +42,6 @@ export function createPlayskin(options = {}) {
   let current = null;
   let crayon = null;
   let catStarted = false;
-  let recordStarted = false;
   const motion = o.motion === false ? null : startMotion({ root, ...o.motion });
 
   const valid = (theme) => (o.themes.includes(theme) ? theme : null);
@@ -61,14 +59,6 @@ export function createPlayskin(options = {}) {
         .then((m) => m.startWhiskers({ root, attribute: o.attribute, ...o.whiskers }))
         .catch(() => {
           catStarted = false;
-        });
-    }
-    if (theme === "record" && o.record && !recordStarted) {
-      recordStarted = true;
-      import("./record.js")
-        .then((m) => m.startRecord({ root, attribute: o.attribute, ...o.record }))
-        .catch(() => {
-          recordStarted = false;
         });
     }
   }

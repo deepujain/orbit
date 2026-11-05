@@ -1,13 +1,12 @@
 # playskin
 
-Playful skins for any web page. Turn one on with a single attribute, and your page becomes soft glass, crayon paper, the home of a cat, or a narrated tour you can film.
+Playful skins for any web page. Turn one on with a single attribute, and your page becomes soft glass, crayon paper or the home of a cat. Record, an action rather than a skin, films a narrated tour of the page in whichever skin is on.
 
 | Skin | What it does |
 |---|---|
 | **Aura** | Soft white glass by day, graphite by night. Cards catch a soft glow in their corners, buttons become pills, page titles get a violet-to-pink wash. |
 | **Crayon** | Cream ruled paper by day, a green chalkboard in a wooden frame by night. Hand-drawn borders, handwriting headings, and doodles behind the page: bunting, drifting clouds, a rainbow and a slow snail. |
 | **Whiskers** | A cat that lives in the whole window. It hops between your cards under real physics, rolls round buttons like wheels, chases a ball of yarn, naps, gets hungry and asks to be fed. Tap it for a trick; double-tap for its trick panel. |
-| **Record** | Keeps your page's look and adds a Record button. It films the tab while it scrolls to each part of the page, rings it, captions a line about it and plays a voice for it, then downloads the video. Each page brings its own script. |
 
 Aura, Crayon and Whiskers follow light and dark mode (a `dark` class on `<html>`), respect `prefers-reduced-motion`, and step aside in forced-colors mode.
 
@@ -38,7 +37,7 @@ The same demo page in each skin, light on the left and dark on the right.
 
 ## Try it
 
-Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small control room for an offshore oil rig, with cards, charts, tabs, a form, its own dropdowns, a side menu that opens when you point at it, and every button style. It shows each chart type `playskin/charts` draws once, on made-up rig numbers: a few on the dashboard, a few to each of its Production, Wells, Drilling, Safety, Supply and Costs pages, and the rest on its Motion page, which plays every effect `motion.css` has. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Record has a narrated tour for every page. `index.html` is a one-page demo of the same skins.
+Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small control room for an offshore oil rig, with cards, charts, tabs, a form, its own dropdowns, a side menu that opens when you point at it, and every button style. It shows each chart type `playskin/charts` draws once, on made-up rig numbers: a few on the dashboard, a few to each of its Production, Wells, Drilling, Safety, Supply and Costs pages, and the rest on its Motion page, which plays every effect `motion.css` has. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Its top bar has a Record button that films a narrated tour of the page you are on, in whichever skin is on. `index.html` is a one-page demo of the same skins.
 
 ## Use it on any page
 
@@ -96,11 +95,11 @@ export function SkinPicker() {
 
 ### Record a narrated tour
 
-Give Record a script for the page you are on. Each step names a heading on the page (or a CSS selector as `target`) and the line to say. `voice` is optional: return audio for a line, from any text-to-speech you run, and it goes into the video. Without it the lines show as captions.
+Record is an action, not a skin, so the video shows your page in whichever skin is on. Give it a script for the page you are on. Each step names a heading on the page (or a CSS selector as `target`) and the line to say. `voice` is optional: return audio for a line, from any text-to-speech you run, and it goes into the video. Without it the lines show as captions.
 
 ```js
 import "playskin/record.css";
-import { createPlayskin } from "playskin";
+import { startRecord } from "playskin/record";
 
 const scripts = {
   home: { title: "Home tour", steps: [
@@ -109,12 +108,14 @@ const scripts = {
     { heading: "Settings", press: '[data-tab="settings"][aria-pressed="false"]', say: "Settings hold the rules." },
   ]},
 };
-createPlayskin({ record: {
+startRecord({
   script: () => scripts[location.pathname.slice(1) || "home"] || null,
   intro: [{ target: ".logo", say: "Acme helps shops sell online." }],
   voice: async (text) => (await fetch("/tts", { method: "POST", body: text })).arrayBuffer(),
-}}).set("record");
+});
 ```
+
+That adds a floating Record button on every page with a script. To use your own button instead, pass `button: false`, call `start()` from it, mark it `data-record-hide` so it stays out of the video, and follow `onChange({ available, busy, recording })` to show or label it.
 
 A step's `press` clicks a control before its line, and the tour presses it back at the end. Chrome and Edge record the tab; the browser asks once to share it. Esc stops early.
 
@@ -139,6 +140,7 @@ A few markers let a skin restyle specific parts:
 | `data-playskin-floor` | An element whose top edge is the cat's floor, such as a bottom tab bar |
 | `data-playskin-ignore` | Anything the cat should never walk on |
 | `data-cat-chart` | Charts the cat plays with |
+| `data-record-hide` | Anything Record should keep out of its video, such as your own Record button |
 
 Dark mode follows `class="dark"` or `data-theme="dark"` on `<html>`, whichever your app uses.
 
@@ -152,14 +154,13 @@ Keeps the attribute on `<html>` in step with the chosen skin and runs each skin'
 
 | Option | Default | Meaning |
 |---|---|---|
-| `themes` | `["aura", "crayon", "whiskers", "record"]` | Skins that may be turned on |
+| `themes` | `["aura", "crayon", "whiskers"]` | Skins that may be turned on |
 | `storageKey` | `"playskin"` | `localStorage` key for the visitor's choice; `null` to not save it |
 | `attribute` | `"data-playskin"` | Attribute set on the root element |
 | `root` | `document.documentElement` | Element that carries the attribute |
 | `effects` | `true` | Set `false` to run Crayon's drawings and the cat yourself |
 | `crayon` | `{}` | Options passed to `startCrayon` |
 | `whiskers` | `{}` | Options passed to `startWhiskers` |
-| `record` | `null` | Options passed to `startRecord`; Record shows nothing without a script |
 
 `setTheme(name)` and `getTheme()` do the same with the default options. `bootScript(options)` returns the no-flash script text.
 
@@ -186,7 +187,7 @@ An app can make the cat its own:
 
 ### `startRecord(options)` from `playskin/record`
 
-Adds the Record button. It shows while `show()` returns true (by default, while the skin is `"record"`) and the page has a script. Options: `script` (a function returning `{ title, steps }` for the current page, or null), `intro` (steps that lead every script), `voice` (async text to an `ArrayBuffer` of audio), `headings` (where heading steps look, default `main h1, main h2, main h3`), `sectionOf` (the part to ring for a heading), `offset` (pixels left above a part when scrolling to it), `label`, and `onMessage(text, tone)`. Returns `{ refresh, start, stop, running, destroy }`; call `refresh()` after the page changes. Colours come from `--playskin-record-accent`, `-surface`, `-ink` and `-line`, or the variables above.
+Starts the Record action, in any skin. Its button shows while the page has a script and `show()` returns true (always, by default). Options: `script` (a function returning `{ title, steps }` for the current page, or null), `intro` (steps that lead every script), `voice` (async text to an `ArrayBuffer` of audio), `button` (`false` to draw none and call `start()` from your own), `headings` (where heading steps look, default `main h1, main h2, main h3`), `sectionOf` (the part to ring for a heading), `offset` (pixels left above a part when scrolling to it), `label`, `onChange({ available, busy, recording })`, and `onMessage(text, tone)`. Returns `{ refresh, start, stop, running, available, destroy }`; call `refresh()` after the page changes. Colours come from `--playskin-record-accent`, `-surface`, `-ink` and `-line`, or the variables above.
 
 ### `mountCrayonDoodles(target)` from `playskin/crayon-doodles`
 

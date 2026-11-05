@@ -1,6 +1,7 @@
-/* playskin: Record. Keeps the page's own look and adds a Record button, a ring and captions for a narrated tour. The
-   colours come from the page: --playskin-record-accent, -surface, -ink and -line, or else the Tailwind-style
-   variables the other skins read. The button stays out of the video while it records. */
+/* playskin: Record, the narrated tour action. Not a skin: it changes no colours, so the video shows the page in
+   whatever skin is on. Its button, ring and captions take colours from the page: --playskin-record-accent, -surface,
+   -ink and -line, or else the Tailwind-style variables the skins read. Its button, and anything marked
+   data-record-hide such as the app's own Record button, stays out of the video. */
 .playskin-record {
   position: fixed;
   right: 22px;
@@ -34,6 +35,7 @@
 .playskin-record.is-busy .playskin-record-dot { animation: playskin-record-pulse 1s ease-in-out infinite; }
 @keyframes playskin-record-pulse { 50% { opacity: 0.35; } }
 [data-playskin-recording] .playskin-record { display: none; }
+[data-playskin-recording] [data-record-hide] { visibility: hidden; }
 .playskin-record-ring {
   position: fixed;
   z-index: 65;

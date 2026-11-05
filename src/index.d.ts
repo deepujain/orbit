@@ -1,9 +1,8 @@
 import type { WhiskersOptions } from "./whiskers/index.js";
-import type { RecordOptions } from "./record.js";
 import type { CrayonOptions } from "./crayon.js";
 import type { Motion, MotionOptions } from "./motion.js";
 
-export type Theme = "aura" | "crayon" | "whiskers" | "record";
+export type Theme = "aura" | "crayon" | "whiskers";
 
 export declare const THEMES: Theme[];
 export declare const THEME_NAMES: Record<Theme, string>;
@@ -20,7 +19,6 @@ export interface PlayskinOptions {
   effects?: boolean;
   crayon?: CrayonOptions;
   whiskers?: WhiskersOptions;
-  record?: RecordOptions | null;
   motion?: MotionOptions | false;
 }
 
