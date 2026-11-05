@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { parseCount, formatCount } from "../src/motion.js";
 import { CHARTS, compact } from "../src/charts.js";
-import { chartsPage, chartCount } from "../example/charts-page.js";
+import { CHART_PAGES, chartPage, chartCount } from "../example/charts-page.js";
 import { motionPage } from "../example/motion-page.js";
 
 const motionCss = readFileSync(new URL("../themes/motion.css", import.meta.url), "utf8");
@@ -27,8 +27,11 @@ test("big numbers read short", () => {
   assert.equal(compact(-14200), "-14.2k");
 });
 
-test("the Charts page shows every chart playskin draws, each one a motion block with sound numbers", () => {
+const chartsPage = () => CHART_PAGES.map((p) => chartPage(p.id)).join("");
+
+test("the chart pages show every chart playskin draws between them, a few to a page, each a motion block with sound numbers", () => {
   const html = chartsPage();
+  for (const p of CHART_PAGES) assert.ok(p.sections.reduce((n, [, items]) => n + items.length, 0) <= 10, `${p.label} is not crowded`);
   for (const name of Object.keys(CHARTS)) assert.match(pageSource, new RegExp(`c\\.${name}\\(`), `${name} is on the Charts page`);
   assert.ok(chartCount >= 40);
   assert.ok((html.match(/class="pc pc-k-/g) || []).length >= Object.keys(CHARTS).length);

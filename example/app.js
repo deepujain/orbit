@@ -3,7 +3,7 @@
    page on every navigation, as real apps do, so each skin has to keep up on its own. */
 import { createPlayskin, THEME_NAMES } from "../src/index.js";
 import { rankedBars, blockGauge, splitGauge, rankTiles, compact } from "../src/charts.js";
-import { chartsPage } from "./charts-page.js";
+import { CHART_PAGES, chartPage } from "./charts-page.js";
 import { motionPage } from "./motion-page.js";
 
 const ICONS = {
@@ -14,14 +14,20 @@ const ICONS = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   down: '<path d="M6 9l6 6 6-6"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
-  pie: '<path d="M12 3a9 9 0 1 0 9 9h-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/>',
+  drop: '<path d="M12 2.7l5.7 5.7a8 8 0 1 1-11.4 0z"/>',
+  derrick: '<path d="M12 2L6 22M12 2l6 20M10 8h4M8.5 13h7M7.3 17.5h9.4"/>',
+  drill: '<path d="M5 3h14l-2 5H7zM9 8v5l3 3 3-3V8M12 16v6"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  clipboard: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 13l2 2 4-4"/>',
+  ship: '<path d="M2 20c1.5 1.3 3.5 1.3 5 0s3.5-1.3 5 0 3.5 1.3 5 0 3.5-1.3 5 0M4 17l-1-6h18l-1 6M12 11V3M8 7h8"/>',
+  dollar: '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
   spark: '<path d="M12 3l2.2 6.3L20.5 12l-6.3 2.2L12 20.5l-2.2-6.3L3.5 12l6.3-2.7z"/>',
 };
 const icon = (name, cls = "") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
 
 const PAGES = [
   ["dashboard", "home", "Dashboard"],
-  ["charts", "pie", "Charts"],
+  ...CHART_PAGES.map((p) => [p.id, p.icon, p.label]),
   ["motion", "spark", "Motion"],
   ["settings", "gear", "Settings"],
 ];
@@ -77,14 +83,14 @@ const BODY = {
         <div class="row"><button class="btn" data-button="default">Save</button><button class="btn" data-button="ghost">Cancel</button><button class="btn" data-button="destructive">Delete account</button><button class="btn" data-button="link">Help</button></div>
       </form>
     </section>`,
-  charts: chartsPage,
+  ...Object.fromEntries(CHART_PAGES.map((p) => [p.id, () => chartPage(p.id)])),
   motion: motionPage,
 };
 
 // One narrated tour per page for the Record skin.
 const TOURS = {
   dashboard: { title: "Platform Alpha dashboard", steps: [{ heading: "Good morning, Platform Alpha", say: "This is Orbit, the control room for an offshore oil rig, dressed by playskin." }, { heading: "Oil produced", say: "Barrels, wells, uptime and permits all take the skin's look." }] },
-  charts: { title: "Platform Alpha charts", steps: [{ heading: "Charts", say: "Every chart playskin draws, on made-up rig numbers." }, { heading: "Rings, pies and gauges", say: "Rings fill, pies spin in and gauges sweep up." }] },
+  ...Object.fromEntries(CHART_PAGES.map((p) => [p.id, { title: `Platform Alpha ${p.label.toLowerCase()}`, steps: [{ heading: p.label, say: p.lede }, { heading: p.sections[0][0], say: "Each chart builds in as it comes into view." }] }])),
   motion: { title: "Platform Alpha motion", steps: [{ heading: "Motion", say: "Every card builds in as it comes into view." }, { heading: "Line draws, area reveals, dots pop", say: "Lines draw themselves, areas sweep in and points pop." }] },
   settings: { title: "Platform Alpha settings", steps: [{ heading: "Settings", say: "Form fields and every button style." }] },
 };
