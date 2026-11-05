@@ -38,7 +38,7 @@ The same demo page in each skin, light on the left and dark on the right.
 
 ## Try it
 
-Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small dashboard with four pages, cards, charts, a table, tabs, a form and every button style. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Record has a narrated tour for every page. `index.html` is a one-page demo of the same skins.
+Run `npm start` and open the address it prints (http://localhost:5173/example/). Orbit, the example app in `example/`, is a small dashboard with cards, charts, a table, tabs, a form and every button style. Its Charts page shows every chart `playskin/charts` draws on made-up numbers, and its Motion page shows every effect `motion.css` plays. Pick a skin in its top bar and switch light and dark with the button beside it. It marks its parts the way [How your page is read](#how-your-page-is-read) describes and redraws the page on every navigation, so it also shows each skin keeping up with an app that re-renders. Record has a narrated tour for every page. `index.html` is a one-page demo of the same skins.
 
 ## Use it on any page
 
@@ -212,6 +212,57 @@ The same drawings, for an app that wants to place them itself. `crayon.css` styl
 | `startCrayonPlane(options)` | Sends the plane off your brand every 14 to 26 seconds |
 
 `startCrayonPlane` options: `anchor` (the element it takes off from, default `[data-brand]`), `active` (whether it may fly, default while the Crayon skin is on), `reducedMotion`, `every` and `first` (milliseconds between flights and before the first, as `[shortest, longest]`). It never flies under reduced motion or in a hidden tab, and returns `{ fly, flights, stop }`; `fly()` sends it now.
+
+## Charts and motion
+
+Dashboards built with playskin can build in the way modern dashboards do: cards rise, bars grow, lines draw, rings fill, dots pop and numbers count up as each block comes into view, and again when it comes back.
+
+### Motion: `motion.css` and `startMotion(options)`
+
+Mark a block with `data-motion` and each moving part inside it with `data-m`. Parts side by side start one after another. Mark a number with `data-count` and it counts up from zero.
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/playskin/themes/motion.css">
+<section data-motion>
+  <b data-count>1,204</b>
+  <div class="bar" data-m="grow-y sheen" style="height:80%"></div>
+</section>
+```
+
+| Effect | What it does |
+| --- | --- |
+| `rise`, `fade`, `blur` | Comes up into place, fades in, or comes into focus |
+| `slide-left`, `slide-right` | Slides in from one side |
+| `grow-x`, `grow-y` | Grows across from the left, or up from the bottom |
+| `pop`, `zoom`, `flip` | Pops out from its centre, spins in, or flips down like a split-flap tile |
+| `draw` | Draws an SVG line or ring; give it `pathLength="1"`, and `--m-fill` (0 to 1) to draw only part of it |
+| `reveal` | Sweeps an area in from left to right |
+| `sheen` | One light sweep across the part after it has grown |
+| `pulse`, `float`, `shimmer` | Always on: a live dot, a gentle bob, a loading skeleton |
+
+`--m-delay` waits before a part starts, `--m-step` sets the gap between neighbours (60ms), and `--m-cap` sets how many steps at most (12). Put `data-m-group` on a parent so that hovering one child sets the others back.
+
+`createPlayskin` runs `startMotion` for you; pass `motion: false` to leave blocks still. It holds each block at its first frame until enough of it is on screen (`threshold`, default 0.15) and plays it again whenever it comes back (`replay`, default true), and every block on screen plays again when a Record recording starts. Blocks your app redraws are found on the next frame. Under reduced motion everything shows complete and still. It returns `{ replay(block?), stop }`, and `skin.motion` is the one `createPlayskin` started.
+
+### Charts: `charts.css` and `playskin/charts`
+
+Each builder takes plain data and returns the chart's markup as a string, plain SVG and HTML with no chart library. Every chart is a motion block and a `data-cat-chart`, and its colours follow the shadcn `--chart-1` to `--chart-5` variables, so each skin repaints it.
+
+```js
+import { columns, donut, compact } from "playskin/charts";
+el.innerHTML = columns({ rows: [{ label: "Mon", value: 820 }, { label: "Tue", value: 940 }], format: (v) => `$${compact(v)}` });
+```
+
+| Kind | Builders |
+| --- | --- |
+| Numbers | `headline`, `statLine`, `kpi` |
+| Columns and bars | `columns`, `stackedColumns`, `rankedBars`, `comboBarLine`, `highlightBars`, `targetBars`, `progressTargets`, `lollipops`, `podium`, `avatarColumns`, `dotMatrix`, `waterfall`, `bandColumns` |
+| Lines and areas | `lineChart`, `areaChart`, `marginStrips`, `flowRibbon`, `stageArea` |
+| Rings, pies and gauges | `donut`, `pie`, `hatchedDonut`, `radialRanks`, `splitGauge`, `blockGauge`, `gauge`, `radialSegments`, `coverageRings` |
+| Shares | `treemap`, `breakdownStrip`, `tickBreakdown`, `hexShare`, `segmentedProgress` |
+| Grids, rows and flows | `heatGrid`, `calendarHeat`, `butterfly`, `dotRows`, `funnel`, `stockBridge`, `shiftTimeline`, `rankTiles`, `flow` |
+
+Charts drawn in SVG take `width` and `height` in drawing units; give a wide card a larger `width` so its text stays the same size. `example/charts-page.js` calls every builder.
 
 ## Credits
 

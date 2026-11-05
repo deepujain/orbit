@@ -1,0 +1,210 @@
+/* playskin charts: the look of the charts src/charts.js draws. Colours follow the shadcn variables when the page has
+   them (--chart-1 to --chart-5, --muted, --foreground and so on), so every skin repaints them; otherwise they fall back
+   to a calm palette. Load motion.css too for the build-in. */
+
+:root {
+  --pc-1: hsl(var(--chart-1, 221 83% 58%));
+  --pc-2: hsl(var(--chart-2, 160 64% 42%));
+  --pc-3: hsl(var(--chart-3, 32 92% 56%));
+  --pc-4: hsl(var(--chart-4, 271 70% 62%));
+  --pc-5: hsl(var(--chart-5, 340 78% 58%));
+  --pc-6: #06b6d4;
+  --pc-7: #84cc16;
+  --pc-8: #f59e0b;
+  --pc-good: #16a34a;
+  --pc-bad: #e11d48;
+  --pc-warn: #f59e0b;
+  --pc-fg: hsl(var(--foreground, 240 10% 4%));
+  --pc-sub: hsl(var(--muted-foreground, 240 4% 46%));
+  --pc-muted: hsl(var(--muted, 240 5% 94%));
+  --pc-border: hsl(var(--border, 240 6% 90%));
+  --pc-card: hsl(var(--card, 0 0% 100%));
+}
+
+.pc { display: grid; gap: 12px; min-width: 0; font-size: 13px; color: var(--pc-fg); font-variant-numeric: tabular-nums; }
+.pc i, .pc em { font-style: normal; }
+.pc-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.pc-axis { fill: var(--pc-sub); font-size: 13px; }
+.pc-grid { stroke: var(--pc-border); stroke-dasharray: 3 4; }
+.pc-ref { stroke: var(--pc-sub); stroke-dasharray: 5 5; stroke-width: 1.4; opacity: .7; }
+.pc-val { fill: var(--pc-fg); font-size: 14px; font-weight: 700; }
+.pc-val.small { font-size: 11px; }
+.pc-val.inv { fill: var(--pc-card); }
+.pc-line { fill: none; stroke: var(--pc-2); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.pc-line.dashed { stroke-dasharray: 6 6; stroke-width: 2; opacity: .7; }
+.pc-line.soft { stroke-width: 10; opacity: .18; }
+.pc-line.good, .pc-dot.good { stroke: var(--pc-good); }
+.pc-line.bad, .pc-dot.bad { stroke: var(--pc-bad); }
+.pc-dot { fill: var(--pc-card); stroke: var(--pc-2); stroke-width: 2.5; }
+.pc-arc { fill: none; stroke-width: 18; stroke-linecap: round; }
+.pc-arc.fat { stroke-width: 22; stroke-linecap: butt; }
+.pc-arc.thin { stroke-width: 11; }
+.pc-track-ring { stroke: var(--pc-muted); }
+.pc-sub { color: var(--pc-sub); font-size: 12px; }
+.pc small { color: var(--pc-sub); font-size: 12px; }
+
+.pc-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--pc-sub); font-size: 12px; }
+.pc-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.pc-legend b { color: var(--pc-fg); font-weight: 600; }
+.pc-legend em { font-style: normal; opacity: .8; }
+.pc-legend i { width: 10px; height: 10px; border-radius: 3px; }
+.pc-legend i.dash { width: 16px; height: 0; border-top: 2px dashed var(--pc-sub); border-radius: 0; }
+.pc-legend i.sq { width: 12px; height: 12px; }
+.pc-side { display: grid; grid-template-columns: minmax(120px, 190px) 1fr; align-items: center; gap: 18px; }
+.pc-side > .pc-legend { flex-direction: column; }
+.pc-side > .pc-legend span { justify-content: flex-start; }
+.pc-side > .pc-legend b { margin-left: auto; }
+
+.pc-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 10px; }
+.pc-head b { font-size: 30px; letter-spacing: -.02em; }
+.pc-head small { flex-basis: 100%; }
+.pc-pill { white-space: nowrap; display: inline-flex; padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+.pc-pill.good { color: var(--pc-good); background: color-mix(in srgb, var(--pc-good) 14%, transparent); }
+.pc-pill.bad { color: var(--pc-bad); background: color-mix(in srgb, var(--pc-bad) 14%, transparent); }
+
+.pc-k-statline { grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0; }
+.pc-k-statline > div { display: grid; gap: 2px; padding: 0 14px; border-left: 1px solid var(--pc-border); }
+.pc-k-statline > div:first-child { padding-left: 0; border-left: 0; }
+.pc-k-statline b { font-size: 20px; }
+.pc-k-kpi { grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; }
+.pc-k-kpi > b { font-size: 26px; letter-spacing: -.02em; }
+.pc-k-kpi > small { grid-column: 1 / -1; }
+.pc-k-kpi > svg { grid-column: 1 / -1; height: 40px; }
+
+.pc-rows { display: grid; gap: 10px; }
+.pc-rank { display: grid; grid-template-columns: minmax(70px, 120px) 1fr; grid-template-areas: "name val" "bar bar"; gap: 4px 10px; align-items: center; }
+.pc-rank > span { grid-area: name; }
+.pc-rank > b { grid-area: val; justify-self: end; }
+.pc-rank > .pc-track { grid-area: bar; }
+.pc-track { position: relative; height: 10px; border-radius: 99px; background: var(--pc-muted); overflow: hidden; }
+.pc-track.clear { background: color-mix(in srgb, var(--pc-muted) 60%, transparent); }
+.pc-track i { display: block; height: 100%; border-radius: inherit; }
+.pc-track.flip { display: flex; justify-content: flex-end; }
+.pc-targets .pc-track { overflow: visible; }
+.pc-targets .pc-track s { position: absolute; top: -4px; bottom: -4px; left: var(--t); border-left: 2px dashed var(--pc-fg); opacity: .55; }
+
+.pc-ringbox { position: relative; width: 100%; max-width: 200px; justify-self: center; }
+.pc-ringbox.half { max-width: 240px; }
+.pc-ringbox.small { width: 72px; }
+.pc-mid { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; line-height: 1.15; }
+.pc-mid b { font-size: 22px; }
+.pc-mid.low { inset: auto 0 0; }
+.pc-ringbox.small .pc-mid b { font-size: 14px; }
+.pc-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.pc-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; background: var(--pc-muted); font-size: 12px; }
+.pc-tag i { width: 8px; height: 8px; border-radius: 50%; }
+.pc-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; }
+.pc-tiles > div { display: grid; grid-template-columns: auto 1fr; gap: 0 6px; align-items: center; padding: 8px 10px; border: 1px solid var(--pc-border); border-radius: 10px; }
+.pc-tiles i { width: 8px; height: 8px; border-radius: 50%; }
+.pc-tiles b, .pc-tiles em { grid-column: 1 / -1; }
+.pc-tiles em { font-style: normal; color: var(--pc-sub); font-size: 12px; }
+
+.pc-tree { position: relative; }
+.pc-tree > div { position: absolute; box-sizing: border-box; padding: 8px; border: 2px solid var(--pc-card); border-radius: 10px; background: var(--c); color: #fff; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 1px; }
+.pc-tree span { font-size: 12px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.pc-tree b { font-size: 16px; }
+.pc-tree em { font-style: normal; font-size: 11px; opacity: .85; }
+
+.pc-strip { display: flex; gap: 3px; height: 24px; }
+.pc-strip i { border-radius: 6px; }
+.pc-keys { display: flex; gap: 10px; }
+.pc-keys > div { position: relative; display: grid; gap: 1px; min-width: 0; padding-left: 10px; overflow: hidden; }
+.pc-keys small, .pc-keys .pc-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-edge { position: absolute; inset: 0 auto 0 0; width: 3px; border-radius: 3px; opacity: .5; }
+.pc-keys b { font-size: 16px; }
+.pc-keyrow { display: flex; align-items: flex-end; gap: 3px; height: 44px; margin-top: 6px; }
+.pc-keyrow i { flex: 1; min-width: 2px; height: 100%; border-radius: 99px; }
+.pc-row-head { display: flex; justify-content: space-between; }
+.pc-segs { display: flex; gap: 3px; height: 26px; }
+.pc-segs i { flex: 1; border-radius: 3px; }
+
+.pc-strip-row { display: grid; grid-template-columns: 90px 1fr; align-items: center; gap: 10px; }
+.pc-ringrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(82px, 1fr)); gap: 12px; }
+.pc-cover { display: grid; justify-items: center; gap: 2px; text-align: center; }
+
+.pc-podium { display: grid; grid-template-columns: repeat(3, 1fr); align-items: end; gap: 10px; text-align: center; }
+.pc-podium > div { display: grid; justify-items: center; gap: 2px; }
+.pc-medal { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; font-weight: 700; font-size: 13px; color: #3b2f05; }
+.pc .gold { background: linear-gradient(135deg, #fde68a, #f59e0b); }
+.pc .silver { background: linear-gradient(135deg, #f1f5f9, #94a3b8); }
+.pc .bronze { background: linear-gradient(135deg, #fed7aa, #c2410c); color: #fff; }
+.pc-step { display: grid; place-items: start center; width: 100%; padding-top: 6px; border-radius: 10px 10px 0 0; font-size: 22px; font-weight: 800; color: rgb(0 0 0 / .45); }
+.pc-lolli { display: flex; align-items: flex-end; gap: 6px; padding-top: 24px; }
+.pc-lolli > div { flex: 1; display: grid; grid-template-rows: 1fr auto; height: 100%; justify-items: center; gap: 6px; min-width: 0; }
+.pc-lolli small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.pc-stick { position: relative; align-self: end; width: 4px; display: flex; }
+.pc-stick i { flex: 1; border-radius: 4px; }
+.pc-stick b { position: absolute; top: -14px; left: 50%; translate: -50% 0; display: grid; place-items: center; min-width: 30px; height: 30px; padding: 0 4px; border-radius: 99px; color: #fff; font-size: 11px; }
+
+.pc-dotrow { display: grid; grid-template-columns: 90px 1fr auto; align-items: center; gap: 10px; }
+.pc-dotrow > div { display: flex; flex-wrap: wrap; gap: 4px; }
+.pc-dotrow i { width: 9px; height: 9px; border-radius: 50%; background: var(--pc-muted); }
+.pc-dotrow i.on { background: var(--pc-bad); }
+.pc-dotrow > b { font-size: 12px; color: var(--pc-sub); font-weight: 600; }
+
+.pc-fly-head { display: flex; justify-content: space-between; font-weight: 700; font-size: 12px; }
+.pc-fly { display: grid; grid-template-columns: 44px 1fr 80px 1fr 44px; align-items: center; gap: 8px; }
+.pc-fly > span { text-align: center; font-size: 12px; }
+.pc-fly > b:last-child { text-align: right; }
+
+.pc-heat { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 12px; }
+.pc-heat th { color: var(--pc-sub); font-weight: 600; text-align: left; padding: 2px 4px; }
+.pc-heat td { padding: 7px 6px; border-radius: 6px; text-align: center; }
+
+.pc-avcols, .pc-hbars, .pc-matrix { display: flex; align-items: flex-end; gap: 10px; }
+.pc-hbars { padding-top: 28px; }
+.pc-avcols > div { flex: 1; display: grid; grid-template-rows: auto 1fr auto; height: 100%; justify-items: center; gap: 4px; }
+.pc-v { font-size: 12px; }
+.pc-stack { align-self: end; display: flex; flex-direction: column; width: 70%; max-width: 44px; border-radius: 8px; overflow: hidden; gap: 2px; }
+.pc-stack i { display: block; }
+.pc-avatar { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--pc-muted); font-size: 11px; font-weight: 700; }
+
+.pc-tabs { display: flex; gap: 4px; padding: 3px; border-radius: 10px; background: var(--pc-muted); width: max-content; font-size: 12px; font-weight: 600; }
+.pc-tabs span { padding: 4px 10px; border-radius: 7px; color: var(--pc-sub); }
+.pc-tabs span.on { background: var(--pc-card); color: var(--pc-fg); }
+.pc-hbars > div { flex: 1; display: grid; grid-template-rows: 1fr auto; height: 100%; justify-items: center; gap: 6px; }
+.pc-hbar { position: relative; align-self: end; width: 100%; border-radius: 8px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--pc-1) 35%, transparent) 0 4px, transparent 4px 8px); border: 1px solid color-mix(in srgb, var(--pc-1) 40%, transparent); }
+.pc-hbar.on { background: var(--pc-1); box-shadow: 0 0 24px color-mix(in srgb, var(--pc-1) 60%, transparent); }
+.pc-tip { position: absolute; top: -32px; left: 50%; translate: -50% 0; padding: 3px 9px; border-radius: 99px; background: var(--pc-fg); color: var(--pc-card); font-size: 12px; white-space: nowrap; }
+.pc-goal { position: relative; align-self: end; display: flex; align-items: flex-end; width: 100%; border: 2px dashed color-mix(in srgb, var(--pc-sub) 60%, transparent); border-radius: 8px; padding: 3px; box-sizing: border-box; }
+.pc-goal i { display: block; width: 100%; border-radius: 5px; background: color-mix(in srgb, var(--pc-5) 55%, transparent); }
+.pc-goal i.on { background: var(--pc-5); box-shadow: 0 0 18px color-mix(in srgb, var(--pc-5) 55%, transparent); }
+.pc-goal b { position: absolute; top: -22px; left: 0; right: 0; text-align: center; font-size: 12px; }
+
+.pc-matrix > div { flex: 1; display: grid; justify-items: center; gap: 6px; }
+.pc-mcol { display: flex; flex-direction: column-reverse; gap: 3px; width: 100%; max-width: 22px; }
+.pc-mcol i { aspect-ratio: 1; border-radius: 4px; }
+
+.pc-stage-row { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; text-align: center; }
+.pc-stage-row > div { display: grid; }
+.pc-stage-row em { font-style: normal; color: var(--pc-sub); font-size: 11px; }
+.pc-funnel { display: grid; gap: 8px; }
+.pc-funnel > div { display: grid; grid-template-columns: 80px 1fr 70px; align-items: center; gap: 10px; }
+.pc-fbar { display: flex; justify-content: center; }
+.pc-fbar i { display: grid; place-items: center; height: 32px; border-radius: 8px; color: #fff; font-weight: 700; }
+.pc-funnel em { font-style: normal; color: var(--pc-sub); font-size: 12px; }
+
+.pc-shifts { display: grid; gap: 8px; }
+.pc-hours { position: relative; height: 16px; margin: 0 44px 0 80px; color: var(--pc-sub); font-size: 11px; }
+.pc-hours span { position: absolute; translate: -50% 0; }
+.pc-shift { display: grid; grid-template-columns: 70px 1fr 34px; align-items: center; gap: 10px; }
+.pc-shift .pc-track { height: 16px; border-radius: 6px; }
+.pc-shift .pc-track i { position: absolute; top: 0; border-radius: 6px; }
+
+.pc-ranktiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.pc-ranktiles > div { display: grid; gap: 2px; padding: 10px; border: 1px solid var(--pc-border); border-radius: 12px; }
+.pc-ranktiles em { font-style: normal; font-weight: 800; color: var(--pc-sub); }
+.pc-ranktiles b { font-size: 20px; }
+.pc-ranktiles .pc-track { height: 6px; }
+
+.pc-cal { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; }
+.pc-cal i { aspect-ratio: 1; border-radius: 3px; }
+
+.pc-ball { filter: drop-shadow(0 0 4px currentColor); }
+@media (prefers-reduced-motion: reduce) { .pc-ball { display: none; } }
+
+@media (max-width: 560px) {
+  .pc-side { grid-template-columns: 1fr; }
+  .pc-k-statline { grid-auto-flow: row; gap: 8px; }
+  .pc-k-statline > div { padding: 0; border: 0; }
+}

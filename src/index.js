@@ -4,13 +4,14 @@
    the Whiskers cat and Record's narrated tour. */
 import { mountCrayonDoodles } from "./crayon-doodles.js";
 import { startCrayon } from "./crayon.js";
+import { startMotion } from "./motion.js";
 
 export const THEMES = ["aura", "crayon", "whiskers", "record"];
 export const THEME_NAMES = { aura: "Aura", crayon: "Crayon", whiskers: "Whiskers", record: "Record" };
 export const CHANGE_EVENT = "playskin-change";
-export { mountCrayonDoodles, startCrayon };
+export { mountCrayonDoodles, startCrayon, startMotion };
 
-const DEFAULTS = { themes: THEMES, storageKey: "playskin", attribute: "data-playskin", effects: true, crayon: {}, whiskers: {}, record: null };
+const DEFAULTS = { themes: THEMES, storageKey: "playskin", attribute: "data-playskin", effects: true, crayon: {}, whiskers: {}, record: null, motion: {} };
 
 function readStored(key) {
   try {
@@ -32,7 +33,8 @@ function writeStored(key, value) {
  * Options: themes (allowed names), storageKey (where the choice is saved, or null to not save), attribute,
  * root (the element that carries the attribute), effects (false to skip Crayon's drawings, the cat and the tour), crayon
  * (options for startCrayon), whiskers
- * (options for startWhiskers), record (options for startRecord; Record shows nothing without a script).
+ * (options for startWhiskers), record (options for startRecord; Record shows nothing without a script), motion
+ * (options for startMotion, or false to leave data-motion blocks still).
  */
 export function createPlayskin(options = {}) {
   const o = { ...DEFAULTS, ...options };
@@ -42,6 +44,7 @@ export function createPlayskin(options = {}) {
   let crayon = null;
   let catStarted = false;
   let recordStarted = false;
+  const motion = o.motion === false ? null : startMotion({ root, ...o.motion });
 
   const valid = (theme) => (o.themes.includes(theme) ? theme : null);
 
@@ -100,8 +103,11 @@ export function createPlayskin(options = {}) {
       listeners.add(fn);
       return () => listeners.delete(fn);
     },
+    /** The page's build-in motion (see startMotion), or null when turned off. */
+    motion,
     destroy() {
       window.removeEventListener("storage", onStorage);
+      motion?.stop();
       listeners.clear();
       crayon?.stop();
       crayon = null;

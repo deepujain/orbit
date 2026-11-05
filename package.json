@@ -27,6 +27,14 @@
       "types": "./src/crayon-doodles.d.ts",
       "default": "./src/crayon-doodles.js"
     },
+    "./motion": {
+      "types": "./src/motion.d.ts",
+      "default": "./src/motion.js"
+    },
+    "./charts": {
+      "types": "./src/charts.d.ts",
+      "default": "./src/charts.js"
+    },
     "./react": {
       "types": "./react/index.d.ts",
       "default": "./react/index.js"
@@ -35,6 +43,8 @@
     "./crayon.css": "./themes/crayon.css",
     "./whiskers.css": "./themes/whiskers.css",
     "./record.css": "./themes/record.css",
+    "./motion.css": "./themes/motion.css",
+    "./charts.css": "./themes/charts.css",
     "./meow.m4a": "./src/whiskers/meow.m4a",
     "./package.json": "./package.json"
   },
