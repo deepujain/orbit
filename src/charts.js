@@ -43,7 +43,10 @@ function smooth(pts) {
 const box = (kind, label, inner, attrs = "") => `<div class="pc pc-k-${kind}" data-motion data-cat-chart role="figure" aria-label="${esc(label)}" ${attrs}>${inner}</div>`;
 const svg = (w, h, inner, cls = "") => `<svg class="pc-svg ${cls}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${inner}</svg>`;
 const legend = (rows, format, total) => `<div class="pc-legend">${rows.map((r, i) => `<span data-m="fade" style="--m-delay:300ms"><i style="background:${r.color || C(i)}"></i>${esc(r.label)}<b>${format(r.value)}</b>${total ? `<em>${pct((r.value / total) * 100)}</em>` : ""}</span>`).join("")}</div>`;
-const xLabels = (labels, x, y) => labels.map((l, i) => `<text x="${f(x(i))}" y="${y}" class="pc-axis" text-anchor="middle" data-m="fade" style="--m-delay:200ms">${esc(l)}</text>`).join("");
+const xLabels = (labels, x, y) => {
+  const edge = x(0) < 20;
+  return labels.map((l, i) => `<text x="${f(x(i))}" y="${y}" class="pc-axis" text-anchor="${edge && i === 0 ? "start" : edge && i === labels.length - 1 ? "end" : "middle"}" data-m="fade" style="--m-delay:200ms">${esc(l)}</text>`).join("");
+};
 const gridLines = (w, ys) => ys.map((y) => `<line x1="0" x2="${w}" y1="${f(y)}" y2="${f(y)}" class="pc-grid" data-m="grow-x"/>`).join("");
 
 /** The big number over a chart, with a change pill and a caption. */
@@ -68,7 +71,7 @@ export function kpi({ label, value, delta, values, invert = false }) {
 }
 
 /** Columns with the peak in full colour, its value above it, and a dashed average line. */
-export function columns({ rows, format = compact, width = 340, height = 200, average = true }) {
+export function columns({ rows, format = compact, width = 440, height = 220, average = true }) {
   const W = width, H = height, top = 26, bottom = 22, n = rows.length;
   const max = nice(Math.max(...rows.map((r) => r.value)));
   const peak = rows.reduce((b, r, i) => (r.value > rows[b].value ? i : b), 0);
@@ -82,7 +85,7 @@ export function columns({ rows, format = compact, width = 340, height = 200, ave
 }
 
 /** Columns stacked by category, with a legend of totals. */
-export function stackedColumns({ rows, keys, format = compact, width = 340, height = 200 }) {
+export function stackedColumns({ rows, keys, format = compact, width = 440, height = 220 }) {
   const W = width, H = height, top = 10, bottom = 22, n = rows.length;
   const max = nice(Math.max(...rows.map((r) => sum(r.values))));
   const slot = W / n, bw = slot * 0.56, k = (H - top - bottom) / max;
@@ -105,7 +108,7 @@ export function rankedBars({ rows, format = compact, color = 0 }) {
 }
 
 /** Lines over time; the first series also fills an area, its peak gets a dot, and a dashed target line. */
-export function lineChart({ labels, series, format = compact, target, width = 340, height = 200, area = true }) {
+export function lineChart({ labels, series, format = compact, target, width = 440, height = 220, area = true }) {
   const W = width, H = height, top = 16, bottom = 22, n = labels.length;
   const max = nice(Math.max(target || 0, ...series.flatMap((s) => s.values)));
   const x = (i) => 8 + (i * (W - 16)) / (n - 1);
@@ -125,7 +128,7 @@ export function lineChart({ labels, series, format = compact, target, width = 34
 }
 
 /** This period as a filled area against last period as a dashed line. */
-export function areaChart({ labels, now, before, format = compact, width = 340, height = 190 }) {
+export function areaChart({ labels, now, before, format = compact, width = 440, height = 210 }) {
   return lineChart({ labels, series: [{ name: "This period", values: now }, { name: "Last period", values: before, dashed: true }], format, width, height });
 }
 
@@ -210,12 +213,12 @@ export function gauge({ value, label, caption }) {
 /** Polar bars: one wedge per point around a ring, longer for larger values, the total in the middle. */
 export function radialSegments({ rows, format = compact, center = "Total" }) {
   const max = Math.max(...rows.map((r) => r.value)), n = rows.length, step = 360 / n;
-  const parts = rows.map((r, i) => `<path d="${wedge(110, 110, 42, 42 + (r.value / max) * 62, i * step + 1, (i + 1) * step - 1)}" fill="${C(0)}" opacity="${f(0.35 + (0.65 * r.value) / max)}" data-m="pop"><title>${esc(r.label)}: ${format(r.value)}</title></path>`).join("");
+  const parts = rows.map((r, i) => `<path d="${wedge(110, 110, 50, 54 + (r.value / max) * 54, i * step + 1, (i + 1) * step - 1)}" fill="${C(0)}" opacity="${f(0.35 + (0.65 * r.value) / max)}" data-m="pop"><title>${esc(r.label)}: ${format(r.value)}</title></path>`).join("");
   return box("polar", "Radial segments", `<div class="pc-ringbox">${svg(220, 220, `<g style="--m-step:30ms;--m-cap:40" data-m-group>${parts}</g>`)}<div class="pc-mid"><b data-count>${format(sum(rows.map((r) => r.value)))}</b><small>${esc(center)}</small></div></div>`);
 }
 
 /** Bars for an amount with a line for a rate on its own axis. */
-export function comboBarLine({ rows, format = compact, rate = pct, width = 340, height = 200 }) {
+export function comboBarLine({ rows, format = compact, rate = pct, width = 440, height = 220 }) {
   const W = width, H = height, top = 18, bottom = 22, n = rows.length;
   const max = nice(Math.max(...rows.map((r) => r.value)));
   const rmax = nice(Math.max(...rows.map((r) => r.rate)));
@@ -292,7 +295,7 @@ export function segmentedProgress({ value, segments = 40, label = "" }) {
 }
 
 /** Column waterfall: each change floats from its running start to its running end; totals stand on zero. */
-export function waterfall({ steps, format = compact, width = 340, height = 220 }) {
+export function waterfall({ steps, format = compact, width = 440, height = 240 }) {
   let run = 0;
   const cols = steps.map((s) => {
     const start = s.total ? 0 : run;
@@ -331,7 +334,7 @@ export function stockBridge({ open, moves, format = compact, unit = "" }) {
 }
 
 /** Small areas stacked one per series, each with its average dashed and a marker on the latest value. */
-export function marginStrips({ series, format = (v) => `${v.toFixed(1)}%`, width = 260, height = 56 }) {
+export function marginStrips({ series, format = (v) => `${v.toFixed(1)}%`, width = 380, height = 56 }) {
   return box("margins", "Margin strips", series.map((s, k) => {
     const W = width, H = height, max = Math.max(...s.values) * 1.1, min = Math.min(...s.values) * 0.9;
     const x = (i) => 4 + (i * (W - 70)) / (s.values.length - 1);
@@ -394,7 +397,7 @@ export function highlightBars({ rows, format = compact, tabs = [], height = 210 
 }
 
 /** Columns of small squares, each one a fixed amount, filled bottom up in series colours; the rest a grey grid. */
-export function dotMatrix({ rows, keys, levels = 14, format = compact }) {
+export function dotMatrix({ rows, keys, levels = 10, format = compact }) {
   const max = Math.max(...rows.map((r) => sum(r.values)));
   const per = max / levels;
   let n = 0;
@@ -423,7 +426,7 @@ export function hexShare({ rows, cells = 91, format = compact }) {
 }
 
 /** A streamgraph: layers stacked around a centre line so the flow of each part reads over time, with markers. */
-export function flowRibbon({ labels, series, markers = [], format = compact, width = 340, height = 200 }) {
+export function flowRibbon({ labels, series, markers = [], format = compact, width = 440, height = 220 }) {
   const W = width, H = height, n = labels.length, bottom = 20;
   const totals = labels.map((_, i) => sum(series.map((s) => s.values[i])));
   const max = Math.max(...totals) * 1.08;
@@ -442,7 +445,7 @@ export function flowRibbon({ labels, series, markers = [], format = compact, wid
 }
 
 /** A few stacked columns, one per period, with translucent bands linking each layer to the next period. */
-export function bandColumns({ periods, keys, format = compact, width = 340, height = 200 }) {
+export function bandColumns({ periods, keys, format = compact, width = 440, height = 220 }) {
   const W = width, H = height, bottom = 22, n = periods.length;
   const max = Math.max(...periods.map((p) => sum(p.values)));
   const slot = W / n, bw = Math.min(54, slot * 0.42), k = (H - bottom - 8) / max;
@@ -467,7 +470,7 @@ export function targetBars({ rows, format = compact, height = 210 }) {
 }
 
 /** Layered smooth areas across ordered stages, with dividers and each stage's value underneath. */
-export function stageArea({ stages, format = compact, width = 340, height = 140 }) {
+export function stageArea({ stages, format = compact, width = 440, height = 160 }) {
   const W = width, H = height, n = stages.length, max = stages[0].value;
   const x = (i) => (i * W) / (n - 1);
   const layer = (s, color, op) => {
@@ -476,7 +479,7 @@ export function stageArea({ stages, format = compact, width = 340, height = 140 
     return `<path d="${top} ${bot}Z" fill="${color}" opacity="${op}"/>`;
   };
   const divs = stages.slice(1, -1).map((_, i) => `<line x1="${f(x(i + 1))}" x2="${f(x(i + 1))}" y1="0" y2="${H}" class="pc-grid"/>`).join("");
-  return box("stages", "Stage area", svg(W, H, `<g data-m="reveal">${layer(1, C(4), 0.28)}${layer(0.68, C(4), 0.45)}${layer(0.36, C(2), 0.8)}</g>${divs}`) + `<div class="pc-stage-row">${stages.map((s, i) => `<div data-m="rise"><small>${esc(s.label)}</small><b data-count>${format(s.value)}</b>${i ? `<em>${pct((s.value / stages[i - 1].value) * 100)}</em>` : ""}</div>`).join("")}</div>`);
+  return box("stages", "Stage area", svg(W, H, `<g data-m="reveal">${layer(1, C(1), 0.18)}${layer(0.68, C(1), 0.36)}${layer(0.36, C(1), 0.85)}</g>${divs}`) + `<div class="pc-stage-row">${stages.map((s, i) => `<div data-m="rise"><small>${esc(s.label)}</small><b data-count>${format(s.value)}</b>${i ? `<em>${pct((s.value / stages[i - 1].value) * 100)}</em>` : ""}</div>`).join("")}</div>`);
 }
 
 /** How many reach each step, as bars that narrow toward the end, with the share kept between steps. */
@@ -512,7 +515,7 @@ export function calendarHeat({ values, weeks = 18 }) {
 }
 
 /** Units flowing from a source into a few destinations, each ball one unit, the totals at the ends. */
-export function flow({ source, sinks, format = compact, width = 340, height = 220 }) {
+export function flow({ source, sinks, format = compact, width = 440, height = 240 }) {
   const W = width, H = height, total = sum(sinks.map((s) => s.value));
   const ys = sinks.map((_, i) => 30 + (i * (H - 60)) / Math.max(1, sinks.length - 1));
   const paths = sinks.map((s, i) => `M70,${H / 2} C${f(W / 2)},${H / 2} ${f(W / 2)},${f(ys[i])} ${W - 110},${f(ys[i])}`);

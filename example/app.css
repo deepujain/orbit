@@ -213,3 +213,6 @@ h1 [data-m] { display: inline-block; }
 .chart-card { min-width: 0; }
 .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .kpis > .pc { padding: 12px; border: 1px solid hsl(var(--border)); border-radius: var(--radius); }
+.shows.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 760px) { .shows.two { grid-template-columns: minmax(0, 1fr); } }
+.shows.two { grid-auto-flow: dense; }
