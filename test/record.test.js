@@ -17,7 +17,7 @@ const fakePage = () => {
 };
 
 test("Record is an action, not a skin, so a page can be filmed in any skin", () => {
-  assert.deepEqual(THEMES, ["aura", "crayon", "whiskers"]);
+  assert.deepEqual(THEMES, ["aura", "crayon", "whiskers", "sketchbook"]);
   assert.equal(THEME_NAMES.record, undefined);
   assert.doesNotMatch(bootScript(), /record/);
   const { added, root } = fakePage();

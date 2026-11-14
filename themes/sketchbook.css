@@ -1,0 +1,164 @@
+/* orbit: Sketchbook. Cream paper, black ink and flat colour, like an illustrated zine: brush-script titles with a
+   mustard swash, handwritten captions, ink-outlined cards with a flat sticker shadow, and posters where hand-drawn
+   people stand in front of huge yellow letters. Turn it on with data-orbit="sketchbook" on <html> or on any wrapper;
+   dark is a navy night page where the posters stay cream paper. The fonts are the page's to load (see README). */
+/* The faces and textures, also set on a poster so a poster works on a page without the skin */
+[data-orbit="sketchbook"], .sb-poster {
+  --sb-script: "Caveat Brush", "Segoe Print", "Bradley Hand", cursive;
+  --sb-hand: "Kalam", "Segoe Print", "Bradley Hand", cursive;
+  --sb-marker: var(--sb-hand);
+  --sb-block: "Archivo Black", "Arial Black", Impact, sans-serif;
+  --sb-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .25 0 0 0 0 .15 .06 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --sb-swash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 22' preserveAspectRatio='none'%3E%3Cpath d='M4 15 C 52 6, 120 4, 236 9 C 180 12, 110 14, 34 19' fill='none' stroke='%23f2c230' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E");
+  --sb-yellow: #f2c230;
+}
+[data-orbit="sketchbook"] {
+  --sb-paper: #faf5e8;
+  --sb-card: #fffdf7;
+  --sb-ink: #1f1d1a;
+  --sb-soft-ink: #4a453d;
+  --sb-blue: #3a5ba0;
+  --sb-olive: #6f8a57;
+  --sb-khaki: #cdb98f;
+  --sb-denim: #9fb4ce;
+  --sb-tan: #c9a27a;
+  --sb-red: #d9452b;
+  --sb-line: var(--sb-ink);
+  --sb-shadow: var(--sb-ink);
+  --sb-wobble: 14px 6px 12px 5px / 6px 12px 5px 14px;
+  --sb-wobble-sm: 10px 4px 9px 4px / 4px 9px 4px 10px;
+  --background: 43 63% 94%;
+  --foreground: 36 9% 11%;
+  --card: 45 100% 98.5%;
+  --card-foreground: 36 9% 11%;
+  --popover: 45 100% 98.5%;
+  --popover-foreground: 36 9% 11%;
+  --primary: 45 88% 57%;
+  --primary-foreground: 36 9% 11%;
+  --secondary: 219 47% 43%;
+  --secondary-foreground: 45 60% 96%;
+  --destructive: 9 70% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --muted: 42 45% 88%;
+  --muted-foreground: 38 9% 27%;
+  --accent: 45 88% 80%;
+  --accent-foreground: 36 9% 11%;
+  --border: 36 9% 11%;
+  --input: 36 9% 11%;
+  --ring: 219 47% 43%;
+  --chart-1: 45 88% 57%;
+  --chart-2: 219 47% 43%;
+  --chart-3: 96 22% 44%;
+  --chart-4: 9 70% 51%;
+  --chart-5: 31 41% 63%;
+}
+:is(.dark, [data-theme="dark"]) [data-orbit="sketchbook"], [data-orbit="sketchbook"]:is(.dark, [data-theme="dark"]) {
+  --sb-paper: #1b2230;
+  --sb-card: #232c3d;
+  --sb-ink: #f4eedd;
+  --sb-soft-ink: #c9c2b0;
+  --sb-blue: #8fa9e0;
+  --sb-line: #f4eedd;
+  --sb-shadow: #0d1119;
+  --background: 220 28% 15%;
+  --foreground: 44 50% 91%;
+  --card: 220 27% 19%;
+  --card-foreground: 44 50% 91%;
+  --popover: 220 27% 19%;
+  --popover-foreground: 44 50% 91%;
+  --muted: 220 22% 24%;
+  --muted-foreground: 42 18% 74%;
+  --accent: 220 22% 26%;
+  --accent-foreground: 44 50% 91%;
+  --border: 44 30% 80%;
+  --input: 44 30% 70%;
+  --secondary: 222 56% 72%;
+  --secondary-foreground: 220 28% 12%;
+}
+/* Paper: on <html> it lines the whole page; on a wrapper it lines the wrapper */
+[data-orbit="sketchbook"]:is(html) body, [data-orbit="sketchbook"]:not(html) {
+  background-color: var(--sb-paper);
+  background-image: var(--sb-grain);
+  color: var(--sb-ink);
+}
+/* Titles in brush script, smaller headings and controls handwritten */
+/* Lettering is for titles and controls only; body copy keeps the page's own face so it stays easy to read.
+   Zero specificity, so the page's own classes always win. */
+:where([data-orbit="sketchbook"]) :where(h1, h2) { font-family: var(--sb-script); font-weight: 400; line-height: 1.08; color: var(--sb-ink); }
+:where([data-orbit="sketchbook"]) :where(h3, h4, [data-card-title], [role="tab"], [data-button], .font-headline) { font-family: var(--sb-hand); font-weight: 700; }
+[data-orbit="sketchbook"] :where(h3, h4, [data-card-title]) { color: var(--sb-ink); }
+/* Ink-outlined cards with a flat sticker shadow, each a little crooked */
+[data-orbit="sketchbook"] [data-card] { background: var(--sb-card); border: 2px solid var(--sb-line); border-radius: var(--sb-wobble); box-shadow: 4px 4px 0 var(--sb-shadow); }
+[data-orbit="sketchbook"] [data-card]:nth-of-type(3n+2) { border-radius: 6px 14px 5px 12px / 12px 5px 14px 6px; }
+[data-orbit="sketchbook"] [data-card]:nth-of-type(3n) { border-radius: 12px 8px 16px 5px / 7px 15px 5px 12px; }
+[data-orbit="sketchbook"] :is(input, textarea, select, [role="combobox"]):not([type="checkbox"]):not([type="radio"]) { border: 2px solid var(--sb-line); border-radius: var(--sb-wobble-sm); background: var(--sb-card); }
+[data-orbit="sketchbook"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])) { border: 2px solid var(--sb-line); border-radius: var(--sb-wobble-sm); box-shadow: 3px 3px 0 var(--sb-shadow); transition: transform .12s ease, box-shadow .12s ease; }
+[data-orbit="sketchbook"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])):hover:not(:disabled) { transform: translate(-1px, -1px) rotate(-.5deg); box-shadow: 4px 5px 0 var(--sb-shadow); }
+[data-orbit="sketchbook"] [data-button]:where(:not([data-button="ghost"]):not([data-button="link"])):active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--sb-shadow); }
+[data-orbit="sketchbook"] [data-button="default"] { background: var(--sb-yellow); color: #1f1d1a; }
+[data-orbit="sketchbook"] [data-button="secondary"] { background: var(--sb-blue); color: #faf5e8; }
+[data-orbit="sketchbook"] [data-button]:disabled { box-shadow: none; }
+[data-orbit="sketchbook"] :is([role="menu"], [role="listbox"], [role="tooltip"]) { border: 2px solid var(--sb-line); border-radius: var(--sb-wobble); box-shadow: 4px 4px 0 var(--sb-shadow); }
+/* Marked parts: an inked rule under the top bar, the current nav link circled, the wordmark in brush script */
+[data-orbit="sketchbook"] [data-topbar] { border-bottom: 2px solid var(--sb-line); }
+[data-orbit="sketchbook"] [data-wordmark] { font-family: var(--sb-script); letter-spacing: .01em; }
+[data-orbit="sketchbook"] [data-nav] :is(a, button) { font-family: var(--sb-hand); }
+[data-orbit="sketchbook"] [data-nav] :is(a, button)[aria-current]:not([aria-current="false"]) { border-radius: var(--sb-wobble-sm); box-shadow: inset 0 0 0 2px var(--sb-line), 2px 2px 0 var(--sb-shadow); }
+
+/* Pieces a page can use on their own */
+.sb-script { font-family: var(--sb-script); font-weight: 400; line-height: 1.02; }
+.sb-marker { font-family: var(--sb-hand); font-weight: 700; }
+.sb-hand { font-family: var(--sb-hand); }
+/* A mustard brush stroke under a word or a title */
+.sb-swash { padding-bottom: .18em; background: var(--sb-swash) left bottom / 100% .32em no-repeat; }
+/* Short handwritten captions, one per line, as on a zine cover */
+.sb-lines { margin: 0; padding: 0; list-style: none; font-family: var(--sb-hand); line-height: 1.5; font-size: 1.1rem; color: var(--sb-soft-ink); }
+/* Motion ticks drawn beside a head or a corner */
+.sb-ticks { display: inline-block; width: 34px; height: 22px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 22'%3E%3Cg fill='none' stroke='%231f1d1a' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 16 9 9'/%3E%3Cpath d='M15 13 17 4'/%3E%3Cpath d='M23 15 30 8'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat; }
+:is(.dark, [data-theme="dark"]) [data-orbit="sketchbook"] .sb-ticks { filter: invert(1); }
+
+/* The poster: hand-drawn people stand in front of huge yellow letters, with a script title and caption lines.
+   <figure class="sb-poster"> <figcaption class="sb-words">…</figcaption>
+     <div class="sb-stage"> <span class="sb-letters" style="--sb-n:3">LPG</span> <img class="sb-art"> </div> </figure>
+   The letters size themselves to the stage from --sb-n, the number of letters. data-side="left" puts the words on the right. */
+.sb-poster {
+  --sb-poster-ink: #1f1d1a;
+  position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: center; gap: clamp(1rem, 3vw, 2.5rem);
+  margin: 0; padding: clamp(1.25rem, 3vw, 2.5rem); color: var(--sb-poster-ink);
+  background: var(--sb-paper, #faf5e8) var(--sb-grain); border-radius: 22px 10px 26px 8px / 10px 24px 8px 22px;
+}
+.sb-poster[data-side="left"] { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+.sb-poster[data-side="left"] .sb-words { order: 2; }
+.sb-stage { position: relative; isolation: isolate; container-type: inline-size; min-width: 0; }
+.sb-letters {
+  position: absolute; z-index: -1; left: 50%; top: 47%; translate: -50% -50%;
+  font-family: var(--sb-block, "Archivo Black", "Arial Black", sans-serif); font-size: min(calc(100cqw / (var(--sb-n, 4) * .82)), 46cqw); line-height: .8; letter-spacing: -.02em;
+  color: var(--sb-yellow, #f2c230); pointer-events: none; user-select: none; white-space: nowrap;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='1'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -5 4.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='1'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -5 4.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.sb-art { display: block; width: auto; max-width: 100%; height: auto; max-height: var(--sb-art-height, 440px); margin-inline: auto; }
+.sb-words { display: flex; flex-direction: column; gap: .9rem; min-width: 0; }
+.sb-words .sb-script { font-size: clamp(2.2rem, 4.6vw, 3.6rem); }
+.sb-words .sb-marker { font-size: clamp(1.6rem, 3.4vw, 2.6rem); line-height: 1.1; }
+.sb-words p { margin: 0; }
+.sb-poster .sb-lines { color: #4a453d; }
+.sb-poster .sb-ticks { position: absolute; right: 6%; top: 8%; }
+:is(.dark, [data-theme="dark"]) .sb-poster {
+  --sb-paper: #faf5e8; --sb-card: #fffdf7; --sb-ink: #1f1d1a; --sb-soft-ink: #4a453d; --sb-line: #1f1d1a; --sb-shadow: #1f1d1a; --sb-blue: #3a5ba0;
+  box-shadow: 5px 5px 0 #0d1119;
+}
+:is(.dark, [data-theme="dark"]) .sb-poster .sb-ticks { filter: none; }
+@media (max-width: 720px) {
+  .sb-poster, .sb-poster[data-side="left"] { grid-template-columns: 1fr; }
+  .sb-poster[data-side="left"] .sb-words { order: 0; }
+  .sb-art { max-height: min(var(--sb-art-height, 440px), 78vw); }
+  .sb-letters { font-size: min(calc(100cqw / (var(--sb-n, 4) * .66)), 56cqw); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sb-poster .sb-ticks { animation: sb-tick 1.6s ease-in-out infinite alternate; }
+}
+@keyframes sb-tick { from { rotate: -6deg; } to { rotate: 4deg; } }
+@media (forced-colors: active) {
+  .sb-letters, .sb-ticks { display: none; }
+}

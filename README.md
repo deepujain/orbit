@@ -1,6 +1,6 @@
 # Orbit
 
-Playful skins, motion and charts for any web page, and a recorder that films a narrated tour of it. Turn a skin on with a single attribute, and your page becomes soft glass, crayon paper or the home of a cat. Record is an action rather than a skin, so it films the page in whichever skin is on.
+Playful skins, motion and charts for any web page, and a recorder that films a narrated tour of it. Turn a skin on with a single attribute, and your page becomes soft glass, crayon paper, a zine sketchbook or the home of a cat. Record is an action rather than a skin, so it films the page in whichever skin is on.
 
 Orbit was called playskin. Choices saved under the old name move to the new one the first time a page loads.
 
@@ -9,8 +9,9 @@ Orbit was called playskin. Choices saved under the old name move to the new one 
 | **Aura** | Soft white glass by day, graphite by night. Cards catch a soft glow in their corners, buttons become pills, page titles get a violet-to-pink wash. |
 | **Crayon** | Cream ruled paper by day, a green chalkboard in a wooden frame by night. Hand-drawn borders, handwriting headings, and doodles behind the page: bunting, drifting clouds, a rainbow and a slow snail. |
 | **Whiskers** | A cat that lives in the whole window. It hops between your cards under real physics, rolls round buttons like wheels, chases a ball of yarn, naps, gets hungry and asks to be fed. Tap it for a trick; double-tap for its trick panel. |
+| **Sketchbook** | Cream paper and black ink with mustard and cobalt, like an illustrated zine. Brush-script titles with a yellow swash, handwritten captions, ink-outlined cards with a flat sticker shadow, and posters where hand-drawn people stand in front of huge yellow letters. Night is a navy page where the posters stay paper. It also works on one wrapper element, so a single section of a page can wear it. |
 
-Aura, Crayon and Whiskers follow light and dark mode (a `dark` class on `<html>`), respect `prefers-reduced-motion`, and step aside in forced-colors mode.
+Every skin follows light and dark mode (a `dark` class on `<html>`), respect `prefers-reduced-motion`, and step aside in forced-colors mode.
 
 ## Screenshots
 
@@ -35,6 +36,14 @@ The same demo page in each skin, light on the left and dark on the right. The ro
 <p>
   <img src="docs/whiskers-light.png" alt="Whiskers skin in light mode: the cat on the floor of the page, its ball of yarn on a button and a toy mouse on a card" width="49%">
   <img src="docs/whiskers-dark.png" alt="Whiskers skin in dark mode: the cat on a dark grid page, with its yarn and a toy mouse on the cards" width="49%">
+</p>
+
+### Sketchbook
+
+<p>
+  <img src="art/sketchbook/walk.webp" alt="Sketchbook drawing: four friends walking and laughing together" width="32%">
+  <img src="art/sketchbook/ride.webp" alt="Sketchbook drawing: a girl on a bike with a flower basket and a friend on a skateboard" width="32%">
+  <img src="art/sketchbook/talk.webp" alt="Sketchbook drawing: two friends sharing chai on a brick wall, one holding a book" width="32%">
 </p>
 
 ### The example app
@@ -79,6 +88,7 @@ npm install github:deepujain/orbit
 import "orbit/aura.css";
 import "orbit/crayon.css";
 import "orbit/whiskers.css";
+import "orbit/sketchbook.css";
 import { setTheme } from "orbit";
 
 setTheme("crayon");
@@ -97,6 +107,7 @@ export function SkinPicker() {
       <option value="aura">Aura</option>
       <option value="crayon">Crayon</option>
       <option value="whiskers">Whiskers</option>
+      <option value="sketchbook">Sketchbook</option>
     </select>
   );
 }
@@ -138,7 +149,7 @@ A few markers let a skin restyle specific parts:
 
 | Marker | Used for |
 |---|---|
-| `data-card` | Cards: glass in Aura, hand-drawn in Crayon, platforms for the cat |
+| `data-card` | Cards: glass in Aura, hand-drawn in Crayon, ink-outlined stickers in Sketchbook, platforms for the cat |
 | `data-card-title` | Card titles |
 | `data-button="default"`, `"outline"`, `"secondary"`, `"ghost"`, `"destructive"`, `"link"` | Buttons and their variants |
 | `data-topbar` | The top bar: frosted glass in Aura; a rainbow edge and bunting in Crayon |
@@ -163,7 +174,7 @@ Keeps the attribute on `<html>` in step with the chosen skin and runs each skin'
 
 | Option | Default | Meaning |
 |---|---|---|
-| `themes` | `["aura", "crayon", "whiskers"]` | Skins that may be turned on |
+| `themes` | `["aura", "crayon", "whiskers", "sketchbook"]` | Skins that may be turned on |
 | `storageKey` | `"orbit"` | `localStorage` key for the visitor's choice; `null` to not save it |
 | `attribute` | `"data-orbit"` | Attribute set on the root element |
 | `root` | `document.documentElement` | Element that carries the attribute |
@@ -205,6 +216,40 @@ Adds Crayon's doodles to `target` (default `document.body`) and returns a functi
 ### `startCrayon(options)` from `orbit/crayon`
 
 Brings out all of Crayon on the marked parts: the corner doodles and snail, bunting under `data-topbar`, a letter for each crayon colour in `data-wordmark`, the sun and moon in `data-theme-toggle`, and the paper plane. `createOrbit` runs it while the skin is `"crayon"`, so most apps never call it. If your app redraws those parts, it adds them again on the next frame. Options: `anchor` (where the plane takes off), `reducedMotion`, `doodles` and `plane` (set `false` to leave one out). Returns `{ fly, flights, stop }`; `stop()` takes every part away and gives the wordmark back its plain text.
+
+### Sketchbook posters from `orbit/sketchbook`
+
+Sketchbook needs three Google fonts and leaves body text in your own font, so paragraphs stay easy to read. Load them in your page (`SKETCHBOOK_FONTS` is the address) or with your framework's font loader; without them it falls back to system handwriting faces.
+
+```html
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Caveat+Brush&family=Kalam:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/deepujain/orbit/themes/sketchbook.css">
+<section data-orbit="sketchbook">
+  <figure class="sb-poster">
+    <figcaption class="sb-words">
+      <p class="sb-script"><span class="sb-swash">Bike Walk</span></p>
+      <ul class="sb-lines"><li>Friends</li><li>Street style</li></ul>
+    </figcaption>
+    <div class="sb-stage">
+      <span class="sb-letters" style="--sb-n:4" aria-hidden="true">WALK</span>
+      <img class="sb-art" src="art/sketchbook/walk.webp" alt="Four friends walking together">
+    </div>
+  </figure>
+</section>
+```
+
+| Piece | What it is |
+| --- | --- |
+| `sb-poster` | The poster; `data-side="left"` puts the drawing on the left and the words on the right. It stacks on phones and stays cream paper at night. |
+| `sb-stage` | Holds the letters and the drawing; the letters size themselves to it |
+| `sb-letters` | Huge yellow block letters behind the drawing, with a chalky edge; set `--sb-n` to the number of letters |
+| `sb-art` | The drawing, standing in front of the letters; use art with a transparent ground. `--sb-art-height` caps its height (440px). |
+| `sb-script`, `sb-marker`, `sb-hand` | Brush script, bold handwriting and plain handwriting (Kalam) |
+| `sb-swash` | A mustard brush stroke under a word |
+| `sb-lines` | Short handwritten captions, one per line |
+| `sb-ticks` | Motion ticks for a corner |
+
+`poster({ letters, art, alt, title, titleStyle, lines, side, ticks })` writes the same markup as a string. `SKETCHBOOK_ART` holds the URLs of the three drawings that ship in `art/sketchbook/` (`walk`, `ride` and `talk`), which bundlers also reach as `orbit/art/sketchbook/walk.webp`.
 
 ### Crayon's drawings from `orbit/crayon`
 

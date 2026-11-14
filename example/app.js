@@ -39,7 +39,7 @@ const OUTPUT = {
   year: [["Q1", 1580000], ["Q2", 1660000], ["Q3", 1610000], ["Q4", 1720000]],
 };
 const state = { tab: "week", team: "Drill crew" };
-const SKINS = [["", "Plain", "The app's own look"], ["aura", THEME_NAMES.aura, "Frosted glass and soft colour"], ["crayon", THEME_NAMES.crayon, "Paper by day, chalkboard by night"], ["whiskers", THEME_NAMES.whiskers, "A cat that lives on the page"]];
+const SKINS = [["", "Plain", "The app's own look"], ["aura", THEME_NAMES.aura, "Frosted glass and soft colour"], ["crayon", THEME_NAMES.crayon, "Paper by day, chalkboard by night"], ["whiskers", THEME_NAMES.whiskers, "A cat that lives on the page"], ["sketchbook", THEME_NAMES.sketchbook, "Ink, cream paper and yellow, like a zine"]];
 const TEAMS = [["Drill crew", "Drill crew", "Runs the drill floor"], ["Deck crew", "Deck crew", "Cranes, cargo and the boats"], ["Maintenance", "Maintenance", "Keeps pumps, engines and power running"], ["Control room", "Control room", "Watches the wells and the process"]];
 
 const page = () => (PAGES.some(([id]) => id === location.hash.slice(1)) ? location.hash.slice(1) : "dashboard");

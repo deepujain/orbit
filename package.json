@@ -1,7 +1,7 @@
 {
   "name": "orbit",
-  "version": "0.1.0",
-  "description": "Playful skins for any web page: Aura glass, Crayon paper and chalkboard, Whiskers, a cat that lives on your page, plus Record, a narrated tour of the page filmed as a video in any skin.",
+  "version": "0.2.0",
+  "description": "Playful skins for any web page: Aura glass, Crayon paper and chalkboard, Whiskers, a cat that lives on your page, Sketchbook zine posters, plus Record, a narrated tour of the page filmed as a video in any skin.",
   "type": "module",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
@@ -27,6 +27,10 @@
       "types": "./src/crayon-doodles.d.ts",
       "default": "./src/crayon-doodles.js"
     },
+    "./sketchbook": {
+      "types": "./src/sketchbook.d.ts",
+      "default": "./src/sketchbook.js"
+    },
     "./motion": {
       "types": "./src/motion.d.ts",
       "default": "./src/motion.js"
@@ -42,16 +46,19 @@
     "./aura.css": "./themes/aura.css",
     "./crayon.css": "./themes/crayon.css",
     "./whiskers.css": "./themes/whiskers.css",
+    "./sketchbook.css": "./themes/sketchbook.css",
     "./record.css": "./themes/record.css",
     "./motion.css": "./themes/motion.css",
     "./charts.css": "./themes/charts.css",
     "./meow.m4a": "./src/whiskers/meow.m4a",
+    "./art/*": "./art/*",
     "./package.json": "./package.json"
   },
   "files": [
     "src",
     "themes",
     "react",
+    "art",
     "README.md",
     "LICENSE"
   ],

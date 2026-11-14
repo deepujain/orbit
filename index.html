@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Orbit: playful skins for any web page</title>
 <meta name="description" content="Aura glass, Crayon paper and chalkboard, Whiskers, a cat that lives on your page. One attribute to turn on. Record films a narrated tour in any of them.">
-<script>(function(){try{var s=localStorage.getItem("orbit");if(["aura","crayon","whiskers"].indexOf(s)>-1)document.documentElement.setAttribute("data-orbit",s);if(localStorage.getItem("orbit-dark")==="1")document.documentElement.classList.add("dark");}catch(e){}})();</script>
+<script>(function(){try{var s=localStorage.getItem("orbit");if(["aura","crayon","whiskers","sketchbook"].indexOf(s)>-1)document.documentElement.setAttribute("data-orbit",s);if(localStorage.getItem("orbit-dark")==="1")document.documentElement.classList.add("dark");}catch(e){}})();</script>
 <link rel="stylesheet" href="./themes/aura.css">
 <link rel="stylesheet" href="./themes/crayon.css">
 <link rel="stylesheet" href="./themes/whiskers.css">
+<link rel="stylesheet" href="./themes/sketchbook.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&amp;family=Caveat+Brush&amp;family=Kalam:wght@400;700&amp;display=swap">
 <link rel="stylesheet" href="./themes/record.css">
 <style>
   /* The page's own look, written the way Tailwind and shadcn sites name their colours. Each skin repaints these. */
@@ -55,6 +57,7 @@
     <button data-button="outline" data-skin="aura">Aura</button>
     <button data-button="outline" data-skin="crayon">Crayon</button>
     <button data-button="outline" data-skin="whiskers">Whiskers</button>
+    <button data-button="outline" data-skin="sketchbook">Sketchbook</button>
     <button data-button="ghost" id="dark">Dark mode</button>
   </div>
 
@@ -96,6 +99,15 @@ setTheme("whiskers");</pre>
       <p>Fields and buttons pick up the skin too.</p>
       <input placeholder="Your name">
     </section>
+    <section data-card>
+      <h2>Sketchbook</h2>
+      <p>Cream paper, black ink and big yellow letters behind hand-drawn people, like a zine cover.</p>
+      <figure class="sb-poster" data-side="left">
+        <figcaption class="sb-words"><p class="sb-script"><span class="sb-swash">Walk Together</span></p><ul class="sb-lines"><li>Friends</li><li>Street style</li></ul></figcaption>
+        <div class="sb-stage"><span class="sb-letters" style="--sb-n:4" aria-hidden="true">WALK</span><img class="sb-art" src="./art/sketchbook/walk.webp" alt="Four friends walking together"></div>
+        <span class="sb-ticks" aria-hidden="true"></span>
+      </figure>
+    </section>
   </div>
 </main>
 <nav class="bar" data-orbit-floor><a href="#">Home</a><a href="#">Cards</a><a href="https://github.com/deepujain/orbit">GitHub</a></nav>
@@ -110,6 +122,7 @@ setTheme("whiskers");</pre>
       { heading: "Aura", say: "Aura is soft glass by day and graphite by night." },
       { heading: "Crayon", say: "Crayon is ruled paper by day and a chalkboard by night." },
       { heading: "Whiskers", say: "Whiskers is a cat that lives on your page." },
+      { heading: "Sketchbook", say: "Sketchbook is ink and cream paper, with big yellow letters behind hand-drawn people." },
       { heading: "Record", say: "And Record films a tour like this one in any skin, with captions and a voice." },
     ],
   };

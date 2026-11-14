@@ -1,5 +1,5 @@
 /* orbit: playful skins for a web page. A skin is turned on by one attribute on <html>, data-orbit="aura",
-   "crayon" or "whiskers", and its stylesheet does the rest. createOrbit() keeps that attribute in step with the
+   "crayon", "whiskers" or "sketchbook", and its stylesheet does the rest. createOrbit() keeps that attribute in step with the
    visitor's saved choice and, unless told not to, brings out what a skin draws beyond CSS: Crayon's doodles and the
    Whiskers cat. Record (orbit/record) is an action, not a skin, so it films the page in any of them. */
 import { mountCrayonDoodles } from "./crayon-doodles.js";
@@ -7,8 +7,8 @@ import { startCrayon } from "./crayon.js";
 import { startMotion } from "./motion.js";
 import { moveSaved } from "./saved.js";
 
-export const THEMES = ["aura", "crayon", "whiskers"];
-export const THEME_NAMES = { aura: "Aura", crayon: "Crayon", whiskers: "Whiskers" };
+export const THEMES = ["aura", "crayon", "whiskers", "sketchbook"];
+export const THEME_NAMES = { aura: "Aura", crayon: "Crayon", whiskers: "Whiskers", sketchbook: "Sketchbook" };
 export const CHANGE_EVENT = "orbit-change";
 export { mountCrayonDoodles, startCrayon, startMotion, moveSaved };
 
